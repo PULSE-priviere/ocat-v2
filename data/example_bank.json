@@ -1,0 +1,7 @@
+{
+ "framework": { "key": "ocat_osc", "name": "OCAT OSC", "version": "1" },
+ "sections": [ { "num": 1, "name_fr": "Gouvernance", "name_en": "Governance" } ],
+ "questions": [
+  { "concept_id": "EX-1.1", "code": "1.1", "section": 1, "order": 1, "text_fr": "Exemple de question ?", "text_en": "Example question?", "guide_fr": null, "guide_en": null }
+ ]
+}

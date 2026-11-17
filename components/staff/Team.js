@@ -1,0 +1,51 @@
+// F25 inviter / révoquer les coachs ; F30 coachs proposés à l'OSC
+import { useState } from 'react';
+import { useI18n } from '../../lib/i18n';
+import { sb, staffApi } from '../../lib/supabase';
+import { safeStr } from '../../lib/safe';
+
+export default function Team({ project, members, isAdmin, reload }) {
+  const { t, lang } = useI18n();
+  const [form, setForm] = useState({ email: '', name: '' });
+  const [msg, setMsg] = useState('');
+  const invite = async e => {
+    e.preventDefault(); setMsg('');
+    try { await staffApi('invite', { ...form, projectId: project.id, role: 'coach', lang }); setMsg('team.invited'); setForm({ email: '', name: '' }); reload(); }
+    catch (err) { setMsg(`errors.${err.message}`); }
+  };
+  const revoke = async (m, role = 'coach') => {
+    if (!window.confirm(t('team.revoke_confirm', { name: m.profile?.name || m.profile?.email }))) return;
+    await sb().from('memberships').delete().match({ user_id: m.user_id, project_id: project.id, role });
+    reload();
+  };
+  const toggleOffered = async m => {
+    await sb().from('memberships').update({ offered_to_osc: !m.offered_to_osc }).match({ user_id: m.user_id, project_id: project.id, role: 'coach' });
+    reload();
+  };
+  const list = role => members.filter(m => m.role === role);
+  return (
+    <>
+      <h2>{t('team.coaches')}</h2>
+      {list('coach').length === 0 ? <p className="empty-inline">{t('team.no_coach')}</p> : (
+        <table className="table"><tbody>{list('coach').map(m => (
+          <tr key={m.user_id}>
+            <td>{safeStr(m.profile?.name)}<br /><small className="muted">{safeStr(m.profile?.email)}</small></td>
+            <td><label className="check"><input type="checkbox" checked={m.offered_to_osc} onChange={() => toggleOffered(m)} /><span>{t('team.offered')}</span></label></td>
+            <td className="right"><button className="btn danger" onClick={() => revoke(m)}>{t('team.revoke')}</button></td>
+          </tr>
+        ))}</tbody></table>
+      )}
+      <form className="card form row" onSubmit={invite}>
+        <label>{t('entry.email')}<input type="email" required value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} /></label>
+        <label>{t('team.name')}<input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} /></label>
+        <button className="btn primary">{t('team.invite_coach')}</button>
+      </form>
+      {msg ? <p className={msg.startsWith('errors') ? 'error' : 'ok'}>{t(msg)}</p> : null}
+      <h2>{t('team.owners')}</h2>
+      <ul className="plain">{list('owner').map(m => (
+        <li key={m.user_id}>{safeStr(m.profile?.name || m.profile?.email)}{' '}
+          {isAdmin ? <button className="btn danger" onClick={() => revoke(m, 'owner')}>{t('team.revoke')}</button> : null}</li>
+      ))}</ul>
+    </>
+  );
+}
