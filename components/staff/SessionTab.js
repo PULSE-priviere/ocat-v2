@@ -10,13 +10,22 @@ const SCALE = ['NA', '1', '2', '3'];
 export default function SessionTab({ bank, answers, comments, needs, assessment, saveAnswer, toggleNeed, addNeed, onQuestionAdded }) {
   const { t, lang } = useI18n();
   const [filter, setFilter] = useState('support');
+  const [open, setOpen] = useState(null);   // null : la première section concernée est ouverte ; sinon { idSection: true/false }
   const flagged = q => !!answers[q.id]?.support;
   const keep = q => (filter === 'support' ? flagged(q) : filter === 'low' ? ['1', '2'].includes(answers[q.id]?.code) : true);
+  const hasAction = q => !!String(answers[q.id]?.coach_action || '').trim();
   const nFlag = bank.questions.filter(flagged).length;
-  const nAction = bank.questions.filter(q => String(answers[q.id]?.coach_action || '').trim()).length;
+  const nAction = bank.questions.filter(hasAction).length;
   const started = bank.questions.some(q => answers[q.id]?.coach_notes || answers[q.id]?.coach_action);
-  const groups = bank.sections.map(s => ({ s, qs: bank.questions.filter(q => q.section_id === s.id && keep(q)) }));
+  const groups = bank.sections.map(s => {
+    const all = bank.questions.filter(q => q.section_id === s.id);
+    return { s, qs: all.filter(keep), nFlag: all.filter(flagged).length, nAct: all.filter(hasAction).length };
+  });
   const total = groups.reduce((a, g) => a + g.qs.length, 0);
+  const firstWith = groups.find(g => g.qs.length)?.s.id;
+  const isOpen = id => (open ? !!open[id] : id === firstWith);
+  const toggle = id => setOpen(o => { const base = o || (firstWith ? { [firstWith]: true } : {}); return { ...base, [id]: !base[id] }; });
+  const setAll = v => setOpen(Object.fromEntries(bank.sections.map(s => [s.id, v])));
 
   return (
     <>
@@ -29,16 +38,35 @@ export default function SessionTab({ bank, answers, comments, needs, assessment,
           {['support', 'low', 'all'].map(f => <button key={f} className={filter === f ? 'on' : ''} aria-pressed={filter === f} onClick={() => setFilter(f)}>{t(`session.f_${f}`)}</button>)}
         </div>
         <span className="muted small">{t('session.stats', { n: nFlag, m: nAction })}</span>
+        <span className="grow" />
+        <button className="btn small" onClick={() => setAll(true)}>{t('session.expand_all')}</button>
+        <button className="btn small" onClick={() => setAll(false)}>{t('session.collapse_all')}</button>
       </div>
       {total === 0 ? <p className="empty-inline">{t(`session.empty_${filter}`)}</p> : null}
-      {groups.filter(g => g.qs.length || filter === 'all').map(({ s, qs }) => (
-        <section key={s.id} className="ssec">
-          <h2>{s.idx}. {pick(s, 'name', lang)}{assessment.section_deepen?.[s.num] ? <span className="tag">{t('session.deepen_badge')}</span> : null}</h2>
-          {comments[s.num] ? <p className="osccomment"><strong>{t('session.osc_comment')}</strong> {safeStr(comments[s.num])}</p> : null}
-          {qs.map(q => <SessionQuestion key={q.id} q={q} a={answers[q.id] || {}} needs={needs} saveAnswer={saveAnswer} toggleNeed={toggleNeed} addNeed={addNeed} />)}
-          {filter === 'all' ? <AddQuestion section={s} assessment={assessment} onAdded={onQuestionAdded} /> : null}
-        </section>
-      ))}
+      {groups.map(({ s, qs, nFlag: nf, nAct }) => {
+        const o = isOpen(s.id);
+        return (
+          <section key={s.id} className={`acc2 ${o ? 'open' : ''}`}>
+            <button type="button" className="acc2-head" aria-expanded={o} onClick={() => toggle(s.id)}>
+              <span className="acc2-chev" aria-hidden="true" />
+              <span className="acc2-title">{s.idx}. {pick(s, 'name', lang)}</span>
+              {assessment.section_deepen?.[s.num] ? <span className="tag">{t('session.deepen_badge')}</span> : null}
+              <span className="acc2-badges">
+                {nf ? <span className="pill blue">{t('session.sec_needs', { n: nf })}</span> : null}
+                {nAct ? <span className="pill green">{t('session.sec_actions', { n: nAct })}</span> : null}
+              </span>
+            </button>
+            {o ? (
+              <div className="acc2-body">
+                {comments[s.num] ? <p className="osccomment"><strong>{t('session.osc_comment')}</strong> {safeStr(comments[s.num])}</p> : null}
+                {qs.length === 0 ? <p className="muted small">{t('session.sec_none')}</p> : null}
+                {qs.map(q => <SessionQuestion key={q.id} q={q} a={answers[q.id] || {}} needs={needs} saveAnswer={saveAnswer} toggleNeed={toggleNeed} addNeed={addNeed} />)}
+                {filter === 'all' ? <AddQuestion section={s} assessment={assessment} onAdded={onQuestionAdded} /> : null}
+              </div>
+            ) : null}
+          </section>
+        );
+      })}
     </>
   );
 }

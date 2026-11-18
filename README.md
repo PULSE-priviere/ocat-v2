@@ -76,3 +76,9 @@ Voir `.env.example`. `SUPABASE_SERVICE_ROLE_KEY` reste côté serveur : ne jamai
 1. Supabase > SQL Editor : exécuter `supabase/migrations/0004_session_and_project_sections.sql` (une seule fois ; `0003` d'abord si ce n'est pas déjà fait).
 2. `git push` : Vercel redéploie.
 3. Sections propres à un projet : espace équipe > onglet « Sections du projet » (owner du projet ou administrateur).
+
+## Mise à jour 2.3 (plan en PDF et Word, calendrier, session dépliable)
+
+- Aucune migration SQL. Nouvelle dépendance : `docx` (export Word, chargée seulement au clic). Localement : `npm install`. Sur Vercel, c'est automatique.
+- Les nouveaux liens personnels n'utilisent que des lettres et des chiffres (les caractères `_` et `-` étaient interprétés comme du formatage par certains e-mails). Les anciens liens restent valables.
+- Un projet ne doit pas être protégé par « Vercel Authentication » : voir la section « Déploiement » ci-dessus. Les OSC n'ont pas de compte Vercel.

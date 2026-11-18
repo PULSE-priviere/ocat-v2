@@ -79,7 +79,8 @@
   "short_2": "Partial",
   "short_3": "In place",
   "short_yes": "Yes",
-  "short_no": "No"
+  "short_no": "No",
+  "label": "Answer"
  },
  "osc": {
   "home_title": "{name} assessment",
@@ -316,7 +317,12 @@
   "needs_flag": "Needs support",
   "more": "Change the answer, tag needs, guide",
   "answer_label": "CSO answer",
-  "needs_label": "Project needs"
+  "needs_label": "Project needs",
+  "expand_all": "Expand all",
+  "collapse_all": "Collapse all",
+  "sec_needs": "{n} needing support",
+  "sec_actions": "{n} with an action",
+  "sec_none": "No question for this filter in this section."
  },
  "plan": {
   "title": "Support plan",
@@ -327,8 +333,8 @@
   "status_draft": "Draft",
   "status_validated": "Approved",
   "status_shared": "Shared with the CSO",
-  "export_fr": "French PDF",
-  "export_en": "English PDF",
+  "export_fr": "PDF (French)",
+  "export_en": "PDF (English)",
   "hint": "Actions and owners come from the session: edit them in the Session tab. Here, only choose each action's due date.",
   "empty": "No rows yet: the plan picks up questions that need support or have an action defined in the session.",
   "keep": "Kept",
@@ -484,5 +490,33 @@
   "add_question_ph": "New question",
   "count": "{n} questions",
   "created": "Section added."
+ },
+ "planx": {
+  "overview": "Overview",
+  "radar_title": "Profile by section",
+  "scores_title": "Scores by section",
+  "global": "Overall score",
+  "calendar_title": "Deadline calendar",
+  "today": "Today",
+  "no_dates": "No due date chosen yet: pick dates in the plan and the calendar will appear here.",
+  "undated": "{n} action(s) without a due date, not shown in the calendar.",
+  "actions_title": "Actions to carry out",
+  "generated": "Generated on {date}",
+  "coach": "Coach",
+  "cal_hint": "The calendar updates as soon as you choose a due date.",
+  "word_fr": "Word (French)",
+  "word_en": "Word (English)",
+  "print": "Print / save as PDF",
+  "download_word": "Download as Word",
+  "preparing": "Preparing the Word file…",
+  "downloaded": "The Word file has been downloaded.",
+  "redownload": "Download again",
+  "back": "Back to the plan",
+  "error": "The file could not be generated. Try again, or use the PDF export."
+ },
+ "eval_short": {
+  "baseline": "Baseline",
+  "followup": "Midline",
+  "endline": "Endline"
  }
 }

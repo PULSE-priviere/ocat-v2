@@ -1,61 +1,88 @@
-// Plan imprimable (Enregistrer en PDF depuis le navigateur), FR ou EN, avec les scores par section
-import { useEffect, useState } from 'react';
+// Plan d'accompagnement : aperçu, PDF (impression du navigateur) et Word (.docx), en français ou en anglais
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import { useI18n, pick } from '../../../lib/i18n';
-import { sb } from '../../../lib/supabase';
+import Link from 'next/link';
+import PlanDocument from '../../../components/PlanDocument';
+import { useI18n } from '../../../lib/i18n';
+import { sb, fetchIn } from '../../../lib/supabase';
 import { loadBank } from '../../../lib/bank';
-import { planRows } from '../../../lib/plan';
-import { safeStr, safeNum } from '../../../lib/safe';
-import { sectionProgress, sectionScore, globalScore } from '../../../lib/scoring';
+import { buildPlanData } from '../../../lib/planData';
+import { radarSvg, barsSvg, timelineSvg } from '../../../lib/planCharts';
+import { fullName } from '../../../lib/names';
+import { safeStr } from '../../../lib/safe';
 import appConfig from '../../../app.config';
 
-export default function PlanPrint() {
+export default function PlanExport() {
   const { query } = useRouter();
   const { t, lang, setLang } = useI18n();
-  const [d, setD] = useState(null);
+  const [raw, setRaw] = useState(null);
+  const [state, setState] = useState('');          // '' | 'preparing' | 'done' | 'error'
+  const started = useRef(false);
+
   useEffect(() => { if (query.lang && query.lang !== lang) setLang(query.lang); }, [query.lang]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!query.id) return;
     (async () => {
-      const { data: a } = await sb().from('assessments').select('*, subject:subjects(name, project:projects(id, name, framework_id))').eq('id', query.id).maybeSingle();
-      if (!a) return setD({ error: true });
+      const { data: a } = await sb().from('assessments')
+        .select('*, subject:subjects(name, project:projects(id, name, framework_id), coach:profiles(name, first_name, last_name, email))').eq('id', query.id).maybeSingle();
+      if (!a) return setRaw({ error: true });
       const bank = await loadBank(sb(), a.subject.project.framework_id, a.id, a.subject.project.id);
-      const { data: ans } = await sb().from('answers').select('question_id, code, support, coach_notes, coach_action, coach_owner').eq('assessment_id', a.id);
-      const { data: plan } = await sb().from('action_plans').select('*').eq('assessment_id', a.id).maybeSingle();
-      const byQ = Object.fromEntries((ans || []).map(x => [x.question_id, x]));
-      setD({ a, bank, plan, rows: planRows(bank.questions, byQ, plan?.items).filter(r => r.kept), progress: sectionProgress(bank.sections, bank.questions, byQ) });
+      const { data: list } = await sb().from('assessments').select('id, type, created_at').eq('subject_id', a.subject_id);
+      const ans = await fetchIn(ids => sb().from('answers').select('assessment_id, question_id, code, support, coach_notes, coach_action, coach_owner').in('assessment_id', ids), (list || []).map(x => x.id));
+      const allAnswers = {};
+      ans.forEach(x => { (allAnswers[x.assessment_id] = allAnswers[x.assessment_id] || {})[x.question_id] = x; });
+      const { data: plan } = await sb().from('action_plans').select('items, status').eq('assessment_id', a.id).maybeSingle();
+      setRaw({ a, bank, assessments: list || [], allAnswers, plan });
     })();
   }, [query.id]);
-  useEffect(() => { if (d && !d.error) setTimeout(() => window.print(), 400); }, [d, lang]);
 
+  const d = useMemo(() => (raw && !raw.error ? buildPlanData({
+    lang, t, orgName: appConfig.orgName, logoUrl: appConfig.logoUrl, subjectName: safeStr(raw.a.subject.name), projectName: safeStr(raw.a.subject.project.name),
+    coachName: fullName(raw.a.subject.coach), assessment: raw.a, assessments: raw.assessments, allAnswers: raw.allAnswers, bank: raw.bank,
+    planItems: raw.plan?.items || [], planStatus: raw.plan?.status || 'draft' }) : null), [raw, lang, t]);
+
+  const makeDocx = async () => {
+    setState('preparing');
+    try {
+      const [{ planDocxBlob, planFileName }, { svgToPng }] = await Promise.all([import('../../../lib/planDocx'), import('../../../lib/svgToPng')]);
+      const radar = radarSvg({ labels: d.sections.map(s => `S${s.idx}`), series: d.series, size: 340 });
+      const bars = barsSvg({ items: d.sections.map(s => ({ label: `${s.idx}. ${s.name}`, value: s.score })), width: 340 });
+      const cal = timelineSvg({ rows: d.rows.map(r => ({ n: r.n, label: r.action || r.question, due: r.due })), today: new Date(`${d.today}T12:00:00`), width: 680, lang, labels: { today: t('planx.today') } });
+      const png = async c => (c.svg ? { data: await svgToPng(c.svg, c.w, c.h), w: c.w, h: c.h } : null);
+      const images = { radar: await png(radar), bars: await png(bars), timeline: await png(cal) };
+      const blob = await planDocxBlob({ d, t, lang, images });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url; link.download = planFileName(d, lang);
+      document.body.appendChild(link); link.click(); link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 3000);
+      setState('done');
+    } catch (e) { console.error('export word', e); setState('error'); }
+  };
+
+  // Ouverture depuis l'onglet Plan : format=pdf lance l'impression, format=docx le téléchargement (une fois la langue appliquée)
+  useEffect(() => {
+    if (!d || started.current || (query.lang && query.lang !== lang)) return;
+    started.current = true;
+    if (query.format === 'docx') makeDocx();
+    else if (query.format === 'pdf') setTimeout(() => window.print(), 600);
+  }, [d, lang, query.lang, query.format]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (raw?.error) return <p className="page error">{t('errors.forbidden')}</p>;
   if (!d) return <p className="page">{t('common.loading')}</p>;
-  if (d.error) return <p className="page error">{t('errors.forbidden')}</p>;
-  const g = globalScore(d.progress);
   return (
-    <main className="page print-doc">
-      <Head><title>{t('plan.title')} · {safeStr(d.a.subject.name)}</title></Head>
-      {appConfig.logoUrl ? <img className="print-logo" src={appConfig.logoUrl} alt="" /> : null}
-      <h1>{t('plan.title')}</h1>
-      <p className="lead">{safeStr(d.a.subject.name)} · {safeStr(d.a.subject.project.name)} · {t(`eval.${d.a.type}`)} · {t(`plan.status_${d.plan?.status || 'draft'}`)}</p>
-      <h2>{t('sheet.scores')}</h2>
-      <table className="table"><tbody>
-        {d.progress.map(p => { const s = sectionScore(p); return <tr key={p.section.id}><td>{p.section.idx}. {pick(p.section, 'name', lang)}</td><td>{safeNum(s) !== null ? s.toFixed(2) : '—'}</td></tr>; })}
-        <tr className="total"><td>{t('sheet.global')}</td><td>{safeNum(g) !== null ? g.toFixed(2) : '—'}</td></tr>
-      </tbody></table>
-      <h2>{t('plan.actions')}</h2>
-      <table className="table">
-        <thead><tr><th>#</th><th>{t('plan.priority')}</th><th>{t('plan.action')}</th><th>{t('plan.owner')}</th><th>{t('plan.due')}</th></tr></thead>
-        <tbody>{d.rows.map((r, n) => (
-          <tr key={r.q.id}>
-            <td>{n + 1}</td>
-            <td>{pick(r.q, 'text', lang)}</td>
-            <td>{safeStr(r.a.coach_action)}{r.a.coach_notes ? <div className="muted small">{safeStr(r.a.coach_notes)}</div> : null}</td>
-            <td>{safeStr(r.a.coach_owner)}</td><td>{safeStr(r.due)}</td>
-          </tr>
-        ))}</tbody>
-      </table>
-      <button className="btn no-print" onClick={() => window.print()}>{t('common.print')}</button>
+    <main className="plandoc-wrap">
+      <Head><title>{t('plan.title')} · {d.meta.org}</title></Head>
+      <div className="plantoolbar no-print">
+        <Link className="btn" href={`/staff/subject/${raw.a.subject_id}`}>← {t('planx.back')}</Link>
+        <button className="btn info" onClick={() => window.print()}>{t('planx.print')}</button>
+        <button className="btn ok" onClick={makeDocx} disabled={state === 'preparing'}>{state === 'done' ? t('planx.redownload') : t('planx.download_word')}</button>
+        {state === 'preparing' ? <span className="muted small">{t('planx.preparing')}</span> : null}
+        {state === 'done' ? <span className="ok small">{t('planx.downloaded')}</span> : null}
+        {state === 'error' ? <span className="error small">{t('planx.error')}</span> : null}
+      </div>
+      <PlanDocument d={d} t={t} lang={lang} />
     </main>
   );
 }

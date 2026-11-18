@@ -79,7 +79,8 @@
   "short_2": "Partiel",
   "short_3": "En place",
   "short_yes": "Oui",
-  "short_no": "Non"
+  "short_no": "Non",
+  "label": "Réponse"
  },
  "osc": {
   "home_title": "Diagnostic de {name}",
@@ -316,7 +317,12 @@
   "needs_flag": "Besoin d'accompagnement",
   "more": "Modifier la réponse, taguer des besoins, guide",
   "answer_label": "Réponse de l'OSC",
-  "needs_label": "Besoins du projet"
+  "needs_label": "Besoins du projet",
+  "expand_all": "Tout déplier",
+  "collapse_all": "Tout replier",
+  "sec_needs": "{n} avec besoin",
+  "sec_actions": "{n} avec action",
+  "sec_none": "Aucune question pour ce filtre dans cette section."
  },
  "plan": {
   "title": "Plan d'accompagnement",
@@ -484,5 +490,33 @@
   "add_question_ph": "Nouvelle question",
   "count": "{n} questions",
   "created": "Section ajoutée."
+ },
+ "planx": {
+  "overview": "Vue d'ensemble",
+  "radar_title": "Profil par section",
+  "scores_title": "Scores par section",
+  "global": "Score global",
+  "calendar_title": "Calendrier des échéances",
+  "today": "Aujourd'hui",
+  "no_dates": "Aucune échéance choisie pour l'instant : sélectionnez les dates dans le plan et le calendrier apparaîtra ici.",
+  "undated": "{n} action(s) sans échéance, non affichée(s) dans le calendrier.",
+  "actions_title": "Actions à mener",
+  "generated": "Généré le {date}",
+  "coach": "Accompagnateur",
+  "cal_hint": "Le calendrier se met à jour dès que vous choisissez une échéance.",
+  "word_fr": "Word français",
+  "word_en": "Word anglais",
+  "print": "Imprimer / enregistrer en PDF",
+  "download_word": "Télécharger en Word",
+  "preparing": "Préparation du fichier Word…",
+  "downloaded": "Le fichier Word a été téléchargé.",
+  "redownload": "Télécharger à nouveau",
+  "back": "Retour au plan",
+  "error": "Le fichier n'a pas pu être généré. Réessayez, ou utilisez l'export PDF."
+ },
+ "eval_short": {
+  "baseline": "Baseline",
+  "followup": "Midline",
+  "endline": "Endline"
  }
 }
