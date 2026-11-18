@@ -82,3 +82,7 @@ Voir `.env.example`. `SUPABASE_SERVICE_ROLE_KEY` reste côté serveur : ne jamai
 - Aucune migration SQL. Nouvelle dépendance : `docx` (export Word, chargée seulement au clic). Localement : `npm install`. Sur Vercel, c'est automatique.
 - Les nouveaux liens personnels n'utilisent que des lettres et des chiffres (les caractères `_` et `-` étaient interprétés comme du formatage par certains e-mails). Les anciens liens restent valables.
 - Un projet ne doit pas être protégé par « Vercel Authentication » : voir la section « Déploiement » ci-dessus. Les OSC n'ont pas de compte Vercel.
+
+## Mise à jour 2.4 (graphiques avec valeurs provisoires)
+
+Les graphiques de l'équipe (radar, barres, score global du Récapitulatif, de la cohorte et du plan PDF/Word) affichent une valeur **provisoire**, marquée `*`, tant qu'une section est incomplète (moyenne des réponses déjà données). Elle devient définitive quand la section est complète. Réglable avec `scoring.showProvisional` dans `app.config.js`. Aucune migration.

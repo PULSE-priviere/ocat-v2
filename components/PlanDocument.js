@@ -5,7 +5,7 @@ import { fmtDate } from '../lib/planData';
 export default function PlanDocument({ d, t, lang }) {
   const m = d.meta;
   const radar = radarSvg({ labels: d.sections.map(s => `S${s.idx}`), series: d.series, responsive: true });
-  const bars = barsSvg({ items: d.sections.map(s => ({ label: `${s.idx}. ${s.name}`, value: s.score })), responsive: true });
+  const bars = barsSvg({ items: d.sections.map(s => ({ label: `${s.idx}. ${s.name}`, value: s.score, provisional: s.provisional })), responsive: true });
   const cal = timelineSvg({ rows: d.rows.map(r => ({ n: r.n, label: r.action || r.question, due: r.due })), today: new Date(`${d.today}T12:00:00`), lang, labels: { today: t('planx.today') }, responsive: true });
   const undated = d.rows.filter(r => !r.due).length;
   return (
@@ -26,9 +26,10 @@ export default function PlanDocument({ d, t, lang }) {
       <section className="pdoc-sec">
         <h2>{t('planx.overview')}</h2>
         <table className="pdoc-cols"><tbody><tr>
-          <td><h3>{t('planx.radar_title')}</h3>{radar.svg ? <div dangerouslySetInnerHTML={{ __html: radar.svg }} /> : null}</td>
+          <td><h3>{t('planx.radar_title')}</h3>{radar.svg ? <div dangerouslySetInnerHTML={{ __html: radar.svg }} /> : <p className="pdoc-empty">{t('planx.no_data')}</p>}</td>
           <td><h3>{t('planx.scores_title')}</h3><div dangerouslySetInnerHTML={{ __html: bars.svg }} />
-            <p className="pdoc-global"><span>{t('planx.global')}</span> <b>{d.global != null ? d.global.toFixed(2) : '—'}</b><small> / 3</small></p></td>
+            <p className="pdoc-global"><span>{t('planx.global')}</span> <b>{d.global != null ? `${d.global.toFixed(2)}${d.globalProvisional ? '*' : ''}` : '—'}</b><small> / 3</small></p>
+            {d.hasProvisional ? <p className="pdoc-note">{t('planx.provisional')}</p> : null}</td>
         </tr></tbody></table>
       </section>
 

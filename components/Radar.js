@@ -8,7 +8,8 @@ const COLORS = { baseline: appConfig.colors.accent, followup: appConfig.colors.w
 // data : [{ section: 'S1', baseline: 2.1, followup: … }]; series : ['baseline', …]
 export default function ScoreRadar({ data, series }) {
   const { t } = useI18n();
-  if (!data.length || !series.length) return null;
+  const has = data.some(r => series.some(k => r[k] != null));
+  if (!data.length || !series.length || !has) return <p className="empty-inline">{t('sheet.no_data')}</p>;
   return (
     <div className="radar">
       <ResponsiveContainer width="100%" height={320}>

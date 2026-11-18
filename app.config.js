@@ -29,6 +29,7 @@ const appConfig = {
     excludeCodes: ['NA'],          // codes exclus de la moyenne
     global: 'mean_of_sections',    // ou 'mean_of_questions'
     requireCompleteSection: true,  // F5 : score seulement si la section est complète
+    showProvisional: true,         // graphiques de l'équipe : valeur provisoire (marquée *) tant qu'une section est incomplète
     globalIncludesProjectSections: false, // les sections propres à un projet ont leur score mais n'entrent pas dans le global (comparabilité)
   },
   // Listes de choix de la fiche organisation (libellés FR/EN dans locales/*.json, clés profile.opt.*)

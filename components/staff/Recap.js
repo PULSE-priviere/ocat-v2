@@ -2,11 +2,13 @@
 import { useI18n, pick } from '../../lib/i18n';
 import ScoreRadar from '../Radar';
 import { safeStr, safeNum } from '../../lib/safe';
-import { sectionScore, globalScore, completion, byAnswer } from '../../lib/scoring';
+import { sectionDisplay, globalDisplay, completion, byAnswer } from '../../lib/scoring';
 
 export default function Recap({ bank, progress, answers, radarData, series, assessment, onStartSession }) {
   const { t, lang } = useI18n();
-  const g = globalScore(progress);
+  const g = globalDisplay(progress);
+  const anyProvisional = g.provisional || progress.some(p => sectionDisplay(p).provisional);
+  const fmt = x => (safeNum(x.value) !== null ? <>{x.value.toFixed(2)}{x.provisional ? <span className="prov" title={t('sheet.provisional_note')}>*</span> : null}</> : '—');
   return (
     <>
       <div className="two">
@@ -15,13 +17,13 @@ export default function Recap({ bank, progress, answers, radarData, series, asse
           <table className="table">
             <thead><tr><th>{t('report.section')}</th><th>{t('sheet.progress')}</th><th>{t('sheet.score')}</th></tr></thead>
             <tbody>
-              {progress.map(p => { const s = sectionScore(p); return (
-                <tr key={p.section.id}><td>{p.section.idx}. {pick(p.section, 'name', lang)}</td><td>{p.done}/{p.total}</td><td>{safeNum(s) !== null ? s.toFixed(2) : '—'}</td></tr>
-              ); })}
-              <tr className="total"><td>{t('sheet.global')}</td><td>{completion(progress)} %</td><td>{safeNum(g) !== null ? g.toFixed(2) : '—'}</td></tr>
+              {progress.map(p => (
+                <tr key={p.section.id}><td>{p.section.idx}. {pick(p.section, 'name', lang)}</td><td>{p.done}/{p.total}</td><td>{fmt(sectionDisplay(p))}</td></tr>
+              ))}
+              <tr className="total"><td>{t('sheet.global')}</td><td>{completion(progress)} %</td><td>{fmt(g)}</td></tr>
             </tbody>
           </table>
-          <p className="muted small">{t('sheet.score_rule')}</p>
+          <p className="muted small">{t('sheet.score_rule')}{anyProvisional ? ` ${t('sheet.provisional_note')}` : ''}</p>
           <button className="btn primary" onClick={onStartSession}>{t('subject.start_session')} →</button>
         </div>
       </div>

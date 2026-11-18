@@ -14,7 +14,7 @@ import { sb, staffApi, fetchIn } from '../../../lib/supabase';
 import { loadBank } from '../../../lib/bank';
 import { fullName } from '../../../lib/names';
 import { safeStr } from '../../../lib/safe';
-import { sectionProgress, sectionScore, EVAL_KEY, EVAL_ORDER } from '../../../lib/scoring';
+import { sectionProgress, sectionDisplay, EVAL_KEY, EVAL_ORDER } from '../../../lib/scoring';
 import appConfig from '../../../app.config';
 
 const TABS = ['recap', 'session', 'plan', 'settings'];
@@ -110,7 +110,7 @@ export default function SubjectPage() {
   const series = assessments.map(a => EVAL_KEY[a.type]).filter((k, i, arr) => arr.indexOf(k) === i);
   const radarData = bank.sections.map((s, i) => {
     const row = { section: `S${s.idx}` };
-    assessments.forEach(a => { row[EVAL_KEY[a.type]] = sectionScore(sectionProgress(bank.sections, bank.questions, allAnswers[a.id] || {})[i]); });
+    assessments.forEach(a => { row[EVAL_KEY[a.type]] = sectionDisplay(sectionProgress(bank.sections, bank.questions, allAnswers[a.id] || {})[i]).value; });
     return row;
   });
 

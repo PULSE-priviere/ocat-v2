@@ -278,7 +278,9 @@
   "score": "Score",
   "scores": "Scores by section",
   "global": "Overall",
-  "score_rule": "Section score: average of answers 1 to 3, N/A excluded, computed once the section is complete. Overall: average of the 9 sections. Visible to the team only."
+  "score_rule": "Section score: average of answers 1 to 3, N/A excluded. Overall: average of the sections of the common framework. Visible to the team only.",
+  "provisional_note": "* Provisional value (average of the answers given so far): the section is not complete yet.",
+  "no_data": "No answers yet: the chart will appear with the first answers."
  },
  "session": {
   "filter": "Filter questions",
@@ -512,7 +514,9 @@
   "downloaded": "The Word file has been downloaded.",
   "redownload": "Download again",
   "back": "Back to the plan",
-  "error": "The file could not be generated. Try again, or use the PDF export."
+  "error": "The file could not be generated. Try again, or use the PDF export.",
+  "provisional": "* Provisional value: the section is not complete yet.",
+  "no_data": "No answers to display yet."
  },
  "eval_short": {
   "baseline": "Baseline",

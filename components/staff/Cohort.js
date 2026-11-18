@@ -71,11 +71,12 @@ export default function Cohort({ project, cohort, coaches, owner, reload }) {
               ) : fullName(r.subject.coach) || '—'}</td>
               <td>{r.current ? `${t(`eval.${r.current.type}`)} · ${t(`astatus.${r.current.status}`)}` : '—'}</td>
               <td><span className="bar inline"><span style={{ width: `${r.completion}%` }} /></span> {r.completion} %</td>
-              <td>{safeNum(r.global) !== null ? r.global.toFixed(2) : '—'}</td>
+              <td>{safeNum(r.global) !== null ? `${r.global.toFixed(2)}${r.globalProvisional ? '*' : ''}` : '—'}</td>
             </tr>
           ))}</tbody>
         </table></div>
       )}
+      {rows.some(r => r.globalProvisional) ? <p className="muted small">{t('sheet.provisional_note')}</p> : null}
     </>
   );
 }

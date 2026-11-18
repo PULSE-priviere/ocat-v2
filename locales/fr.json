@@ -278,7 +278,9 @@
   "score": "Score",
   "scores": "Scores par section",
   "global": "Global",
-  "score_rule": "Score d'une section : moyenne des réponses 1 à 3, N/A exclues, calculée quand la section est complète. Global : moyenne des 9 sections. Visible par l'équipe uniquement."
+  "score_rule": "Score d'une section : moyenne des réponses 1 à 3, N/A exclues. Global : moyenne des sections du cadre commun. Visible par l'équipe uniquement.",
+  "provisional_note": "* Valeur provisoire (moyenne des réponses déjà données) : la section n'est pas encore complète.",
+  "no_data": "Pas encore de réponses : le graphique apparaîtra dès les premières réponses."
  },
  "session": {
   "filter": "Filtrer les questions",
@@ -512,7 +514,9 @@
   "downloaded": "Le fichier Word a été téléchargé.",
   "redownload": "Télécharger à nouveau",
   "back": "Retour au plan",
-  "error": "Le fichier n'a pas pu être généré. Réessayez, ou utilisez l'export PDF."
+  "error": "Le fichier n'a pas pu être généré. Réessayez, ou utilisez l'export PDF.",
+  "provisional": "* Valeur provisoire : la section n'est pas encore complète.",
+  "no_data": "Pas encore de réponses à afficher."
  },
  "eval_short": {
   "baseline": "Baseline",

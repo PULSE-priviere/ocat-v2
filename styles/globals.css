@@ -329,3 +329,5 @@ textarea.notion { resize: none; overflow: hidden; min-height: 2rem; line-height:
 .acc2-body .sq2:first-child { margin-top: 0.2rem; }
 .pcal svg { max-width: 100%; }
 .pcal h2 { margin-top: 0; }
+
+.prov { color: var(--coralFg); font-weight: 700; margin-left: 1px; cursor: help; }
