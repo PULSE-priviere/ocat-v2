@@ -1,4 +1,4 @@
-// Menu latéral de l'espace équipe : tous les projets, administration, puis les rubriques du projet ouvert
+// Menu latéral de l'espace équipe : tous les projets (chacun avec sa pastille), rubriques du projet ouvert, administration, profil
 import Link from 'next/link';
 import Icon from '../Icon';
 import { useI18n } from '../../lib/i18n';
@@ -9,21 +9,34 @@ const ICONS = { cohort: 'users', needs: 'target', team: 'user', project: 'link',
 
 export default function StaffNav({ staff, project, active, onSignOut }) {
   const { t } = useI18n();
+  const projects = (staff.projects || []).filter(p => !p.archived || staff.profile?.is_admin);
   const owner = project ? staff.isOwner(project.id) : false;
-  const items = project ? ['cohort', 'needs', ...(owner ? ['team', 'project', 'sections', 'journal', 'duplicates'] : [])] : [];
+  const items = ['cohort', 'needs', ...(owner ? ['team', 'project', 'sections', 'journal', 'duplicates'] : [])];
   return (
     <nav className="sidenav" aria-label={t('staff.menu')}>
       <Link className={`sideitem ${active === 'home' ? 'on' : ''}`} href="/staff"><Icon name="grid" />{t('staff.all_projects')}</Link>
-      {staff.profile?.is_admin ? <Link className={`sideitem ${active === 'admin' ? 'on' : ''}`} href="/staff?tab=admin"><Icon name="shield" />{t('staff.tab_admin')}</Link> : null}
-      {project ? (
-        <>
-          <p className="sidehead"><span className="sidedot" style={{ background: projectColor(project.id) }} />{safeStr(project.name)}</p>
-          {items.map(k => (
-            <Link key={k} className={`sideitem ${active === k ? 'on' : ''}`} href={`/staff?p=${project.id}&tab=${k}`}><Icon name={ICONS[k]} />{t(`staff.tab_${k}`)}</Link>
-          ))}
-        </>
-      ) : null}
+      <div className="sideprojects">
+        {projects.map(p => {
+          const open = project && project.id === p.id;
+          return (
+            <div key={p.id}>
+              <Link className={`sideitem sideproj ${open ? 'cur' : ''}`} href={`/staff?p=${p.id}&tab=cohort`}>
+                <span className="sq" style={{ background: projectColor(staff.projects, p.id) }} />
+                <span className="sidename">{safeStr(p.name)}</span>
+              </Link>
+              {open ? (
+                <div className="sidesub">
+                  {items.map(k => (
+                    <Link key={k} className={`sideitem ${active === k ? 'on' : ''}`} href={`/staff?p=${p.id}&tab=${k}`}><Icon name={ICONS[k]} size={16} />{t(`staff.tab_${k}`)}</Link>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          );
+        })}
+      </div>
       <div className="sidefoot">
+        {staff.profile?.is_admin ? <Link className={`sideitem ${active === 'admin' ? 'on' : ''}`} href="/staff?tab=admin"><Icon name="shield" />{t('staff.tab_admin')}</Link> : null}
         <Link className={`sideitem ${active === 'profile' ? 'on' : ''}`} href="/staff/profile"><Icon name="user" />{t('staff.profile')}</Link>
         {onSignOut ? <button type="button" className="sideitem" onClick={onSignOut}><Icon name="logout" />{t('staff.sign_out')}</button> : null}
       </div>

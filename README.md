@@ -115,3 +115,12 @@ Thème sobre inspiré des interfaces type Supabase : fond gris très clair, cart
 - Parcours OSC : menu latéral avec chaque section et son avancement (masqué sur petit écran, où les tuiles suffisent).
 - En-têtes de page en deux tons, blocs en couleur pleine (lien public du projet, carte du diagnostic), encadré pastel pour le guide de session, sections de projet repliables.
 - Aucune migration.
+
+## Mise à jour 3.0 (administration par projet, Airtable pour tous les projets, plan individuel côté OSC)
+
+**Ordre : d'abord la base, ensuite le code.** Supabase > SQL Editor : exécuter `supabase/migrations/0006_zone_and_settings.sql` (champ « zone » des projets, réglages de l'application).
+
+- Administration : vues Projets (un clic sur un projet montre ses owners et coachs ; changer un rôle, révoquer, inviter), Comptes (rôles de chacun, droit d'administrateur), Airtable (une seule base pour tous les projets ; jeton saisi dans l'application, enregistré côté serveur, jamais réaffiché ; les variables `AIRTABLE_*` restent possibles en secours).
+- Menu latéral collé au bord gauche, repliable (bouton en haut à gauche), avec la liste des projets.
+- OSC : rubrique « Plan d'accompagnement individuel » en lecture seule (visible quand le coach l'a partagé).
+- Cases à cocher instantanées, boutons avec indicateur d'envoi.

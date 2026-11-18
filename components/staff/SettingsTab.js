@@ -1,6 +1,7 @@
 // Paramètres de l'OSC : lien personnel, clôture, partage, nouvelle évaluation
 import { useState } from 'react';
 import LinkBox from '../LinkBox';
+import Check from '../Check';
 import { useI18n } from '../../lib/i18n';
 import { EVAL_ORDER } from '../../lib/scoring';
 
@@ -32,7 +33,7 @@ export default function SettingsTab({ assessment, link, onAction, onUpdate, onCr
           <section className="card">
             <h2>{t('settings.share_title')}</h2>
             <p className="muted small">{t('settings.share_desc')}</p>
-            <label className="check"><input type="checkbox" checked={assessment.notes_shared} onChange={e => onUpdate({ notes_shared: e.target.checked })} /><span>{t('subject.share_notes')}</span></label>
+            <Check checked={assessment.notes_shared} onChange={v => onUpdate({ notes_shared: v })} label={t('subject.share_notes')} />
           </section>
         </>
       ) : <p className="empty-inline">{t('subject.no_assessment')}</p>}

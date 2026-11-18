@@ -14,6 +14,7 @@ export default function Cohort({ project, cohort, coaches, owner, reload }) {
   const [form, setForm] = useState({ name: '', firstName: '', lastName: '', email: '', coachId: '' });
   const [created, setCreated] = useState('');
   const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
 
   const rows = cohort.rows.filter(r => !coachFilter || (coachFilter === 'none' ? !r.subject.coach_id : r.subject.coach_id === coachFilter));
   const assign = async (subjectId, coachId) => {
@@ -21,9 +22,10 @@ export default function Cohort({ project, cohort, coaches, owner, reload }) {
     if (e) setError('forbidden'); else reload();
   };
   const create = async e => {
-    e.preventDefault(); setError('');
+    e.preventDefault(); setError(''); setBusy(true);
     try { const r = await staffApi('create_subject', { ...form, projectId: project.id, lang }); setCreated(r.url); setForm({ name: '', firstName: '', lastName: '', email: '', coachId: '' }); reload(); }
     catch (err) { setError(err.message); }
+    setBusy(false);
   };
   const unassigned = cohort.rows.filter(r => !r.subject.coach_id).length;
 
@@ -50,7 +52,7 @@ export default function Cohort({ project, cohort, coaches, owner, reload }) {
             <option value="">{t('cohort.no_coach')}</option>
             {coaches.map(c => <option key={c.id} value={c.id}>{fullName(c)}</option>)}
           </select></label>
-          <button className="btn primary">{t('cohort.create')}</button>
+          <button className="btn primary" aria-busy={busy} disabled={busy}>{t('cohort.create')}</button>
         </form>
       ) : null}
       {created ? <LinkBox url={created} /> : null}

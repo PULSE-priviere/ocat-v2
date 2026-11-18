@@ -15,7 +15,9 @@
   "export_csv": "Exporter en CSV",
   "yes": "Oui",
   "no": "Non",
-  "back": "Retour"
+  "back": "Retour",
+  "show_menu": "Afficher le menu",
+  "hide_menu": "Masquer le menu"
  },
  "home": {
   "title": "Diagnostic organisationnel",
@@ -114,7 +116,12 @@
   "nav_dashboard": "Tableau de bord",
   "nav_diagnostic": "Diagnostic",
   "nav_report": "Mon rapport",
-  "nav_sections": "Sections"
+  "nav_sections": "Sections",
+  "nav_plan": "Plan d'accompagnement individuel",
+  "plan_title": "Plan d'accompagnement",
+  "plan_accent": "individuel",
+  "plan_intro": "Ce plan est établi par votre coach à partir de la session d'accompagnement. Vous pouvez le consulter ici ; seul votre coach peut le modifier.",
+  "plan_empty": "Votre plan d'accompagnement individuel n'a pas encore été défini. Il sera établi avec votre coach lors de la session d'accompagnement : n'hésitez pas à vous rapprocher de lui."
  },
  "report": {
   "title": "Rapport de {name}",
@@ -190,7 +197,10 @@
   "kpi_completion": "Complétion moyenne",
   "open": "Ouvrir",
   "new_project": "Nouveau projet",
-  "admin_accent": "projets, comptes et rôles"
+  "admin_accent": "projets, comptes et rôles",
+  "zone": "Zone",
+  "owners": "Owner",
+  "coaches": "Coachs"
  },
  "role": {
   "owner": "Owner de projet",
@@ -280,7 +290,35 @@
   "active": "Actif",
   "project": "Projet",
   "role": "Rôle",
-  "invite": "Inviter"
+  "invite": "Inviter",
+  "v_projects": "Projets",
+  "v_accounts": "Comptes",
+  "v_airtable": "Airtable",
+  "back": "Tous les projets",
+  "members": "Équipe du projet",
+  "person": "Personne",
+  "no_members": "Personne n'est encore rattaché à ce projet.",
+  "invite_member": "Inviter dans ce projet",
+  "edit_project": "Informations du projet",
+  "saved": "Enregistré.",
+  "projects_roles": "Projets et rôles",
+  "invite_admin": "Inviter un administrateur",
+  "at_title": "Base Airtable de suivi-évaluation",
+  "at_status_ok": "Connectée : base {base}, table « {table} ». Tous les projets y envoient leurs évaluations.",
+  "at_status_none": "Aucune base Airtable n'est connectée. Renseignez la connexion ci-dessous.",
+  "at_from_env": "(réglage repris des variables d'environnement)",
+  "at_sync_all": "Synchroniser tous les projets",
+  "at_test": "Tester la connexion",
+  "at_test_ok": "Connexion réussie : la table répond.",
+  "at_csv_all": "Tout télécharger en CSV",
+  "at_settings": "Connexion à Airtable",
+  "at_lead": "Une seule base pour tous les projets : chaque évaluation (baseline, midline, endline) devient une ligne, avec une colonne « Projet » (RISE, EU REACH…) pour savoir à quel projet elle se rattache.",
+  "at_token": "Jeton d'accès Airtable",
+  "at_base": "Identifiant de la base",
+  "at_table": "Nom de la table",
+  "at_token_hint": "Le jeton (commence par pat) doit avoir les droits data.records:write et, pour créer la table, schema.bases:write. Il est enregistré côté serveur et n'est jamais réaffiché ; laissez le champ vide pour garder le jeton actuel.",
+  "at_auto": "Envoyer automatiquement chaque diagnostic soumis",
+  "at_saved": "Connexion enregistrée."
  },
  "subject": {
   "back": "Retour à la cohorte",

@@ -1,6 +1,7 @@
 import Head from 'next/head';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import Icon from './Icon';
 import { useI18n } from '../lib/i18n';
 import { safeStr } from '../lib/safe';
 import appConfig from '../app.config';
@@ -25,15 +26,13 @@ export function LangToggle() {
 }
 
 // home : adresse du logo ; onHome : retour interne (sans rechargement) ; identity : { org, person, href }
-// sidebar : menu latéral (espace équipe, parcours OSC) ; masqué en haut de page sur petit écran
+// sidebar : menu latéral collé au bord gauche, repliable (choix mémorisé dans le navigateur)
 export default function Layout({ title, right, wide, home, onHome, identity, sidebar, children }) {
   const { t } = useI18n();
-  const brand = (
-    <>
-      <Logo />
-      <span>{t('common.app_title')}</span>
-    </>
-  );
+  const [collapsed, setCollapsed] = useState(false);
+  useEffect(() => { try { setCollapsed(localStorage.getItem('ocat:side') === 'closed'); } catch {} }, []);
+  const toggle = () => { const n = !collapsed; setCollapsed(n); try { localStorage.setItem('ocat:side', n ? 'closed' : 'open'); } catch {} };
+  const brand = <><Logo /><span>{t('common.app_title')}</span></>;
   const who = identity ? (
     <>
       <span className="who-org">{safeStr(identity.org)}</span>
@@ -44,10 +43,17 @@ export default function Layout({ title, right, wide, home, onHome, identity, sid
     <>
       <Head><title>{title ? `${title} · ${appConfig.appName}` : appConfig.appName}</title></Head>
       <header className="top no-print">
-        <div className="top-in">
-          {onHome
-            ? <a className="brand" href={home || '/'} onClick={e => { e.preventDefault(); onHome(); }}>{brand}</a>
-            : <Link className="brand" href={home || '/'}>{brand}</Link>}
+        <div className={sidebar ? 'top-in full' : 'top-in'}>
+          <div className="top-left">
+            {sidebar ? (
+              <button type="button" className="sidetoggle" onClick={toggle} aria-pressed={!collapsed} title={t(collapsed ? 'common.show_menu' : 'common.hide_menu')} aria-label={t(collapsed ? 'common.show_menu' : 'common.hide_menu')}>
+                <Icon name="panel" />
+              </button>
+            ) : null}
+            {onHome
+              ? <a className="brand" href={home || '/'} onClick={e => { e.preventDefault(); onHome(); }}>{brand}</a>
+              : <Link className="brand" href={home || '/'}>{brand}</Link>}
+          </div>
           <div className="top-right">
             {right}
             {who ? (identity.href ? <Link className="who" href={identity.href}>{who}</Link> : <div className="who">{who}</div>) : null}
@@ -56,9 +62,9 @@ export default function Layout({ title, right, wide, home, onHome, identity, sid
         </div>
       </header>
       {sidebar ? (
-        <div className="shell">
+        <div className={`shell ${collapsed ? 'collapsed' : ''}`}>
           <aside className="side no-print">{sidebar}</aside>
-          <main className="shell-main">{children}</main>
+          <main className="shell-main"><div className="shell-inner">{children}</div></main>
         </div>
       ) : <main className={wide ? 'page wide' : 'page'}>{children}</main>}
     </>

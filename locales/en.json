@@ -15,7 +15,9 @@
   "export_csv": "Export as CSV",
   "yes": "Yes",
   "no": "No",
-  "back": "Back"
+  "back": "Back",
+  "show_menu": "Show menu",
+  "hide_menu": "Hide menu"
  },
  "home": {
   "title": "Organisational assessment",
@@ -114,7 +116,12 @@
   "nav_dashboard": "Dashboard",
   "nav_diagnostic": "Assessment",
   "nav_report": "My report",
-  "nav_sections": "Sections"
+  "nav_sections": "Sections",
+  "nav_plan": "Individual support plan",
+  "plan_title": "Support plan",
+  "plan_accent": "individual",
+  "plan_intro": "This plan is set by your coach from the support session. You can view it here; only your coach can change it.",
+  "plan_empty": "Your individual support plan has not been defined yet. It will be set with your coach during the support session: feel free to get in touch with them."
  },
  "report": {
   "title": "{name} report",
@@ -190,7 +197,10 @@
   "kpi_completion": "Average completion",
   "open": "Open",
   "new_project": "New project",
-  "admin_accent": "projects, accounts and roles"
+  "admin_accent": "projects, accounts and roles",
+  "zone": "Area",
+  "owners": "Owner",
+  "coaches": "Coaches"
  },
  "role": {
   "owner": "Project owner",
@@ -280,7 +290,35 @@
   "active": "Active",
   "project": "Project",
   "role": "Role",
-  "invite": "Invite"
+  "invite": "Invite",
+  "v_projects": "Projects",
+  "v_accounts": "Accounts",
+  "v_airtable": "Airtable",
+  "back": "All projects",
+  "members": "Project team",
+  "person": "Person",
+  "no_members": "Nobody is attached to this project yet.",
+  "invite_member": "Invite to this project",
+  "edit_project": "Project details",
+  "saved": "Saved.",
+  "projects_roles": "Projects and roles",
+  "invite_admin": "Invite an administrator",
+  "at_title": "Airtable monitoring & evaluation base",
+  "at_status_ok": "Connected: base {base}, table \"{table}\". All projects send their assessments there.",
+  "at_status_none": "No Airtable base is connected. Fill in the connection below.",
+  "at_from_env": "(setting taken from environment variables)",
+  "at_sync_all": "Synchronise all projects",
+  "at_test": "Test the connection",
+  "at_test_ok": "Connection successful: the table responds.",
+  "at_csv_all": "Download everything as CSV",
+  "at_settings": "Airtable connection",
+  "at_lead": "One base for all projects: each assessment (baseline, midline, endline) becomes a row, with a \"Projet\" column (RISE, EU REACH…) showing which project it belongs to.",
+  "at_token": "Airtable access token",
+  "at_base": "Base ID",
+  "at_table": "Table name",
+  "at_token_hint": "The token (starts with pat) needs the data.records:write scope and, to create the table, schema.bases:write. It is stored server-side and never shown again; leave the field empty to keep the current token.",
+  "at_auto": "Automatically send each submitted assessment",
+  "at_saved": "Connection saved."
  },
  "subject": {
   "back": "Back to the cohort",

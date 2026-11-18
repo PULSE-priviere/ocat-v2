@@ -95,9 +95,13 @@ export default function SubjectPage() {
     await toggleNeed(q, data.id);
   };
 
+  // Mise à jour immédiate à l'écran, puis enregistrement ; retour en arrière en cas d'échec
   const updateAssessment = async patch => {
-    const { error } = await sb().from('assessments').update(patch).eq('id', current.id);
-    if (error) setMsg('server_error'); else reload();
+    const before = current;
+    const apply = c => ({ ...c, ...patch });
+    setCurrent(apply); setAssessments(list => list.map(a => (a.id === before.id ? apply(a) : a)));
+    const { error } = await sb().from('assessments').update(patch).eq('id', before.id);
+    if (error) { setCurrent(before); setAssessments(list => list.map(a => (a.id === before.id ? before : a))); setMsg('server_error'); throw error; }
   };
 
   const action = async (name, body) => {

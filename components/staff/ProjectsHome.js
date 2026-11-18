@@ -1,11 +1,12 @@
-// Tableau de bord « Tous les projets » : chiffres clés et une carte par projet
+// Tableau de bord « Tous les projets » : chiffres clés et une carte simple par projet (zone, owners, coachs, chiffres)
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Icon from '../Icon';
 import { useI18n } from '../../lib/i18n';
 import { sb, fetchAll, fetchIn } from '../../lib/supabase';
 import { safeStr } from '../../lib/safe';
-import { projectGradient, initials } from '../../lib/projectColor';
+import { fullName } from '../../lib/names';
+import { projectColor } from '../../lib/projectColor';
 
 export default function ProjectsHome({ staff, projects }) {
   const { t } = useI18n();
@@ -15,15 +16,15 @@ export default function ProjectsHome({ staff, projects }) {
     let alive = true;
     (async () => {
       const ids = projects.map(p => p.id);
-      const st = Object.fromEntries(ids.map(id => [id, { osc: 0, submitted: 0, nocoach: 0, coaches: 0 }]));
+      const st = Object.fromEntries(ids.map(id => [id, { osc: 0, submitted: 0, nocoach: 0, owners: [], coaches: [] }]));
       if (ids.length) {
         const subs = await fetchAll(() => sb().from('subjects').select('id, project_id, coach_id').in('project_id', ids));
         const ass = subs.length ? await fetchIn(c => sb().from('assessments').select('subject_id, status').in('subject_id', c), subs.map(s => s.id)) : [];
-        const { data: mems } = await sb().from('memberships').select('project_id, role').in('project_id', ids);
+        const { data: mems } = await sb().from('memberships').select('project_id, role, profile:profiles(first_name, last_name, name, email)').in('project_id', ids);
         const proj = Object.fromEntries(subs.map(s => [s.id, s.project_id]));
         subs.forEach(s => { st[s.project_id].osc++; if (!s.coach_id) st[s.project_id].nocoach++; });
         ass.forEach(a => { if (a.status !== 'in_progress' && st[proj[a.subject_id]]) st[proj[a.subject_id]].submitted++; });
-        (mems || []).forEach(m => { if (m.role === 'coach' && st[m.project_id]) st[m.project_id].coaches++; });
+        (mems || []).forEach(m => { const x = st[m.project_id]; if (x) (m.role === 'owner' ? x.owners : x.coaches).push(fullName(m.profile)); });
       }
       if (alive) setStats(st);
     })().catch(() => alive && setStats({}));
@@ -32,6 +33,7 @@ export default function ProjectsHome({ staff, projects }) {
 
   const sum = k => Object.values(stats || {}).reduce((a, s) => a + (s[k] || 0), 0);
   const role = p => (staff.profile.is_admin ? t('role.admin') : (staff.roles[p.id] || []).includes('owner') ? t('role.owner') : t('role.coach'));
+  const names = list => (list && list.length ? list.join(', ') : '—');
   return (
     <>
       <section className="hero2">
@@ -53,23 +55,26 @@ export default function ProjectsHome({ staff, projects }) {
       {projects.length === 0 ? <p className="empty-inline">{t('staff.no_project')}</p> : (
         <div className="projgrid">
           {projects.map(p => {
-            const s = stats?.[p.id] || { osc: 0, submitted: 0, coaches: 0 };
+            const s = stats?.[p.id] || { osc: 0, submitted: 0, owners: [], coaches: [] };
             return (
               <Link key={p.id} href={`/staff?p=${p.id}&tab=cohort`} className="projcard">
-                <div className="projcard-top" style={{ background: projectGradient(p.id) }}>
-                  <span className="projcard-initials">{initials(p.name)}</span>
-                  {p.archived ? <span className="pill glass">{t('admin.archived')}</span> : null}
-                </div>
-                <div className="projcard-body">
-                  <h3>{safeStr(p.name)}</h3>
-                  <p className="muted small">{safeStr(p.cohort) || '—'}</p>
-                  <div className="projcard-stats">
-                    <span><b>{s.osc}</b> {t('staff.kpi_osc')}</span>
-                    <span><b>{s.submitted}</b> {t('staff.kpi_submitted_short')}</span>
-                    <span><b>{s.coaches}</b> {t('staff.kpi_coaches')}</span>
+                <div className="pc-head">
+                  <span className="sq lg" style={{ background: projectColor(staff.projects, p.id) }} />
+                  <div>
+                    <h3>{safeStr(p.name)}</h3>
+                    <p className="muted small">{safeStr(p.cohort) || '—'}{p.archived ? ` · ${t('admin.archived')}` : ''}</p>
                   </div>
-                  <div className="projcard-foot"><span className="pill">{role(p)}</span><span className="projcard-open">{t('staff.open')} <Icon name="arrow" size={15} /></span></div>
                 </div>
+                <dl className="pc-meta">
+                  <dt>{t('staff.zone')}</dt><dd>{safeStr(p.zone) || '—'}</dd>
+                  <dt>{t('staff.owners')}</dt><dd>{stats ? names(s.owners) : '…'}</dd>
+                  <dt>{t('staff.coaches')}</dt><dd>{stats ? names(s.coaches) : '…'}</dd>
+                </dl>
+                <div className="projcard-stats">
+                  <span><b>{s.osc}</b> {t('staff.kpi_osc')}</span>
+                  <span><b>{s.submitted}</b> {t('staff.kpi_submitted_short')}</span>
+                </div>
+                <div className="projcard-foot"><span className="pill">{role(p)}</span><span className="projcard-open">{t('staff.open')} <Icon name="arrow" size={15} /></span></div>
               </Link>
             );
           })}

@@ -7,7 +7,7 @@ import { downloadCsv } from '../../lib/csv';
 
 export default function Needs({ project, cohort, needs }) {
   const { t, lang } = useI18n();
-  const [open, setOpen] = useState({});
+  const maxN = Math.max(1, ...needs.agg.map(a => a.subjects.length));
   const exportCsv = () => downloadCsv(`besoins-${project.name}.csv`, [
     [t('needs.need'), t('needs.count'), t('needs.oscs')],
     ...needs.agg.map(a => [a.need.label, a.subjects.length, a.subjects.map(s => s.name).join(', ')]),
@@ -25,16 +25,18 @@ export default function Needs({ project, cohort, needs }) {
     <>
       <div className="toolbar"><h2>{t('needs.title')}</h2>{needs.agg.length ? <button className="btn info" onClick={exportCsv}>{t('common.export_csv')}</button> : null}</div>
       {needs.agg.every(a => !a.subjects.length) ? <p className="empty-inline">{t('needs.empty')}</p> : (
-        <ul className="needs">
-          {needs.agg.filter(a => a.subjects.length).map(a => (
-            <li key={a.need.id}>
-              <button className="needrow" aria-expanded={!!open[a.need.id]} onClick={() => setOpen({ ...open, [a.need.id]: !open[a.need.id] })}>
-                <span className="count">{a.subjects.length}</span><span>{safeStr(a.need.label)}</span>
-              </button>
-              {open[a.need.id] ? <ul className="sublist">{a.subjects.map(s => <li key={s.id}><Link href={`/staff/subject/${s.id}`}>{safeStr(s.name)}</Link></li>)}</ul> : null}
-            </li>
-          ))}
-        </ul>
+        <div className="card flush">
+          <table className="table needs-table">
+            <thead><tr><th>{t('needs.need')}</th><th>{t('needs.count')}</th><th>{t('needs.oscs')}</th></tr></thead>
+            <tbody>{needs.agg.filter(a => a.subjects.length).map(a => (
+              <tr key={a.need.id}>
+                <td><b>{safeStr(a.need.label)}</b></td>
+                <td className="nt-count"><span className="nt-bar"><span style={{ width: `${(a.subjects.length / maxN) * 100}%` }} /></span><b>{a.subjects.length}</b></td>
+                <td><div className="chips">{a.subjects.map(s => <Link key={s.id} className="chiplink" href={`/staff/subject/${s.id}`}>{safeStr(s.name)}</Link>)}</div></td>
+              </tr>
+            ))}</tbody>
+          </table>
+        </div>
       )}
       <h2>{t('needs.weakest')}</h2>
       <p className="muted small">{t('needs.weakest_hint')}</p>

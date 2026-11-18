@@ -2,15 +2,20 @@
 import { admin, fail, isEmail, staffFromReq, newToken, hashToken, tokenExpiry, personalUrl, rotateToken } from '../../../lib/server';
 import { sendMail } from '../../../lib/mail';
 import { sendLoginLink } from '../../../lib/login';
-import { airtableReady, buildRows, pushToAirtable, createScoresTable, FIELD_DEFS } from '../../../lib/scoresExport';
+import { airtableConfig, airtableReady, buildRows, pushToAirtable, createScoresTable, testAirtable, FIELD_DEFS } from '../../../lib/scoresExport';
 
 const rpc = async (db, fn, args) => (await db.rpc(fn, args)).data === true;
+
+// Droit d'export : owner du projet, ou administrateur pour tous les projets
+const canScores = (db, body) => (body.all ? rpc(db, 'is_admin') : rpc(db, 'is_owner', { p: body.projectId }));
 
 // Une page de 40 évaluations d'un projet, dans un ordre stable
 async function assessmentPage(svc, body) {
   const offset = Math.max(0, Number(body.offset) || 0), limit = 40;
-  const { data, count, error } = await svc.from('assessments').select('id, subjects!inner(project_id)', { count: 'exact' })
-    .eq('subjects.project_id', body.projectId).order('created_at').order('id').range(offset, offset + limit - 1);
+  // body.all : toutes les évaluations de tous les projets (administrateur)
+  let q = svc.from('assessments').select('id, subjects!inner(project_id)', { count: 'exact' });
+  if (!body.all) q = q.eq('subjects.project_id', body.projectId);
+  const { data, count, error } = await q.order('created_at').order('id').range(offset, offset + limit - 1);
   if (error) throw new Error(error.message);
   return { ids: (data || []).map(x => x.id), total: count || 0, offset };
 }
@@ -134,25 +139,52 @@ const actions = {
   },
 
   // Suivi-évaluation : crée la table Airtable, envoie les scores, ou renvoie les lignes pour un CSV (par lots de 40 évaluations)
-  async scores_setup({ db, body }) {
-    if (!(await rpc(db, 'is_owner', { p: body.projectId }))) return [403, 'forbidden'];
-    if (!airtableReady()) return [400, 'airtable_not_configured'];
-    try { return await createScoresTable(); } catch (e) { return [502, 'airtable_error', e.message]; }
+  async scores_setup({ db, svc, body }) {
+    if (!(await canScores(db, body))) return [403, 'forbidden'];
+    const cfg = await airtableConfig(svc);
+    if (!airtableReady(cfg)) return [400, 'airtable_not_configured'];
+    try { return await createScoresTable(cfg); } catch (e) { return [502, 'airtable_error', e.message]; }
   },
   async scores_sync({ db, svc, body }) {
-    if (!(await rpc(db, 'is_owner', { p: body.projectId }))) return [403, 'forbidden'];
-    if (!airtableReady()) return [400, 'airtable_not_configured'];
+    if (!(await canScores(db, body))) return [403, 'forbidden'];
+    const cfg = await airtableConfig(svc);
+    if (!airtableReady(cfg)) return [400, 'airtable_not_configured'];
     const { ids, total, offset } = await assessmentPage(svc, body);
-    try { await pushToAirtable(await buildRows(svc, ids)); } catch (e) { return [502, 'airtable_error', e.message]; }
+    try { await pushToAirtable(await buildRows(svc, ids), cfg); } catch (e) { return [502, 'airtable_error', e.message]; }
     const done = offset + ids.length;
     return { sent: ids.length, done, total, next: ids.length && done < total ? done : null };
   },
   async scores_csv({ db, svc, body }) {
-    if (!(await rpc(db, 'is_owner', { p: body.projectId }))) return [403, 'forbidden'];
+    if (!(await canScores(db, body))) return [403, 'forbidden'];
     const { ids, total, offset } = await assessmentPage(svc, body);
     const rows = await buildRows(svc, ids);
     const done = offset + ids.length;
     return { fields: FIELD_DEFS.map(f => f.name), rows, done, total, next: ids.length && done < total ? done : null };
+  },
+
+  // Connexion Airtable (administrateur) : le jeton est enregistré côté serveur et n'est jamais renvoyé en clair
+  async airtable_get({ db, svc }) {
+    if (!(await rpc(db, 'is_admin'))) return [403, 'forbidden'];
+    const cfg = await airtableConfig(svc);
+    return { configured: airtableReady(cfg), baseId: cfg.base, table: cfg.table, auto: cfg.auto,
+      tokenHint: cfg.token ? `••••${cfg.token.slice(-4)}` : '', source: cfg.fromApp ? 'app' : (cfg.token ? 'env' : '') };
+  },
+  async airtable_save({ db, svc, body }) {
+    if (!(await rpc(db, 'is_admin'))) return [403, 'forbidden'];
+    const { data: cur } = await svc.from('app_settings').select('value').eq('key', 'airtable').maybeSingle();
+    const next = { ...(cur?.value || {}), baseId: String(body.baseId || '').trim().slice(0, 40),
+      table: String(body.table || '').trim().slice(0, 100) || 'Scores', auto: body.auto !== false };
+    if (body.token) next.token = String(body.token).trim().slice(0, 300);
+    if (!next.baseId) return [400, 'invalid_form'];
+    const { error } = await svc.from('app_settings').upsert({ key: 'airtable', value: next, updated_at: new Date().toISOString() });
+    if (error) return [500, 'server_error'];
+    return { ok: true };
+  },
+  async airtable_test({ db, svc }) {
+    if (!(await rpc(db, 'is_admin'))) return [403, 'forbidden'];
+    const cfg = await airtableConfig(svc);
+    if (!airtableReady(cfg)) return [400, 'airtable_not_configured'];
+    try { return await testAirtable(cfg); } catch (e) { return [502, 'airtable_error', e.message]; }
   },
 
   // Fusion de doublons (F31) : les évaluations passent sur le dossier conservé

@@ -1,5 +1,6 @@
 // Texte d'introduction du diagnostic (dans locales/*.json, clé intro)
 import { useI18n } from '../lib/i18n';
+import Icon from './Icon';
 import appConfig from '../app.config';
 
 export default function Intro({ open, n = 9 }) {
@@ -7,7 +8,7 @@ export default function Intro({ open, n = 9 }) {
   const levels = t('intro.levels');
   return (
     <details className="intro" open={open}>
-      <summary>{t('intro.toggle')}</summary>
+      <summary><Icon name="bulb" />{t('intro.toggle')}</summary>
       <h2>{t('intro.title', { org: appConfig.orgName })}</h2>
       <p>{t('intro.p1')}</p>
       <p>{t('intro.p2', { n })}</p>

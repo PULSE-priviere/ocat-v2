@@ -4,6 +4,7 @@ import { useI18n } from '../../lib/i18n';
 import { sb } from '../../lib/supabase';
 import { safeStr } from '../../lib/safe';
 import Icon from '../Icon';
+import Check from '../Check';
 import ScoresExport from './ScoresExport';
 
 const randomSlug = () => Array.from(crypto.getRandomValues(new Uint8Array(9))).map(b => b.toString(16).padStart(2, '0')).join('');
@@ -18,8 +19,11 @@ export default function ProjectSettings({ project, needs, reload }) {
   useEffect(() => { setP(project); setOrigin(window.location.origin); }, [project]);
 
   const update = async patch => {
+    const before = p;
+    setP(x => ({ ...x, ...patch }));                       // affichage immédiat
     const { error } = await sb().from('projects').update(patch).eq('id', project.id);
-    if (!error) { setSaved(true); setTimeout(() => setSaved(false), 1500); reload(); }
+    if (error) { setP(before); throw error; }
+    setSaved(true); setTimeout(() => setSaved(false), 1500); reload();
   };
   const renew = () => { if (window.confirm(t('project.renew_confirm'))) update({ public_slug: randomSlug() }); };
   const addNeed = async e => { e.preventDefault(); if (!newNeed.trim()) return; await sb().from('needs').insert({ project_id: project.id, label: newNeed.trim() }); setNewNeed(''); reload(); };
@@ -40,9 +44,9 @@ export default function ProjectSettings({ project, needs, reload }) {
           </div>
         ) : <p className="feature-off">{t('project.link_disabled')}</p>}
         <div className="feature-actions">
-          <button className="btn glass" onClick={() => update({ public_active: !p.public_active })}>{p.public_active ? t('project.disable') : t('project.enable')}</button>
+          <button className="btn glass" onClick={() => update({ public_active: !p.public_active }).catch(() => {})}>{p.public_active ? t('project.disable') : t('project.enable')}</button>
           <button className="btn glass" onClick={renew}>{t('project.renew')}</button>
-          <label className="check light"><input type="checkbox" checked={p.offer_coach_choice} onChange={e => update({ offer_coach_choice: e.target.checked })} /><span>{t('project.offer_coach_choice')}</span></label>
+          <Check className="light" checked={p.offer_coach_choice} onChange={v => update({ offer_coach_choice: v })} label={t('project.offer_coach_choice')} />
         </div>
       </section>
       <h2>{t('project.welcome_title')}</h2>

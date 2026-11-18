@@ -6,6 +6,8 @@ import LinkBox from '../../components/LinkBox';
 import Intro from '../../components/Intro';
 import OscDashboard from '../../components/OscDashboard';
 import Icon from '../../components/Icon';
+import { timelineSvg } from '../../lib/planCharts';
+import { fmtDate } from '../../lib/planData';
 import { useI18n, pick } from '../../lib/i18n';
 import { safeStr } from '../../lib/safe';
 import { contactName } from '../../lib/names';
@@ -171,6 +173,8 @@ export default function OscPage() {
             onStart={startOrResume} onReport={() => { setView('report'); toTop(); }} />
           <PersonalLink />
         </>
+      ) : view === 'plan' ? (
+        <PlanPublic data={data} />
       ) : view === 'report' ? (
         <Report data={data} answers={answers} comments={comments} deepen={deepen} progress={progress} onBack={() => { setView('dashboard'); toTop(); }} />
       ) : section ? (
@@ -409,6 +413,7 @@ function OscNav({ data, progress, view, go }) {
     <nav className="sidenav" aria-label={t('staff.menu')}>
       <button type="button" className={`sideitem ${view === 'dashboard' ? 'on' : ''}`} onClick={() => go('dashboard')}><Icon name="home" />{t('osc.nav_dashboard')}</button>
       <button type="button" className={`sideitem ${view === 'home' ? 'on' : ''}`} onClick={() => go('home')}><Icon name="list" />{t('osc.nav_diagnostic')}</button>
+      <button type="button" className={`sideitem ${view === 'plan' ? 'on' : ''}`} onClick={() => go('plan')}><Icon name="clipboard" />{t('osc.nav_plan')}</button>
       {submitted ? <button type="button" className={`sideitem ${view === 'report' ? 'on' : ''}`} onClick={() => go('report')}><Icon name="file" />{t('osc.nav_report')}</button> : null}
       <p className="sidehead">{t('osc.nav_sections')}</p>
       {progress.map(p => (
@@ -419,5 +424,48 @@ function OscNav({ data, progress, view, go }) {
         </button>
       ))}
     </nav>
+  );
+}
+
+// Plan d'accompagnement individuel : préparé par le coach, en lecture seule pour l'OSC (visible quand le coach l'a partagé)
+function PlanPublic({ data }) {
+  const { t, lang } = useI18n();
+  const plan = data.plan || [];
+  const q = id => data.questions.find(x => x.id === id);
+  const cal = timelineSvg({ rows: plan.map((r, i) => ({ n: i + 1, label: r.action || pick(q(r.questionId), 'text', lang), due: r.due })), today: new Date(), lang, labels: { today: t('planx.today') }, responsive: true });
+  return (
+    <>
+      <section className="hero2 compact">
+        <div>
+          <p className="eyebrow">{safeStr(data.subject.name)}</p>
+          <h1 className="display sm">{t('osc.plan_title')}<br /><span className="accent">{t('osc.plan_accent')}</span></h1>
+        </div>
+        <div className="hero2-side"><p className="lead">{t('osc.plan_intro')}</p></div>
+      </section>
+      {plan.length === 0 ? (
+        <div className="callout"><Icon name="clipboard" size={20} /><p>{t('osc.plan_empty')}</p></div>
+      ) : (
+        <>
+          {cal.svg ? <section className="card pcal"><h2>{t('planx.calendar_title')}</h2><div dangerouslySetInnerHTML={{ __html: cal.svg }} /></section> : null}
+          <ol className="planlist readonly">
+            {plan.map((r, i) => {
+              const qq = q(r.questionId);
+              return (
+                <li key={r.id || i}>
+                  <div className="planrow-main">
+                    <p className="q-text"><span className="numbadge">{i + 1}</span>{qq?.code ? <span className="q-code">{qq.code}</span> : null}{pick(qq, 'text', lang)}</p>
+                    <dl className="planrow-fields">
+                      <dt>{t('plan.action')}</dt><dd>{safeStr(r.action) || '—'}</dd>
+                      <dt>{t('plan.owner')}</dt><dd>{safeStr(r.owner) || '—'}</dd>
+                    </dl>
+                  </div>
+                  <div className="planrow-side"><span className="muted small">{t('plan.due')}</span><b>{r.due ? fmtDate(r.due, lang, { day: 'numeric', month: 'long', year: 'numeric' }) : '—'}</b></div>
+                </li>
+              );
+            })}
+          </ol>
+        </>
+      )}
+    </>
   );
 }
