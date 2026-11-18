@@ -6,6 +6,9 @@ import Layout from '../../../components/Layout';
 import LinkBox from '../../../components/LinkBox';
 import ScoreRadar from '../../../components/Radar';
 import PlanEditor from '../../../components/staff/PlanEditor';
+import OrgInfoForm from '../../../components/OrgInfoForm';
+import { fullName } from '../../../lib/names';
+import appConfig from '../../../app.config';
 import { useI18n, pick } from '../../../lib/i18n';
 import { useStaff } from '../../../lib/useStaff';
 import { sb, staffApi, fetchIn } from '../../../lib/supabase';
@@ -38,7 +41,7 @@ export default function SubjectPage() {
     if (!query.id || staff.loading) return;
     (async () => {
       const { data: s } = await sb().from('subjects')
-        .select('*, project:projects(id, name, framework_id), coach:profiles(name, email)').eq('id', query.id).maybeSingle();
+        .select('*, project:projects(id, name, framework_id), coach:profiles(name, first_name, last_name, email)').eq('id', query.id).maybeSingle();
       if (!s) return setMsg('forbidden');
       const { data: list } = await sb().from('assessments').select('*').eq('subject_id', s.id);
       const sorted = (list || []).sort((a, b) => EVAL_ORDER.indexOf(a.type) - EVAL_ORDER.indexOf(b.type) || a.created_at.localeCompare(b.created_at));
@@ -116,18 +119,32 @@ export default function SubjectPage() {
 
   const st = current?.status;
   return (
-    <Layout wide title={safeStr(subject.name)}>
+    <Layout wide title={safeStr(subject.name)} home="/staff" identity={{ org: appConfig.orgName, person: fullName(staff.profile), href: '/staff/profile' }}>
       <Link className="link" href="/staff">{t('subject.back')}</Link>
       <div className="toolbar">
         <h1 className="h1-small">{safeStr(subject.name)}</h1>
+        {current ? <span className="pill">{t(`eval.${current.type}`)}</span> : null}
         {assessments.length > 1 ? (
           <select aria-label={t('cohort.evaluation')} value={current?.id || ''} onChange={e => { setCurrent(assessments.find(a => a.id === e.target.value)); reload(); }}>
             {assessments.map(a => <option key={a.id} value={a.id}>{t(`eval.${a.type}`)} · {new Date(a.created_at).toLocaleDateString(lang)}</option>)}
           </select>
         ) : null}
       </div>
-      <p className="muted">{safeStr(subject.email)} · {t('cohort.coach')} : {safeStr(subject.coach?.name || subject.coach?.email) || '—'}
+      <p className="muted">{safeStr(subject.email)} · {t('cohort.coach')} : {fullName(subject.coach) || '—'}
         {current ? ` · ${t(`eval.${current.type}`)} · ${t(`astatus.${st}`)}` : ''}</p>
+
+      <section className="card">
+        <h2>{t('profile.title')}</h2>
+        <OrgInfoForm value={subject}
+          rows={[{ label: t('dashboard.project'), value: subject.project?.name }, { label: t('dashboard.coach'), value: fullName(subject.coach) }]}
+          onSave={async f => {
+            const { error } = await sb().from('subjects').update({
+              contact_first_name: f.contact_first_name.trim(), contact_last_name: f.contact_last_name.trim(),
+              country: f.country || null, org_type: f.org_type || null, org_size: f.org_size || null }).eq('id', subject.id);
+            if (error) throw new Error('server_error');
+            reload();
+          }} />
+      </section>
 
       {current ? (
         <div className="toolbar wrap">
@@ -232,7 +249,7 @@ function Session({ bank, answers, comments, needs, filter, setFilter, saveAnswer
         const qs = bank.questions.filter(q => q.section_id === s.id && keep(q));
         return (
           <section key={s.id} className="ssec">
-            <h2>{pick(s, 'name', lang)}</h2>
+            <h2>{pick(s, 'name', lang)}{assessment.section_deepen?.[s.num] ? <span className="tag">{t('session.deepen_badge')}</span> : null}</h2>
             {comments[s.num] ? <p className="osccomment"><strong>{t('session.osc_comment')}</strong> {safeStr(comments[s.num])}</p> : null}
             {qs.map(q => <SessionQuestion key={q.id} q={q} a={answers[q.id] || {}} needs={needs} saveAnswer={saveAnswer} toggleNeed={toggleNeed} addNeed={addNeed} />)}
             <AddQuestion section={s} assessment={assessment} onAdded={onQuestionAdded} />

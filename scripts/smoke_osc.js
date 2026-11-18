@@ -13,14 +13,18 @@ const check = (label, ok) => { console.log(`${ok ? 'OK    ' : 'ÉCHEC '} ${label
 
 (async () => {
   const email = `smoke-${Date.now()}@example.org`;
-  const e = await post('/api/public/enter', { slug, name: 'OSC test', email, consent: true });
+  const e = await post('/api/public/enter', { slug, name: 'OSC test', firstName: 'Test', lastName: 'Osc', email, consent: true });
   check('entrée par le lien public → dossier créé', e.json.status === 'created' && /\/a\//.test(e.json.url));
   const token = e.json.url.split('/a/')[1];
 
-  const noConsent = await post('/api/public/enter', { slug, name: 'X', email: 'x' + email });
+  const noConsent = await post('/api/public/enter', { slug, name: 'X', firstName: 'A', lastName: 'B', email: 'x' + email });
   check('consentement obligatoire', noConsent.status === 400);
 
+  const noNames = await post('/api/public/enter', { slug, name: 'X', email: 'y' + email, consent: true });
+  check('prénom et nom du contact obligatoires', noNames.status === 400);
+
   let d = (await post('/api/osc/load', { token })).json;
+  check('nom et prénom du contact enregistrés', d.subject?.contact_first_name === 'Test' && d.subject?.contact_last_name === 'Osc');
   check('9 sections chargées', d.sections?.length === 9);
   const bank = d.questions.filter(q => !q.assessment_id && q.format === 'scale');
   check('124 questions chargées', bank.length === 124);
@@ -40,6 +44,17 @@ const check = (label, ok) => { console.log(`${ok ? 'OK    ' : 'ÉCHEC '} ${label
   const three = d.answers.find(a => a.code === '3');
   check('appui effacé pour une réponse 3', three && three.support === null);
 
+  const pr = await post('/api/osc/save', { token, op: 'profile', patch: { country: 'morocco', org_type: 'ngo', org_size: '6-20' } });
+  check('fiche organisation (pays, type, taille) enregistrée', pr.json.ok === true);
+  check('valeur hors liste refusée', (await post('/api/osc/save', { token, op: 'profile', patch: { country: 'mars' } })).status === 400);
+  check('prénom vide refusé', (await post('/api/osc/save', { token, op: 'profile', patch: { contact_first_name: ' ' } })).status === 400);
+  await post('/api/osc/save', { token, op: 'deepen', section: '1', value: true });
+  await post('/api/osc/save', { token, op: 'deepen', section: '2', value: false });
+  d = (await post('/api/osc/load', { token })).json;
+  check('fiche organisation retrouvée au rechargement', d.subject.country === 'morocco' && d.subject.org_type === 'ngo' && d.subject.org_size === '6-20');
+  check('approfondissement par section retrouvé', d.assessment.section_deepen['1'] === true && d.assessment.section_deepen['2'] === false);
+  check('type d\'évaluation transmis (baseline)', d.assessment.type === 'baseline');
+
   const early = await post('/api/osc/submit', { token });
   check('soumission refusée tant que tout n\'est pas complet', early.status === 400 && early.json.error === 'incomplete');
 
@@ -52,7 +67,7 @@ const check = (label, ok) => { console.log(`${ok ? 'OK    ' : 'ÉCHEC '} ${label
   const bad = await post('/api/osc/load', { token: 'x'.repeat(43) });
   check('jeton inconnu refusé', bad.status === 404);
 
-  const again = await post('/api/public/enter', { slug, name: 'Un autre nom', email, consent: true });
+  const again = await post('/api/public/enter', { slug, name: 'Un autre nom', firstName: 'A', lastName: 'B', email, consent: true });
   check('même e-mail : aucun lien affiché, renvoi par e-mail', again.json.status === 'exists' && !again.json.url);
   const old = await post('/api/osc/load', { token });
   check('ancien lien remplacé après renvoi', old.status === 404);

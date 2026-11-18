@@ -19,7 +19,8 @@ const actions = {
   // Inviter un compte ; owner : coachs de son projet ; admin : tout
   async invite({ db, svc, body }) {
     const email = String(body.email || '').trim().toLowerCase();
-    const { projectId, role, makeAdmin, name } = body;
+    const { projectId, role, makeAdmin } = body;
+    const first = String(body.firstName || '').trim(), last = String(body.lastName || '').trim();
     if (!isEmail(email)) return [400, 'invalid_form'];
     const isAdm = await rpc(db, 'is_admin');
     if ((makeAdmin || role === 'owner') && !isAdm) return [403, 'forbidden'];
@@ -28,7 +29,7 @@ const actions = {
     if (!prof) {
       const { data: u, error } = await svc.auth.admin.createUser({ email, email_confirm: true });
       if (error) return [500, 'server_error'];
-      const { data: p2 } = await svc.from('profiles').insert({ id: u.user.id, email, name: name || null }).select('id').single();
+      const { data: p2 } = await svc.from('profiles').insert({ id: u.user.id, email, first_name: first || null, last_name: last || null, name: [first, last].filter(Boolean).join(' ') || null }).select('id').single();
       prof = p2;
     }
     if (makeAdmin) await svc.from('profiles').update({ is_admin: true }).eq('id', prof.id);
@@ -60,10 +61,10 @@ const actions = {
   async create_subject({ db, svc, body }) {
     const email = String(body.email || '').trim().toLowerCase();
     const name = String(body.name || '').trim();
-    if (!name || !isEmail(email)) return [400, 'invalid_form'];
+    if (!name || !isEmail(email) || !body.firstName || !body.lastName) return [400, 'invalid_form'];
     if (!(await rpc(db, 'is_owner', { p: body.projectId }))) return [403, 'forbidden'];
     const { data: s, error } = await svc.from('subjects')
-      .insert({ project_id: body.projectId, name, email, coach_id: body.coachId || null, origin: 'manual' }).select('id').single();
+      .insert({ project_id: body.projectId, name, email, contact_first_name: String(body.firstName).trim(), contact_last_name: String(body.lastName).trim(), coach_id: body.coachId || null, origin: 'manual' }).select('id').single();
     if (error) return [409, 'email_exists'];
     const r = await createAssessment(svc, s.id, 'baseline', email, body.lang);
     return { subjectId: s.id, url: r.url };

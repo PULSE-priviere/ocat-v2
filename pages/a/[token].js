@@ -1,10 +1,13 @@
-// Parcours OSC (F1 à F7) : accueil par sections, questionnaire, enregistrement automatique, rapport
+// Parcours OSC : Dashboard (point d'entrée), diagnostic par sections, enregistrement automatique, rapport
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import Layout from '../../components/Layout';
 import LinkBox from '../../components/LinkBox';
+import Intro from '../../components/Intro';
+import OscDashboard from '../../components/OscDashboard';
 import { useI18n, pick } from '../../lib/i18n';
 import { safeStr } from '../../lib/safe';
+import { contactName } from '../../lib/names';
 import { sectionProgress, isBankScale, byAnswer } from '../../lib/scoring';
 
 const SCALE = ['NA', '1', '2', '3'];
@@ -22,7 +25,8 @@ export default function OscPage() {
   const [fatal, setFatal] = useState('');
   const [answers, setAnswers] = useState({});      // question_id → réponse
   const [comments, setComments] = useState({});    // n° section → texte
-  const [view, setView] = useState('home');        // 'home' | section id | 'report'
+  const [deepen, setDeepen] = useState({});        // n° section → true/false
+  const [view, setView] = useState('dashboard');  // 'dashboard' | 'home' | id de section | 'report'
   const [save, setSave] = useState('saved');       // saved | saving | offline | error
   const [saveError, setSaveError] = useState('');
   const [resent, setResent] = useState(false);
@@ -35,13 +39,14 @@ export default function OscPage() {
       if (j.error) return setFatal(j.error);
       const byQ = Object.fromEntries(j.answers.map(a => [a.question_id, a]));
       const sc = { ...(j.assessment.section_comments || {}) };
+      const dp = { ...(j.assessment.section_deepen || {}) };
       // Les modifications locales non envoyées l'emportent
       Object.values(readQueue(token)).forEach(p => {
         if (p.op === 'answer') byQ[p.questionId] = { ...(byQ[p.questionId] || {}), question_id: p.questionId, code: p.code, support: p.support, value_text: p.valueText };
         if (p.op === 'comment') sc[p.section] = p.text;
+        if (p.op === 'deepen') dp[p.section] = p.value;
       });
-      setAnswers(byQ); setComments(sc); setData(j);
-      return { j, byQ };
+      setAnswers(byQ); setComments(sc); setDeepen(dp); setData(j);
     } catch { setFatal('offline'); }
   }, [token]);
 
@@ -68,19 +73,9 @@ export default function OscPage() {
     if (Object.keys(readQueue(token)).length) flush();
   }, [token]);
 
-  // Chargement + reprise à la première question sans réponse (F4)
   useEffect(() => {
     if (!token) return;
-    load().then(res => {
-      if (!res) return;
-      const { j, byQ } = res;
-      if (j.assessment.status !== 'in_progress') return setView('report');
-      if (!Object.keys(byQ).length) return;
-      for (const s of j.sections) {
-        const q = j.questions.find(x => x.section_id === s.id && isBankScale(x) && !byQ[x.id]?.code);
-        if (q) { setView(s.id); setTimeout(() => document.getElementById(`q-${q.id}`)?.scrollIntoView({ block: 'center' }), 150); return; }
-      }
-    });
+    load();
     flush();
     const on = () => flush();
     window.addEventListener('online', on);
@@ -109,9 +104,30 @@ export default function OscPage() {
     clearTimeout(commentTimer.current);
     commentTimer.current = setTimeout(() => queue(`c:${num}`, { op: 'comment', section: String(num), text }), 800);
   };
+  const setDeepenFor = (num, value) => {
+    if (locked) return;
+    setDeepen(d => ({ ...d, [num]: value }));
+    queue(`d:${num}`, { op: 'deepen', section: String(num), value });
+  };
+
+  const saveProfile = async patch => {
+    const r = await fetch('/api/osc/save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token, op: 'profile', patch }) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j.error || 'server_error');
+    setData(d => ({ ...d, subject: { ...d.subject, ...patch } }));
+  };
 
   const progress = useMemo(() => data ? sectionProgress(data.sections, data.questions, answers) : [], [data, answers]);
   const allComplete = progress.length > 0 && progress.every(p => p.status === 'complete');
+  const toTop = () => window.scrollTo(0, 0);
+
+  // Reprise : première question sans réponse (F4) ; sans aucune réponse, page d'introduction
+  const startOrResume = () => {
+    const first = data.sections.map(s => ({ s, q: data.questions.find(x => x.section_id === s.id && isBankScale(x) && !answers[x.id]?.code) })).find(x => x.q);
+    if (!first || !Object.keys(answers).length) { setView('home'); toTop(); return; }
+    setView(first.s.id);
+    setTimeout(() => document.getElementById(`q-${first.q.id}`)?.scrollIntoView({ block: 'center' }), 150);
+  };
 
   const submit = async () => {
     if (!window.confirm(t('osc.submit_confirm'))) return;
@@ -119,7 +135,7 @@ export default function OscPage() {
     const r = await fetch('/api/osc/submit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token }) });
     const j = await r.json().catch(() => ({}));
     if (j.error) { setSaveError(j.error); setSave('error'); return; }
-    await load(); setView('report'); window.scrollTo(0, 0);
+    await load(); setView('report'); toTop();
   };
 
   const resend = async () => {
@@ -129,7 +145,7 @@ export default function OscPage() {
 
   if (fatal) return (
     <Layout>
-      <div className="narrow empty">
+      <div className="narrow hero empty">
         <h1>{t(`errors.title_${['invalid_link', 'expired_link', 'offline'].includes(fatal) ? fatal : 'generic'}`)}</h1>
         <p className="lead">{t(`errors.${fatal}`)}</p>
         {fatal === 'expired_link' ? (resent ? <p className="ok">{t('osc.resent')}</p> : <button className="btn primary" onClick={resend}>{t('osc.resend')}</button>) : null}
@@ -139,27 +155,42 @@ export default function OscPage() {
   );
   if (!data) return <Layout><p className="muted">{t('common.loading')}</p></Layout>;
 
-  const status = <SaveStatus state={save} error={saveError} />;
   const section = data.sections.find(s => s.id === view);
+  const identity = { org: safeStr(data.subject.name), person: contactName(data.subject) };
+  const status = <SaveStatus state={save} error={saveError} />;
 
   return (
-    <Layout title={safeStr(data.subject.name)} right={status}>
+    <Layout title={safeStr(data.subject.name)} right={status} identity={identity} onHome={() => { setView('dashboard'); toTop(); }}>
       {locked ? <p className="banner">{t('osc.locked_banner')}</p> : null}
-      {view === 'report' ? (
-        <Report data={data} answers={answers} comments={comments} progress={progress} onBack={() => setView('home')} />
+      {view === 'dashboard' ? (
+        <>
+          <OscDashboard data={data} progress={progress} locked={locked} saveProfile={saveProfile}
+            onStart={startOrResume} onReport={() => { setView('report'); toTop(); }} />
+          <PersonalLink />
+        </>
+      ) : view === 'report' ? (
+        <Report data={data} answers={answers} comments={comments} deepen={deepen} progress={progress} onBack={() => { setView('dashboard'); toTop(); }} />
       ) : section ? (
         <SectionView data={data} section={section} answers={answers} comment={comments[section.num] || ''}
+          deepen={deepen[section.num]} setDeepen={v => setDeepenFor(section.num, v)}
           locked={locked} setAnswer={setAnswer} setComment={setComment}
           progress={progress.find(p => p.section.id === section.id)}
-          onHome={() => { setView('home'); window.scrollTo(0, 0); }}
+          onHome={() => { setView('home'); toTop(); }}
           next={data.sections[data.sections.findIndex(s => s.id === section.id) + 1]}
-          onNext={s => { setView(s.id); window.scrollTo(0, 0); }} />
+          onNext={s => { setView(s.id); toTop(); }} />
       ) : (
-        <Home data={data} progress={progress} allComplete={allComplete} onOpen={s => { setView(s.id); window.scrollTo(0, 0); }}
-          onSubmit={submit} onReport={() => setView('report')} />
+        <DiagnosticHome data={data} progress={progress} allComplete={allComplete} hasAnswers={Object.keys(answers).length > 0}
+          onOpen={s => { setView(s.id); toTop(); }} onSubmit={submit} onReport={() => { setView('report'); toTop(); }}
+          onBack={() => { setView('dashboard'); toTop(); }} />
       )}
     </Layout>
   );
+}
+
+function PersonalLink() {
+  const [url, setUrl] = useState('');
+  useEffect(() => setUrl(window.location.href.split('#')[0]), []);
+  return url ? <LinkBox url={url} /> : null;
 }
 
 function SaveStatus({ state, error }) {
@@ -168,16 +199,15 @@ function SaveStatus({ state, error }) {
   return <span className={`save save-${state}`} role="status" aria-live="polite">{label}</span>;
 }
 
-// F1 : écran d'accueil
-function Home({ data, progress, allComplete, onOpen, onSubmit, onReport }) {
+// Page du diagnostic : introduction et sections
+function DiagnosticHome({ data, progress, allComplete, hasAnswers, onOpen, onSubmit, onReport, onBack }) {
   const { t, lang } = useI18n();
   const st = data.assessment.status;
-  const [url, setUrl] = useState('');
-  useEffect(() => setUrl(window.location.href.split('#')[0]), []);
   return (
     <>
-      <h1>{t('osc.home_title', { name: safeStr(data.subject.name) })}</h1>
-      <p className="lead">{t('osc.home_intro')}</p>
+      <button className="link" onClick={onBack}>← {t('osc.back_dashboard')}</button>
+      <div className="toolbar"><h1>{t('tools.ocat.title')}</h1><span className="pill">{t(`eval.${data.assessment.type}`)}</span></div>
+      <Intro open={!hasAnswers} />
       <div className="grid">
         {progress.map(p => (
           <button key={p.section.id} type="button" className={`tile ${p.status}`} onClick={() => onOpen(p.section)}>
@@ -197,23 +227,32 @@ function Home({ data, progress, allComplete, onOpen, onSubmit, onReport }) {
             : <p className="muted">{t('osc.submit_hint')}</p>
         ) : <button className="btn primary" onClick={onReport}>{t('osc.see_report')}</button>}
       </div>
-      {url ? <LinkBox url={url} /> : null}
     </>
   );
 }
 
-// F2 : questions d'une section
-function SectionView({ data, section, answers, comment, locked, setAnswer, setComment, progress, onHome, next, onNext }) {
+// Questions d'une section
+function SectionView({ data, section, answers, comment, deepen, setDeepen, locked, setAnswer, setComment, progress, onHome, next, onNext }) {
   const { t, lang } = useI18n();
   const qs = data.questions.filter(q => q.section_id === section.id);
   return (
     <>
-      <button className="link" onClick={onHome}>{t('osc.back_home')}</button>
+      <button className="link" onClick={onHome}>← {t('osc.back_home')}</button>
       <h1>{pick(section, 'name', lang)}</h1>
       <p className="muted">{progress.done}/{progress.total} · {t(`status.${progress.status}`)}</p>
       <ol className="questions">
         {qs.map(q => <Question key={q.id} q={q} a={answers[q.id]} locked={locked} onChange={p => setAnswer(q, p)} />)}
       </ol>
+      <fieldset className="card deepen" disabled={locked}>
+        <legend className="h3">{t('osc.deepen_question')}</legend>
+        <p className="muted small">{t('osc.deepen_hint')}</p>
+        {[true, false].map(v => (
+          <label key={String(v)} className={`opt small ${deepen === v ? 'on' : ''}`}>
+            <input type="radio" name={`deepen-${section.id}`} checked={deepen === v} onChange={() => setDeepen(v)} />
+            <span>{t(v ? 'common.yes' : 'common.no')}</span>
+          </label>
+        ))}
+      </fieldset>
       <label className="card comment">
         <span className="h3">{t('osc.section_comment')}</span>
         <textarea rows={4} value={comment} disabled={locked} onChange={e => setComment(section.num, e.target.value)} />
@@ -270,16 +309,16 @@ function Question({ q, a, locked, onChange }) {
   );
 }
 
-// F6 : rapport OSC (sans score)
-function Report({ data, answers, comments, progress, onBack }) {
+// Rapport OSC (sans score)
+function Report({ data, answers, comments, deepen, progress, onBack }) {
   const { t, lang } = useI18n();
   return (
     <div className="report">
       <div className="no-print navrow">
-        <button className="btn" onClick={onBack}>{t('osc.see_sections')}</button>
+        <button className="btn" onClick={onBack}>← {t('osc.back_dashboard')}</button>
         <button className="btn" onClick={() => window.print()}>{t('common.print')}</button>
       </div>
-      <h1>{t('report.title', { name: safeStr(data.subject.name) })}</h1>
+      <div className="toolbar"><h1>{t('report.title', { name: safeStr(data.subject.name) })}</h1><span className="pill">{t(`eval.${data.assessment.type}`)}</span></div>
       <p className="lead">{t('report.intro')}</p>
       <table className="table">
         <thead><tr><th>{t('report.section')}</th><th>{t('answer.short_3')}</th><th>{t('answer.short_2')}</th><th>{t('answer.short_1')}</th><th>{t('answer.short_NA')}</th></tr></thead>
@@ -291,7 +330,7 @@ function Report({ data, answers, comments, progress, onBack }) {
         const qs = data.questions.filter(q => q.section_id === s.id).sort(byAnswer(answers));
         return (
           <section key={s.id} className="rsec">
-            <h2>{pick(s, 'name', lang)}</h2>
+            <h2>{pick(s, 'name', lang)}{deepen[s.num] ? <span className="tag">{t('osc.deepen_asked')}</span> : null}</h2>
             <ul className="rlist">
               {qs.map(q => {
                 const a = answers[q.id];

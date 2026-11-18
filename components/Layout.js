@@ -1,5 +1,7 @@
 import Head from 'next/head';
+import Link from 'next/link';
 import { useI18n } from '../lib/i18n';
+import { safeStr } from '../lib/safe';
 import appConfig from '../app.config';
 
 export function LangToggle() {
@@ -15,17 +17,35 @@ export function LangToggle() {
   );
 }
 
-export default function Layout({ title, right, wide, children }) {
+// home : adresse du logo ; onHome : retour interne (sans rechargement) ; identity : { org, person, href }
+export default function Layout({ title, right, wide, home, onHome, identity, children }) {
   const { t } = useI18n();
+  const brand = (
+    <>
+      {appConfig.logoUrl ? <img src={appConfig.logoUrl} alt={appConfig.orgName} /> : null}
+      <span>{t('common.app_title')}</span>
+    </>
+  );
+  const who = identity ? (
+    <>
+      <span className="who-org">{safeStr(identity.org)}</span>
+      {identity.person ? <span className="who-person">{safeStr(identity.person)}</span> : null}
+    </>
+  ) : null;
   return (
     <>
       <Head><title>{title ? `${title} · ${appConfig.appName}` : appConfig.appName}</title></Head>
       <header className="top no-print">
-        <div className="brand">
-          {appConfig.logoUrl ? <img src={appConfig.logoUrl} alt={appConfig.orgName} /> : null}
-          <span>{t('common.app_title')}</span>
+        <div className="top-in">
+          {onHome
+            ? <a className="brand" href={home || '/'} onClick={e => { e.preventDefault(); onHome(); }}>{brand}</a>
+            : <Link className="brand" href={home || '/'}>{brand}</Link>}
+          <div className="top-right">
+            {right}
+            {who ? (identity.href ? <Link className="who" href={identity.href}>{who}</Link> : <div className="who">{who}</div>) : null}
+            <LangToggle />
+          </div>
         </div>
-        <div className="top-right">{right}<LangToggle /></div>
       </header>
       <main className={wide ? 'page wide' : 'page'}>{children}</main>
     </>

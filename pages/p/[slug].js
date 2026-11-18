@@ -14,7 +14,7 @@ export default function PublicEntry() {
   const { t, lang } = useI18n();
   const [project, setProject] = useState(null);
   const [loadError, setLoadError] = useState('');
-  const [form, setForm] = useState({ name: '', email: '', coachId: '', consent: false });
+  const [form, setForm] = useState({ name: '', firstName: '', lastName: '', email: '', coachId: '', consent: false });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [result, setResult] = useState(null);
@@ -54,11 +54,11 @@ export default function PublicEntry() {
   if (!project) return <Layout><p className="muted">{t('common.loading')}</p></Layout>;
 
   if (result?.status === 'exists') return (
-    <Layout><div className="narrow"><h1>{t('entry.exists_title')}</h1><p className="lead">{t('entry.exists_body')}</p></div></Layout>
+    <Layout><div className="narrow hero"><h1>{t('entry.exists_title')}</h1><p className="lead">{t('entry.exists_body')}</p></div></Layout>
   );
   if (result?.status === 'created') return (
     <Layout>
-      <div className="narrow">
+      <div className="narrow hero">
         <h1>{t('entry.created_title')}</h1>
         <p className="lead">{t('entry.created_body')}</p>
         <LinkBox url={result.url} />
@@ -71,13 +71,21 @@ export default function PublicEntry() {
   return (
     <Layout title={safeStr(project.name)}>
       {SITE_KEY ? <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" onLoad={renderCaptcha} /> : null}
-      <div className="narrow">
+      <div className="narrow hero">
         <h1>{t('entry.title')}</h1>
         <p className="lead">{welcome || t('entry.default_welcome', { project: safeStr(project.name) })}</p>
         <form className="card form" onSubmit={submit}>
           <label>{t('entry.name')}
             <input required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} autoComplete="organization" />
           </label>
+          <div className="form row">
+            <label>{t('entry.first_name')}
+              <input required value={form.firstName} onChange={e => setForm({ ...form, firstName: e.target.value })} autoComplete="given-name" />
+            </label>
+            <label>{t('entry.last_name')}
+              <input required value={form.lastName} onChange={e => setForm({ ...form, lastName: e.target.value })} autoComplete="family-name" />
+            </label>
+          </div>
           <label>{t('entry.email')}
             <input required type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} autoComplete="email" />
             <small>{t('entry.email_hint')}</small>

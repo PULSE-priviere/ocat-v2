@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { useI18n } from '../lib/i18n';
 
-export default function LinkBox({ url }) {
+export default function LinkBox({ url: raw }) {
   const { t } = useI18n();
+  // Une adresse relative (APP_URL manquant côté serveur) est complétée avec le domaine courant
+  const url = typeof window !== 'undefined' && String(raw).startsWith('/') ? window.location.origin + raw : raw;
   const [copied, setCopied] = useState(false);
   const copy = async () => { try { await navigator.clipboard.writeText(url); setCopied(true); setTimeout(() => setCopied(false), 2000); } catch {} };
   return (

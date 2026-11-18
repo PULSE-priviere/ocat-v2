@@ -20,7 +20,7 @@ export default function Login() {
   };
   return (
     <Layout title={t('login.title')}>
-      <div className="narrow">
+      <div className="narrow hero">
         <h1>{t('login.title')}</h1>
         {router.query.e ? <p className="error">{t(`errors.${router.query.e}`)}</p> : null}
         {sent ? <p className="lead">{t('login.sent')}</p> : (

@@ -23,6 +23,15 @@ const appConfig = {
     global: 'mean_of_sections',    // ou 'mean_of_questions'
     requireCompleteSection: true,  // F5 : score seulement si la section est complète
   },
+  // Listes de choix de la fiche organisation (libellés FR/EN dans locales/*.json, clés profile.opt.*)
+  profileOptions: {
+    country: ['morocco', 'algeria', 'tunisia', 'libya', 'egypt', 'mauritania', 'south_africa', 'other'],
+    org_type: ['association', 'ngo', 'cooperative', 'social_enterprise', 'foundation', 'network'],
+    org_size: ['1-5', '6-20', '21-50', '50+'],
+  },
+  // Graphiques montrés à l'OSC pendant qu'elle répond. Aucun chiffre de score n'est affiché.
+  oscView: { radar: true, distribution: true, liveBeforeComplete: true },
+  tools: ['ocat'],                 // outils proposés sur le Dashboard (point d'entrée)
   tokenDays: 60,                   // validité du lien personnel, prolongée à chaque réponse
   publicEntryLimit: { max: 5, perHours: 1 },  // créations par IP
   frameworkKey: 'ocat_osc',

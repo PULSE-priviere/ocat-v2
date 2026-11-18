@@ -8,7 +8,9 @@ export default async function handler(req, res) {
   if (!isEmail(email)) return fail(res, 400, 'invalid_form');
   const db = admin();
   if (await rateLimited(db, 'login', clientIp(req))) return fail(res, 429, 'too_many_attempts');
-  const { data: p } = await db.from('profiles').select('id').eq('email', email).maybeSingle();
-  if (p) await sendLoginLink(db, email, req.body?.lang).catch(() => {});
+  const { data: p, error } = await db.from('profiles').select('id').eq('email', email).maybeSingle();
+  if (error) console.error('[login] lecture des profils impossible :', error.message);
+  else if (!p) console.error('[login] aucun profil staff pour cette adresse : exécuter le seed avec --admin');
+  else await sendLoginLink(db, email, req.body?.lang).catch(() => {});
   res.json({ ok: true });
 }

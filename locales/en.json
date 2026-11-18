@@ -1,134 +1,430 @@
 {
-  "common": { "app_title": "Organisational assessment", "language": "Language", "loading": "Loading…", "sending": "Sending…", "copy": "Copy", "copied": "Copied", "retry": "Try again", "print": "Print or save as PDF", "save": "Save", "add": "Add", "delete": "Delete", "cancel": "Cancel", "export_csv": "Export as CSV", "yes": "Yes", "no": "No" },
-  "home": { "title": "Organisational assessment", "body": "To answer the questionnaire, open the link your project sent you.", "staff": "Team area" },
-  "entry": {
-    "title": "Start your assessment",
-    "default_welcome": "Project {project}. Enter your organisation's name and an email address: we create your file and send you your personal link.",
-    "name": "Organisation name", "email": "Email address",
-    "email_hint": "Your personal link will be sent to this address. It is the only way to recover it.",
-    "coach": "Your coach (optional)", "coach_none": "I don't know",
-    "consent": "I have read how our data is used for this assessment.",
-    "submit": "Create my file", "unavailable_title": "Link unavailable",
-    "created_title": "Your file is ready", "created_body": "Keep this link: it lets you come back to your assessment at any time. We also sent it to you by email.",
-    "start": "Start the questionnaire",
-    "exists_title": "Check your inbox", "exists_body": "A file already exists for this address in this project. We just sent a new link to that address so you can resume."
+ "common": {
+  "app_title": "Organisational assessment",
+  "language": "Language",
+  "loading": "Loading…",
+  "sending": "Sending…",
+  "copy": "Copy",
+  "copied": "Copied",
+  "retry": "Try again",
+  "print": "Print or save as PDF",
+  "save": "Save",
+  "add": "Add",
+  "delete": "Delete",
+  "cancel": "Cancel",
+  "export_csv": "Export as CSV",
+  "yes": "Yes",
+  "no": "No",
+  "back": "Back"
+ },
+ "home": {
+  "title": "Organisational assessment",
+  "body": "To answer the questionnaire, open the link your project sent you.",
+  "staff": "Team area"
+ },
+ "entry": {
+  "title": "Start your assessment",
+  "default_welcome": "Project {project}. Enter your organisation's name and an email address: we create your file and send you your personal link.",
+  "name": "Organisation name",
+  "email": "Email address",
+  "email_hint": "Your personal link will be sent to this address. It is the only way to recover it.",
+  "coach": "Your coach (optional)",
+  "coach_none": "I don't know",
+  "consent": "I have read how our data is used for this assessment.",
+  "submit": "Create my file",
+  "unavailable_title": "Link unavailable",
+  "created_title": "Your file is ready",
+  "created_body": "Keep this link: it lets you come back to your assessment at any time. We also sent it to you by email.",
+  "start": "Start the questionnaire",
+  "exists_title": "Check your inbox",
+  "exists_body": "A file already exists for this address in this project. We just sent a new link to that address so you can resume.",
+  "first_name": "First name",
+  "last_name": "Last name",
+  "contact_title": "Person filling in the assessment"
+ },
+ "link": {
+  "label": "Your personal link",
+  "warning": "Anyone with this link can see and change your assessment. Do not share it."
+ },
+ "save": {
+  "saved": "Saved",
+  "saving": "Saving…",
+  "offline": "Waiting for connection",
+  "error": "Not saved"
+ },
+ "status": {
+  "not_started": "Not started",
+  "in_progress": "In progress",
+  "complete": "Complete"
+ },
+ "astatus": {
+  "in_progress": "In progress",
+  "submitted": "Submitted",
+  "locked": "Locked"
+ },
+ "eval": {
+  "baseline": "Baseline (start of support)",
+  "followup": "Mid-term follow-up (midline)",
+  "endline": "Endline (end of support)"
+ },
+ "answer": {
+  "NA": "Not applicable (N/A)",
+  "1": "1 - Not in place / Not functional",
+  "2": "2 - Partially in place / functional",
+  "3": "3 - Documented and operational/functional",
+  "yes": "Yes",
+  "no": "No",
+  "short_NA": "N/A",
+  "short_1": "Not in place",
+  "short_2": "Partial",
+  "short_3": "In place",
+  "short_yes": "Yes",
+  "short_no": "No"
+ },
+ "osc": {
+  "home_title": "{name} assessment",
+  "home_intro": "The assessment has 9 sections. Fill them in any order, in one or several sittings: each answer is saved as soon as you give it.",
+  "submit": "Send my assessment",
+  "submit_hint": "The send button appears once all 9 sections are complete.",
+  "submit_confirm": "Send your assessment? You can still change your answers until your coach closes the session.",
+  "see_report": "See my report",
+  "see_sections": "See the sections",
+  "back_home": "All sections",
+  "next_section": "Next section: {name}",
+  "section_comment": "Comment on this section (optional)",
+  "guide": "Answer guide",
+  "guide_generic": "N/A: the practice does not apply to your organisation.\n1: the practice is not in place.\n2: the practice is partially or informally in place.\n3: the practice is documented and fully operational.",
+  "support_question": "Would you like support from the organisation to put this in place?",
+  "edited_by_coach": "Answer changed by your coach",
+  "coach_note": "Coach's note:",
+  "locked_banner": "Your coach has closed the session: answers can no longer be changed.",
+  "resend": "Get a new link by email",
+  "resent": "If this file exists, a new link was sent to the registered address.",
+  "back_dashboard": "Dashboard",
+  "deepen_question": "Would you like to go deeper on this section?",
+  "deepen_hint": "If yes, your coach will come back to this section with you in more detail.",
+  "deepen_asked": "Deeper review requested"
+ },
+ "report": {
+  "title": "{name} report",
+  "intro": "Here is a summary of your answers, section by section. Practices to strengthen come first.",
+  "section": "Section",
+  "no_answer": "No answer",
+  "text_answer": "Free answer",
+  "support_requested": "Support requested"
+ },
+ "errors": {
+  "title_invalid_link": "Invalid link",
+  "title_expired_link": "Link expired",
+  "title_offline": "No connection",
+  "title_generic": "Something went wrong",
+  "invalid_link": "This link does not exist or has been replaced. Use the latest link you received by email, or contact your coach.",
+  "expired_link": "This link has expired. Request a new one: it will be sent to the registered email address.",
+  "offline": "The server cannot be reached. Check your connection and try again.",
+  "link_inactive": "This project link is not active. Contact the project team.",
+  "invalid_form": "Check the name and email address.",
+  "consent_required": "Tick the box to continue.",
+  "captcha_failed": "The anti-robot check failed. Try again.",
+  "too_many_attempts": "Too many attempts from this connection. Try again in an hour.",
+  "server_error": "The server could not save. Try again in a moment.",
+  "locked": "The session is closed: changes are not possible.",
+  "incomplete": "All sections must be complete before sending.",
+  "forbidden": "You do not have access to this file.",
+  "not_signed_in": "Your session has expired. Sign in again.",
+  "email_exists": "A CSO with this address already exists in this project.",
+  "need_exists": "This need is already in the list.",
+  "no_framework": "No question bank loaded. Run the seed script.",
+  "last_admin": "At least one administrator must remain.",
+  "link_failed": "This sign-in link is no longer valid (it works once and lasts one hour). Request a new one.",
+  "no_account": "No account is linked to this address.",
+  "method": "Invalid request.",
+  "not_found": "Unknown action.",
+  "invalid_profile": "Check the details entered (first and last name are required)."
+ },
+ "login": {
+  "title": "Team sign-in",
+  "submit": "Get a sign-in link",
+  "sent": "If an account exists for this address, a sign-in link was just sent to it. It is valid for one hour."
+ },
+ "staff": {
+  "title": "Team area",
+  "sign_out": "Sign out",
+  "project": "Project",
+  "no_project": "You are not part of any project yet.",
+  "tab_cohort": "Cohort",
+  "tab_needs": "Needs",
+  "tab_team": "Team",
+  "tab_project": "Project",
+  "tab_journal": "Log",
+  "tab_duplicates": "Duplicates",
+  "tab_admin": "Administration",
+  "profile": "My profile",
+  "complete_name": "Complete your first and last name: they appear at the top right."
+ },
+ "role": {
+  "owner": "Project owner",
+  "coach": "Coach",
+  "admin": "Administrator"
+ },
+ "cohort": {
+  "filter_coach": "Coach",
+  "all_coaches": "All coaches",
+  "no_coach": "No coach",
+  "add_osc": "Add a CSO",
+  "create": "Create and send the link",
+  "osc": "CSO",
+  "coach": "Coach",
+  "evaluation": "Assessment",
+  "completion": "Completion",
+  "global": "Overall score",
+  "empty": "No CSO yet. Share the project's public link, or add a CSO by hand.",
+  "contact": "Contact",
+  "empty_coach": "No CSO is assigned to you yet. Ask the project owner to assign some: you will then see each CSO, even if it has not finished its questionnaire."
+ },
+ "needs": {
+  "title": "Aggregated needs",
+  "need": "Need",
+  "count": "Number of CSOs",
+  "oscs": "CSOs concerned",
+  "empty": "No needs tagged yet. Coaches tag needs during the session.",
+  "weakest": "Weakest questions",
+  "weakest_hint": "The 10 questions with the most \"1\" answers across the cohort.",
+  "weakest_empty": "No \"1\" answers yet."
+ },
+ "team": {
+  "coaches": "Project coaches",
+  "owners": "Project owners",
+  "no_coach": "No coaches. Invite one below.",
+  "name": "Name",
+  "invite_coach": "Invite as coach",
+  "invited": "Invitation sent.",
+  "offered": "Offered to CSOs",
+  "revoke": "Revoke",
+  "revoke_confirm": "Revoke {name}'s access to this project? Access ends immediately. Remember to reassign their CSOs."
+ },
+ "project": {
+  "public_link": "Project public link",
+  "link_disabled": "The public link is disabled: nobody can create a file.",
+  "disable": "Disable the link",
+  "enable": "Enable the link",
+  "renew": "Renew the link",
+  "renew_confirm": "Renew the public link? The old link will stop working. CSOs' personal links do not change.",
+  "offer_coach_choice": "Show the list of coaches to the CSO",
+  "welcome_fr": "Welcome text (French)",
+  "welcome_en": "Welcome text (English)",
+  "needs": "List of needs",
+  "need_new": "New need, e.g. \"Finance: cost accounting\"",
+  "need_delete_confirm": "Delete the need \"{label}\"? It will be removed from all answers.",
+  "needs_hint": "Coaches can also add a need during the session."
+ },
+ "journal": {
+  "empty": "No changes recorded.",
+  "date": "Date",
+  "author": "Author",
+  "what": "Item",
+  "field": "Field",
+  "old": "Old value",
+  "new": "New value",
+  "table_answers": "Answer",
+  "table_assessments": "Assessment",
+  "table_subjects": "CSO",
+  "table_action_plans": "Plan"
+ },
+ "dup": {
+  "empty": "No likely duplicates.",
+  "keep_left": "Keep the first",
+  "keep_right": "Keep the second",
+  "confirm": "Merge \"{drop}\" into \"{keep}\"? Assessments move to the file you keep and the other file is deleted."
+ },
+ "admin": {
+  "projects": "Projects",
+  "accounts": "Accounts and roles",
+  "project_name": "Project name",
+  "cohort": "Cohort",
+  "create_project": "Create the project",
+  "archive": "Archive",
+  "unarchive": "Reactivate",
+  "archived": "Archived",
+  "active": "Active",
+  "project": "Project",
+  "role": "Role",
+  "invite": "Invite"
+ },
+ "subject": {
+  "back": "Back to the cohort",
+  "new_link": "Generate a new link",
+  "send_link": "Send a link by email",
+  "revoke_link": "Revoke the link",
+  "revoke_confirm": "Revoke the personal link? The CSO will not be able to open its assessment until a new link is generated.",
+  "lock": "Close the session",
+  "unlock": "Reopen",
+  "lock_confirm": "Close the session? The CSO will no longer be able to change its answers.",
+  "share_notes": "Show my notes to the CSO",
+  "new_assessment": "New assessment",
+  "new_assessment_confirm": "Create a new assessment for this CSO? A link will be sent by email.",
+  "tab_session": "Session",
+  "tab_sheet": "Overview",
+  "tab_plan": "Support plan"
+ },
+ "sheet": {
+  "progress": "Answers",
+  "score": "Score",
+  "scores": "Scores by section",
+  "global": "Overall",
+  "score_rule": "Section score: average of answers 1 to 3, N/A excluded, computed once the section is complete. Overall: average of the 9 sections. Visible to the team only."
+ },
+ "session": {
+  "filter": "Filter questions",
+  "f_all": "All",
+  "f_low": "Answers 1 and 2",
+  "f_support": "Support requested",
+  "f_empty": "No answer",
+  "discussed": "{n} questions with notes or needs",
+  "osc_comment": "CSO comment:",
+  "notes": "Coach notes",
+  "new_need": "Other need…",
+  "edited": "Changed by the coach",
+  "added": "Added",
+  "add_question": "Add a question to this assessment",
+  "question_text": "Question",
+  "format": "Format",
+  "format_text": "Free text",
+  "format_yesno": "Yes / no",
+  "format_scale": "Scale 1 to 3",
+  "deepen_badge": "Deeper review requested"
+ },
+ "plan": {
+  "title": "Support plan",
+  "actions": "Actions",
+  "propose": "Suggest priorities",
+  "add_free": "Add a free action",
+  "status": "Status",
+  "status_draft": "Draft",
+  "status_validated": "Approved",
+  "status_shared": "Shared with the CSO",
+  "export_fr": "French PDF",
+  "export_en": "English PDF",
+  "hint": "Suggested priorities: answers 1 or 2 with support requested, then the other 1s, then the other 2s. The CSO sees the plan only when its status is \"Shared\".",
+  "empty": "No priorities. Click \"Suggest priorities\" to start from the answers.",
+  "keep": "Kept",
+  "free": "Free action",
+  "up": "Move up",
+  "down": "Move down",
+  "priority": "Priority",
+  "action": "Action",
+  "owner": "Owner",
+  "due": "Due date",
+  "need": "Related need"
+ },
+ "email": {
+  "personal_link": {
+   "subject": "Your personal link for the assessment",
+   "body": "{hello}\n\nYour assessment file is ready. Open this link to answer, in one or several sittings:\n{url}\n\nKeep this message. Anyone with this link can see your assessment: do not forward it.\n\n{org}"
   },
-  "link": { "label": "Your personal link", "warning": "Anyone with this link can see and change your assessment. Do not share it." },
-  "save": { "saved": "Saved", "saving": "Saving…", "offline": "Waiting for connection", "error": "Not saved" },
-  "status": { "not_started": "Not started", "in_progress": "In progress", "complete": "Complete" },
-  "astatus": { "in_progress": "In progress", "submitted": "Submitted", "locked": "Locked" },
-  "eval": { "baseline": "Baseline", "followup": "Mid-term follow-up", "endline": "Endline" },
-  "answer": {
-    "NA": "Not applicable (N/A)", "1": "1 - Not in place / Not functional", "2": "2 - Partially in place / functional", "3": "3 - Documented and operational/functional", "yes": "Yes", "no": "No",
-    "short_NA": "N/A", "short_1": "Not in place", "short_2": "Partial", "short_3": "In place", "short_yes": "Yes", "short_no": "No"
+  "resume_link": {
+   "subject": "Your new link to resume the assessment",
+   "body": "{hello}\n\nHere is your new link to resume your assessment. Previous links no longer work.\n{url}\n\nIf you did not request anything, you can ignore this message.\n\n{org}"
   },
-  "osc": {
-    "home_title": "{name} assessment",
-    "home_intro": "The assessment has 9 sections. Fill them in any order, in one or several sittings: each answer is saved as soon as you give it.",
-    "submit": "Send my assessment", "submit_hint": "The send button appears once all 9 sections are complete.",
-    "submit_confirm": "Send your assessment? You can still change your answers until your coach closes the session.",
-    "see_report": "See my report", "see_sections": "See the sections", "back_home": "All sections",
-    "next_section": "Next section: {name}", "section_comment": "Comment on this section (optional)",
-    "guide": "Answer guide",
-    "guide_generic": "N/A: the practice does not apply to your organisation.\n1: the practice is not in place.\n2: the practice is partially or informally in place.\n3: the practice is documented and fully operational.",
-    "support_question": "Would you like support from the organisation to put this in place?",
-    "edited_by_coach": "Answer changed by your coach", "coach_note": "Coach's note:",
-    "locked_banner": "Your coach has closed the session: answers can no longer be changed.",
-    "resend": "Get a new link by email", "resent": "If this file exists, a new link was sent to the registered address."
+  "login": {
+   "subject": "Your sign-in link",
+   "body": "{hello}\n\nClick this link to sign in to the team area. It is valid for one hour and works once:\n{url}\n\n{org}"
   },
-  "report": {
-    "title": "{name} report", "intro": "Here is a summary of your answers, section by section. Practices to strengthen come first.",
-    "section": "Section", "no_answer": "No answer", "text_answer": "Free answer", "support_requested": "Support requested"
+  "submitted": {
+   "subject": "Assessment submitted: {name}",
+   "body": "{hello}\n\n{name} has just submitted its assessment. Open its file:\n{url}\n\n{org}"
   },
-  "errors": {
-    "title_invalid_link": "Invalid link", "title_expired_link": "Link expired", "title_offline": "No connection", "title_generic": "Something went wrong",
-    "invalid_link": "This link does not exist or has been replaced. Use the latest link you received by email, or contact your coach.",
-    "expired_link": "This link has expired. Request a new one: it will be sent to the registered email address.",
-    "offline": "The server cannot be reached. Check your connection and try again.",
-    "link_inactive": "This project link is not active. Contact the project team.",
-    "invalid_form": "Check the name and email address.", "consent_required": "Tick the box to continue.",
-    "captcha_failed": "The anti-robot check failed. Try again.", "too_many_attempts": "Too many attempts from this connection. Try again in an hour.",
-    "server_error": "The server could not save. Try again in a moment.", "locked": "The session is closed: changes are not possible.",
-    "incomplete": "All sections must be complete before sending.", "forbidden": "You do not have access to this file.",
-    "not_signed_in": "Your session has expired. Sign in again.", "email_exists": "A CSO with this address already exists in this project.",
-    "need_exists": "This need is already in the list.", "no_framework": "No question bank loaded. Run the seed script.",
-    "last_admin": "At least one administrator must remain.", "link_failed": "This sign-in link is no longer valid (it works once and lasts one hour). Request a new one.", "no_account": "No account is linked to this address.",
-    "method": "Invalid request.", "not_found": "Unknown action."
+  "hello": "Hello {name},",
+  "hello_anon": "Hello,"
+ },
+ "profile": {
+  "title": "Organisation details",
+  "edit": "Edit",
+  "save": "Save",
+  "cancel": "Cancel",
+  "saved": "Details saved",
+  "missing": "Not provided",
+  "to_complete": "To complete",
+  "choose": "Choose…",
+  "label": {
+   "first_name": "First name",
+   "last_name": "Last name",
+   "contact": "Contact person",
+   "email": "Email",
+   "country": "Country",
+   "org_type": "Type of organisation",
+   "org_size": "Size (number of employees)"
   },
-  "login": { "title": "Team sign-in", "submit": "Get a sign-in link", "sent": "If an account exists for this address, a sign-in link was just sent to it. It is valid for one hour." },
-  "staff": {
-    "title": "Team area", "sign_out": "Sign out", "project": "Project", "no_project": "You are not part of any project yet.",
-    "tab_cohort": "Cohort", "tab_needs": "Needs", "tab_team": "Team", "tab_project": "Project", "tab_journal": "Log", "tab_duplicates": "Duplicates", "tab_admin": "Administration"
-  },
-  "role": { "owner": "Project owner", "coach": "Coach", "admin": "Administrator" },
-  "cohort": {
-    "filter_coach": "Coach", "all_coaches": "All coaches", "no_coach": "No coach", "add_osc": "Add a CSO", "create": "Create and send the link",
-    "osc": "CSO", "coach": "Coach", "evaluation": "Assessment", "completion": "Completion", "global": "Overall score",
-    "empty": "No CSO yet. Share the project's public link, or add a CSO by hand."
-  },
-  "needs": {
-    "title": "Aggregated needs", "need": "Need", "count": "Number of CSOs", "oscs": "CSOs concerned",
-    "empty": "No needs tagged yet. Coaches tag needs during the session.",
-    "weakest": "Weakest questions", "weakest_hint": "The 10 questions with the most \"1\" answers across the cohort.",
-    "weakest_empty": "No \"1\" answers yet."
-  },
-  "team": {
-    "coaches": "Project coaches", "owners": "Project owners", "no_coach": "No coaches. Invite one below.", "name": "Name",
-    "invite_coach": "Invite as coach", "invited": "Invitation sent.", "offered": "Offered to CSOs", "revoke": "Revoke",
-    "revoke_confirm": "Revoke {name}'s access to this project? Access ends immediately. Remember to reassign their CSOs."
-  },
-  "project": {
-    "public_link": "Project public link", "link_disabled": "The public link is disabled: nobody can create a file.",
-    "disable": "Disable the link", "enable": "Enable the link", "renew": "Renew the link",
-    "renew_confirm": "Renew the public link? The old link will stop working. CSOs' personal links do not change.",
-    "offer_coach_choice": "Show the list of coaches to the CSO", "welcome_fr": "Welcome text (French)", "welcome_en": "Welcome text (English)",
-    "needs": "List of needs", "need_new": "New need, e.g. \"Finance: cost accounting\"",
-    "need_delete_confirm": "Delete the need \"{label}\"? It will be removed from all answers.",
-    "needs_hint": "Coaches can also add a need during the session."
-  },
-  "journal": {
-    "empty": "No changes recorded.", "date": "Date", "author": "Author", "what": "Item", "field": "Field", "old": "Old value", "new": "New value",
-    "table_answers": "Answer", "table_assessments": "Assessment", "table_subjects": "CSO", "table_action_plans": "Plan"
-  },
-  "dup": {
-    "empty": "No likely duplicates.", "keep_left": "Keep the first", "keep_right": "Keep the second",
-    "confirm": "Merge \"{drop}\" into \"{keep}\"? Assessments move to the file you keep and the other file is deleted."
-  },
-  "admin": {
-    "projects": "Projects", "accounts": "Accounts and roles", "project_name": "Project name", "cohort": "Cohort", "create_project": "Create the project",
-    "archive": "Archive", "unarchive": "Reactivate", "archived": "Archived", "active": "Active", "project": "Project", "role": "Role", "invite": "Invite"
-  },
-  "subject": {
-    "back": "Back to the cohort", "new_link": "Generate a new link", "send_link": "Send a link by email", "revoke_link": "Revoke the link",
-    "revoke_confirm": "Revoke the personal link? The CSO will not be able to open its assessment until a new link is generated.",
-    "lock": "Close the session", "unlock": "Reopen", "lock_confirm": "Close the session? The CSO will no longer be able to change its answers.",
-    "share_notes": "Show my notes to the CSO", "new_assessment": "New assessment",
-    "new_assessment_confirm": "Create a new assessment for this CSO? A link will be sent by email.",
-    "tab_session": "Session", "tab_sheet": "Overview", "tab_plan": "Support plan"
-  },
-  "sheet": {
-    "progress": "Answers", "score": "Score", "scores": "Scores by section", "global": "Overall",
-    "score_rule": "Section score: average of answers 1 to 3, N/A excluded, computed once the section is complete. Overall: average of the 9 sections. Visible to the team only."
-  },
-  "session": {
-    "filter": "Filter questions", "f_all": "All", "f_low": "Answers 1 and 2", "f_support": "Support requested", "f_empty": "No answer",
-    "discussed": "{n} questions with notes or needs", "osc_comment": "CSO comment:", "notes": "Coach notes", "new_need": "Other need…",
-    "edited": "Changed by the coach", "added": "Added", "add_question": "Add a question to this assessment",
-    "question_text": "Question", "format": "Format", "format_text": "Free text", "format_yesno": "Yes / no", "format_scale": "Scale 1 to 3"
-  },
-  "plan": {
-    "title": "Support plan", "actions": "Actions", "propose": "Suggest priorities", "add_free": "Add a free action",
-    "status": "Status", "status_draft": "Draft", "status_validated": "Approved", "status_shared": "Shared with the CSO",
-    "export_fr": "French PDF", "export_en": "English PDF",
-    "hint": "Suggested priorities: answers 1 or 2 with support requested, then the other 1s, then the other 2s. The CSO sees the plan only when its status is \"Shared\".",
-    "empty": "No priorities. Click \"Suggest priorities\" to start from the answers.",
-    "keep": "Kept", "free": "Free action", "up": "Move up", "down": "Move down",
-    "priority": "Priority", "action": "Action", "owner": "Owner", "due": "Due date", "need": "Related need"
-  },
-  "email": {
-    "personal_link": { "subject": "Your personal link for the assessment", "body": "Hello,\n\nYour assessment file is ready. Open this link to answer, in one or several sittings:\n{url}\n\nKeep this message. Anyone with this link can see your assessment: do not forward it.\n\n{org}" },
-    "resume_link": { "subject": "Your new link to resume the assessment", "body": "Hello,\n\nHere is your new link to resume your assessment. Previous links no longer work.\n{url}\n\nIf you did not request anything, you can ignore this message.\n\n{org}" },
-    "login": { "subject": "Your sign-in link", "body": "Hello,\n\nClick this link to sign in to the team area. It is valid for one hour and works once:\n{url}\n\n{org}" },
-    "submitted": { "subject": "Assessment submitted: {name}", "body": "Hello,\n\n{name} has just submitted its assessment. Open its file:\n{url}\n\n{org}" }
+  "opt": {
+   "country": {
+    "morocco": "Morocco",
+    "algeria": "Algeria",
+    "tunisia": "Tunisia",
+    "libya": "Libya",
+    "egypt": "Egypt",
+    "mauritania": "Mauritania",
+    "south_africa": "South Africa",
+    "other": "Other"
+   },
+   "org_type": {
+    "association": "Association",
+    "ngo": "NGO",
+    "cooperative": "Cooperative",
+    "social_enterprise": "Social enterprise",
+    "foundation": "Foundation",
+    "network": "Network"
+   },
+   "org_size": {
+    "1-5": "1 to 5",
+    "6-20": "6 to 20",
+    "21-50": "21 to 50",
+    "50+": "More than 50"
+   }
   }
+ },
+ "dashboard": {
+  "title": "{name} dashboard",
+  "subtitle": "Find your organisation's details and your tools here.",
+  "tools": "Tools",
+  "project": "Project",
+  "coach": "Coach",
+  "evaluation": "Assessment",
+  "progress": "{done} of {total} questions",
+  "start": "Start the assessment",
+  "continue": "Continue the assessment",
+  "report": "See my report",
+  "live_title": "Your live profile",
+  "live_hint": "The chart updates with every answer. A section becomes final once all its questions are answered.",
+  "live_empty": "Answer a few questions: your profile will appear here.",
+  "radar_title": "Profile by section",
+  "dist_title": "Breakdown of your answers",
+  "provisional": "provisional",
+  "complete": "final"
+ },
+ "tools": {
+  "ocat": {
+   "title": "Organisational assessment",
+   "desc": "Self-assessment in 9 sections to identify your strengths and priority areas for development."
+  }
+ },
+ "intro": {
+  "toggle": "Introduction to the assessment",
+  "title": "Welcome to the {org} organisational assessment tool",
+  "p1": "This tool supports you in a self-assessment of your organisational needs. It is a starting point to identify together your strengths and your priority areas for development, so that we can support you better.",
+  "p2": "The assessment is organised in 9 thematic sections. You can fill them in in any order, in one or several sittings.",
+  "p3": "For each question, choose the level that best matches the current reality of your organisation:",
+  "levels": [
+   "Not applicable (N/A);",
+   "1 (practice not in place);",
+   "2 (practice partially or informally in place);",
+   "3 (practice documented and fully operational)."
+  ],
+  "p4": "When you answer 1 or 2, a follow-up question asks whether you would like support from the organisation to help you progress. This helps us identify your needs but does not automatically guarantee support: the decision will be made by mutual agreement.",
+  "p5": "The honesty of your answers is the condition for support that fits your real needs."
+ },
+ "myprofile": {
+  "title": "My profile",
+  "intro": "These details appear at the top right of every page.",
+  "saved": "Profile saved",
+  "back": "Back to the team area"
+ }
 }

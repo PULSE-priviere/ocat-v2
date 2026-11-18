@@ -1,0 +1,71 @@
+// Fiche organisation : consultation et modification (OSC par l'API, staff par la base)
+import { Fragment, useEffect, useState } from 'react';
+import { useI18n } from '../lib/i18n';
+import { safeStr } from '../lib/safe';
+import { contactName } from '../lib/names';
+import appConfig from '../app.config';
+
+const SELECTS = ['country', 'org_type', 'org_size'];
+const pickFields = v => ({
+  contact_first_name: safeStr(v?.contact_first_name), contact_last_name: safeStr(v?.contact_last_name),
+  country: safeStr(v?.country), org_type: safeStr(v?.org_type), org_size: safeStr(v?.org_size),
+});
+
+export default function OrgInfoForm({ value, onSave, rows = [], editable = true }) {
+  const { t } = useI18n();
+  const [edit, setEdit] = useState(false);
+  const [f, setF] = useState(pickFields(value));
+  const [err, setErr] = useState('');
+  const [ok, setOk] = useState(false);
+  const [busy, setBusy] = useState(false);
+  useEffect(() => { if (!edit) setF(pickFields(value)); }, [value, edit]);
+
+  const label = (field, code) => (code ? t(`profile.opt.${field}.${code}`) : '');
+  const incomplete = SELECTS.some(k => !safeStr(value?.[k]));
+  const save = async e => {
+    e.preventDefault(); setBusy(true); setErr('');
+    try { await onSave(f); setEdit(false); setOk(true); setTimeout(() => setOk(false), 2500); }
+    catch (x) { setErr(x.message || 'server_error'); }
+    setBusy(false);
+  };
+
+  if (!edit) {
+    const missing = <span className="muted">{t('profile.missing')}</span>;
+    return (
+      <>
+        <dl className="kv">
+          <dt>{t('profile.label.contact')}</dt><dd>{contactName(value) || missing}</dd>
+          <dt>{t('profile.label.email')}</dt><dd>{safeStr(value?.email) || missing}</dd>
+          {SELECTS.map(k => <Fragment key={k}><dt>{t(`profile.label.${k}`)}</dt><dd>{label(k, safeStr(value?.[k])) || missing}</dd></Fragment>)}
+          {rows.map((r, i) => <Fragment key={i}><dt>{r.label}</dt><dd>{safeStr(r.value) || missing}</dd></Fragment>)}
+        </dl>
+        <div className="toolbar">
+          {editable ? <button type="button" className="btn small" onClick={() => setEdit(true)}>{t('profile.edit')}</button> : null}
+          {editable && incomplete ? <span className="pill">{t('profile.to_complete')}</span> : null}
+          {ok ? <span className="ok small">{t('profile.saved')}</span> : null}
+        </div>
+      </>
+    );
+  }
+  return (
+    <form className="form" onSubmit={save}>
+      <div className="form row">
+        <label>{t('profile.label.first_name')}<input required value={f.contact_first_name} onChange={e => setF({ ...f, contact_first_name: e.target.value })} /></label>
+        <label>{t('profile.label.last_name')}<input required value={f.contact_last_name} onChange={e => setF({ ...f, contact_last_name: e.target.value })} /></label>
+      </div>
+      {SELECTS.map(k => (
+        <label key={k}>{t(`profile.label.${k}`)}
+          <select value={f[k]} onChange={e => setF({ ...f, [k]: e.target.value })}>
+            <option value="">{t('profile.choose')}</option>
+            {appConfig.profileOptions[k].map(code => <option key={code} value={code}>{label(k, code)}</option>)}
+          </select>
+        </label>
+      ))}
+      {err ? <p className="error" role="alert">{t(`errors.${err}`)}</p> : null}
+      <div className="toolbar">
+        <button className="btn primary small" disabled={busy}>{t('profile.save')}</button>
+        <button type="button" className="btn small" onClick={() => setEdit(false)}>{t('profile.cancel')}</button>
+      </div>
+    </form>
+  );
+}

@@ -3,14 +3,15 @@ import { useEffect, useState } from 'react';
 import { useI18n } from '../../lib/i18n';
 import { sb, staffApi } from '../../lib/supabase';
 import { safeStr } from '../../lib/safe';
+import { fullName } from '../../lib/names';
 
 export default function Admin({ projects, reload }) {
   const { t, lang } = useI18n();
   const [proj, setProj] = useState({ name: '', cohort: '' });
-  const [inv, setInv] = useState({ email: '', name: '', projectId: '', role: 'owner', makeAdmin: false });
+  const [inv, setInv] = useState({ email: '', firstName: '', lastName: '', projectId: '', role: 'owner', makeAdmin: false });
   const [profiles, setProfiles] = useState([]);
   const [msg, setMsg] = useState('');
-  const loadProfiles = () => sb().from('profiles').select('id, email, name, is_admin').order('email').then(({ data }) => setProfiles(data || []));
+  const loadProfiles = () => sb().from('profiles').select('id, email, name, first_name, last_name, is_admin').order('email').then(({ data }) => setProfiles(data || []));
   useEffect(() => { loadProfiles(); }, []);
 
   const createProject = async e => {
@@ -48,7 +49,8 @@ export default function Admin({ projects, reload }) {
       <h2>{t('admin.accounts')}</h2>
       <form className="card form row" onSubmit={invite}>
         <label>{t('entry.email')}<input type="email" required value={inv.email} onChange={e => setInv({ ...inv, email: e.target.value })} /></label>
-        <label>{t('team.name')}<input value={inv.name} onChange={e => setInv({ ...inv, name: e.target.value })} /></label>
+        <label>{t('profile.label.first_name')}<input required value={inv.firstName} onChange={e => setInv({ ...inv, firstName: e.target.value })} /></label>
+        <label>{t('profile.label.last_name')}<input required value={inv.lastName} onChange={e => setInv({ ...inv, lastName: e.target.value })} /></label>
         <label>{t('admin.project')}<select value={inv.projectId} onChange={e => setInv({ ...inv, projectId: e.target.value })}>
           <option value="">—</option>{projects.map(p => <option key={p.id} value={p.id}>{safeStr(p.name)}</option>)}
         </select></label>
@@ -60,7 +62,7 @@ export default function Admin({ projects, reload }) {
       </form>
       {msg ? <p className={msg.startsWith('errors') ? 'error' : 'ok'}>{t(msg)}</p> : null}
       <table className="table"><tbody>{profiles.map(p => (
-        <tr key={p.id}><td>{safeStr(p.name)}<br /><small className="muted">{safeStr(p.email)}</small></td>
+        <tr key={p.id}><td>{fullName(p)}<br /><small className="muted">{safeStr(p.email)}</small></td>
           <td><label className="check"><input type="checkbox" checked={p.is_admin} onChange={() => toggleAdmin(p)} /><span>{t('role.admin')}</span></label></td></tr>
       ))}</tbody></table>
     </>

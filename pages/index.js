@@ -13,5 +13,5 @@ export default function Home() {
     if (!/access_token|error_description/.test(window.location.hash)) return;
     sb().auth.getSession().then(({ data }) => router.replace(data.session ? '/staff' : '/login?e=link_failed'));
   }, [router]);
-  return <Layout><div className="narrow"><h1>{t('home.title')}</h1><p className="lead">{t('home.body')}</p><a className="btn" href="/login">{t('home.staff')}</a></div></Layout>;
+  return <Layout><div className="narrow hero"><h1>{t('home.title')}</h1><p className="lead">{t('home.body')}</p><a className="btn" href="/login">{t('home.staff')}</a></div></Layout>;
 }

@@ -64,3 +64,9 @@ Voir `.env.example`. `SUPABASE_SERVICE_ROLE_KEY` reste côté serveur : ne jamai
 
 `scripts/extract_fillout.py export.json data/questions_fr.json` extrait les questions d'un export Fillout.
 `node scripts/build_bank.js ancien/config.js data/questions_fr.json data/ocat_osc.json` fusionne avec les textes FR/EN de l'ancienne app et contrôle la cohérence.
+
+## Mise à jour 2.1 (dashboard, fiche organisation, noms)
+
+1. Supabase > SQL Editor : exécuter `supabase/migrations/0003_profile_fields.sql` (une seule fois).
+2. Vercel > Settings > Environment Variables : vérifier `APP_URL` (adresse complète en https, sans slash final) et `NEXT_PUBLIC_ORG_NAME` (nom affiché dans les e-mails et le texte d'introduction). Ces variables sont figées au build : **Redeploy** après toute modification.
+3. `git push`, puis se connecter une fois et compléter son prénom et son nom sur `/staff/profile`.

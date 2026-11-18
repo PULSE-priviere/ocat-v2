@@ -3,14 +3,15 @@ import { useState } from 'react';
 import { useI18n } from '../../lib/i18n';
 import { sb, staffApi } from '../../lib/supabase';
 import { safeStr } from '../../lib/safe';
+import { fullName } from '../../lib/names';
 
 export default function Team({ project, members, isAdmin, reload }) {
   const { t, lang } = useI18n();
-  const [form, setForm] = useState({ email: '', name: '' });
+  const [form, setForm] = useState({ email: '', firstName: '', lastName: '' });
   const [msg, setMsg] = useState('');
   const invite = async e => {
     e.preventDefault(); setMsg('');
-    try { await staffApi('invite', { ...form, projectId: project.id, role: 'coach', lang }); setMsg('team.invited'); setForm({ email: '', name: '' }); reload(); }
+    try { await staffApi('invite', { ...form, projectId: project.id, role: 'coach', lang }); setMsg('team.invited'); setForm({ email: '', firstName: '', lastName: '' }); reload(); }
     catch (err) { setMsg(`errors.${err.message}`); }
   };
   const revoke = async (m, role = 'coach') => {
@@ -29,7 +30,7 @@ export default function Team({ project, members, isAdmin, reload }) {
       {list('coach').length === 0 ? <p className="empty-inline">{t('team.no_coach')}</p> : (
         <table className="table"><tbody>{list('coach').map(m => (
           <tr key={m.user_id}>
-            <td>{safeStr(m.profile?.name)}<br /><small className="muted">{safeStr(m.profile?.email)}</small></td>
+            <td>{fullName(m.profile)}<br /><small className="muted">{safeStr(m.profile?.email)}</small></td>
             <td><label className="check"><input type="checkbox" checked={m.offered_to_osc} onChange={() => toggleOffered(m)} /><span>{t('team.offered')}</span></label></td>
             <td className="right"><button className="btn danger" onClick={() => revoke(m)}>{t('team.revoke')}</button></td>
           </tr>
@@ -37,7 +38,8 @@ export default function Team({ project, members, isAdmin, reload }) {
       )}
       <form className="card form row" onSubmit={invite}>
         <label>{t('entry.email')}<input type="email" required value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} /></label>
-        <label>{t('team.name')}<input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} /></label>
+        <label>{t('profile.label.first_name')}<input required value={form.firstName} onChange={e => setForm({ ...form, firstName: e.target.value })} /></label>
+        <label>{t('profile.label.last_name')}<input required value={form.lastName} onChange={e => setForm({ ...form, lastName: e.target.value })} /></label>
         <button className="btn primary">{t('team.invite_coach')}</button>
       </form>
       {msg ? <p className={msg.startsWith('errors') ? 'error' : 'ok'}>{t(msg)}</p> : null}

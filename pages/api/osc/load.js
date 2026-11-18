@@ -14,9 +14,16 @@ export default async function handler(req, res) {
   let plan = null;
   const { data: p } = await db.from('action_plans').select('items, status').eq('assessment_id', a.id).maybeSingle();
   if (p && p.status === 'shared') plan = p.items;
+  let coach = null;
+  if (s.coach_id) {
+    const { data: c } = await db.from('profiles').select('first_name, last_name, name').eq('id', s.coach_id).maybeSingle();
+    if (c) coach = [c.first_name, c.last_name].filter(Boolean).join(' ') || c.name || null;
+  }
   res.json({
-    assessment: { status: a.status, type: a.type, section_comments: a.section_comments, notes_shared: a.notes_shared },
-    subject: { name: s.name }, project: { name: s.projects.name },
+    assessment: { status: a.status, type: a.type, section_comments: a.section_comments, section_deepen: a.section_deepen || {}, notes_shared: a.notes_shared },
+    subject: { name: s.name, email: s.email, contact_first_name: s.contact_first_name, contact_last_name: s.contact_last_name,
+      country: s.country, org_type: s.org_type, org_size: s.org_size },
+    project: { name: s.projects.name }, coach,
     sections, questions,
     // Notes du coach visibles seulement si partagées
     answers: (answers || []).map(x => ({ ...x, coach_notes: a.notes_shared ? x.coach_notes : null })),

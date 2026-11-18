@@ -1,134 +1,430 @@
 {
-  "common": { "app_title": "Diagnostic organisationnel", "language": "Langue", "loading": "Chargement…", "sending": "Envoi…", "copy": "Copier", "copied": "Copié", "retry": "Réessayer", "print": "Imprimer ou enregistrer en PDF", "save": "Enregistrer", "add": "Ajouter", "delete": "Supprimer", "cancel": "Annuler", "export_csv": "Exporter en CSV", "yes": "Oui", "no": "Non" },
-  "home": { "title": "Diagnostic organisationnel", "body": "Pour répondre au questionnaire, ouvrez le lien que votre projet vous a transmis.", "staff": "Espace équipe" },
-  "entry": {
-    "title": "Commencer votre diagnostic",
-    "default_welcome": "Projet {project}. Indiquez le nom de votre organisation et une adresse e-mail : nous créons votre dossier et vous envoyons votre lien personnel.",
-    "name": "Nom de l'organisation", "email": "Adresse e-mail",
-    "email_hint": "Votre lien personnel sera envoyé à cette adresse. C'est la seule façon de le retrouver.",
-    "coach": "Votre accompagnateur (facultatif)", "coach_none": "Je ne sais pas",
-    "consent": "J'ai pris connaissance de l'usage de nos données dans le cadre de ce diagnostic.",
-    "submit": "Créer mon dossier", "unavailable_title": "Lien indisponible",
-    "created_title": "Votre dossier est créé", "created_body": "Gardez ce lien : il vous permet de reprendre votre diagnostic à tout moment. Nous vous l'avons aussi envoyé par e-mail.",
-    "start": "Commencer le questionnaire",
-    "exists_title": "Vérifiez votre boîte e-mail", "exists_body": "Un dossier existe déjà pour cette adresse dans ce projet. Nous venons d'y envoyer un nouveau lien pour le reprendre."
+ "common": {
+  "app_title": "Diagnostic organisationnel",
+  "language": "Langue",
+  "loading": "Chargement…",
+  "sending": "Envoi…",
+  "copy": "Copier",
+  "copied": "Copié",
+  "retry": "Réessayer",
+  "print": "Imprimer ou enregistrer en PDF",
+  "save": "Enregistrer",
+  "add": "Ajouter",
+  "delete": "Supprimer",
+  "cancel": "Annuler",
+  "export_csv": "Exporter en CSV",
+  "yes": "Oui",
+  "no": "Non",
+  "back": "Retour"
+ },
+ "home": {
+  "title": "Diagnostic organisationnel",
+  "body": "Pour répondre au questionnaire, ouvrez le lien que votre projet vous a transmis.",
+  "staff": "Espace équipe"
+ },
+ "entry": {
+  "title": "Commencer votre diagnostic",
+  "default_welcome": "Projet {project}. Indiquez le nom de votre organisation et une adresse e-mail : nous créons votre dossier et vous envoyons votre lien personnel.",
+  "name": "Nom de l'organisation",
+  "email": "Adresse e-mail",
+  "email_hint": "Votre lien personnel sera envoyé à cette adresse. C'est la seule façon de le retrouver.",
+  "coach": "Votre accompagnateur (facultatif)",
+  "coach_none": "Je ne sais pas",
+  "consent": "J'ai pris connaissance de l'usage de nos données dans le cadre de ce diagnostic.",
+  "submit": "Créer mon dossier",
+  "unavailable_title": "Lien indisponible",
+  "created_title": "Votre dossier est créé",
+  "created_body": "Gardez ce lien : il vous permet de reprendre votre diagnostic à tout moment. Nous vous l'avons aussi envoyé par e-mail.",
+  "start": "Commencer le questionnaire",
+  "exists_title": "Vérifiez votre boîte e-mail",
+  "exists_body": "Un dossier existe déjà pour cette adresse dans ce projet. Nous venons d'y envoyer un nouveau lien pour le reprendre.",
+  "first_name": "Prénom",
+  "last_name": "Nom",
+  "contact_title": "Personne qui remplit le diagnostic"
+ },
+ "link": {
+  "label": "Votre lien personnel",
+  "warning": "Toute personne qui a ce lien peut voir et modifier votre diagnostic. Ne le partagez pas."
+ },
+ "save": {
+  "saved": "Enregistré",
+  "saving": "Enregistrement…",
+  "offline": "En attente de connexion",
+  "error": "Non enregistré"
+ },
+ "status": {
+  "not_started": "Non commencée",
+  "in_progress": "En cours",
+  "complete": "Complète"
+ },
+ "astatus": {
+  "in_progress": "En cours",
+  "submitted": "Soumise",
+  "locked": "Verrouillée"
+ },
+ "eval": {
+  "baseline": "Baseline (début d'accompagnement)",
+  "followup": "Suivi intermédiaire (midline)",
+  "endline": "Endline (fin d'accompagnement)"
+ },
+ "answer": {
+  "NA": "Non applicable (N/A)",
+  "1": "1 - Non mis en place / Non fonctionnel",
+  "2": "2 - Partiellement mis en place / fonctionnel",
+  "3": "3 - Documenté et opérationnel/fonctionnel",
+  "yes": "Oui",
+  "no": "Non",
+  "short_NA": "N/A",
+  "short_1": "Non en place",
+  "short_2": "Partiel",
+  "short_3": "En place",
+  "short_yes": "Oui",
+  "short_no": "Non"
+ },
+ "osc": {
+  "home_title": "Diagnostic de {name}",
+  "home_intro": "Le diagnostic compte 9 sections. Remplissez-les dans l'ordre que vous voulez, en une ou plusieurs fois : chaque réponse est enregistrée aussitôt.",
+  "submit": "Envoyer mon diagnostic",
+  "submit_hint": "Le bouton d'envoi apparaît quand les 9 sections sont complètes.",
+  "submit_confirm": "Envoyer votre diagnostic ? Vous pourrez encore modifier vos réponses tant que votre accompagnateur n'a pas clôturé la session.",
+  "see_report": "Voir mon rapport",
+  "see_sections": "Voir les sections",
+  "back_home": "Toutes les sections",
+  "next_section": "Section suivante : {name}",
+  "section_comment": "Commentaire sur cette section (facultatif)",
+  "guide": "Guide de réponse",
+  "guide_generic": "N/A : la pratique ne concerne pas votre organisation.\n1 : la pratique n'est pas mise en place.\n2 : la pratique est partiellement ou informellement en place.\n3 : la pratique est documentée et pleinement opérationnelle.",
+  "support_question": "Souhaitez-vous un appui de la structure pour la mise en place ?",
+  "edited_by_coach": "Réponse modifiée par votre accompagnateur",
+  "coach_note": "Note de l'accompagnateur :",
+  "locked_banner": "Votre accompagnateur a clôturé la session : les réponses ne peuvent plus être modifiées.",
+  "resend": "Recevoir un nouveau lien par e-mail",
+  "resent": "Si ce dossier existe, un nouveau lien a été envoyé à l'adresse enregistrée.",
+  "back_dashboard": "Dashboard",
+  "deepen_question": "Souhaitez-vous approfondir cette section ?",
+  "deepen_hint": "Si oui, votre accompagnateur reviendra plus en détail sur cette section avec vous.",
+  "deepen_asked": "Approfondissement souhaité"
+ },
+ "report": {
+  "title": "Rapport de {name}",
+  "intro": "Voici la synthèse de vos réponses, section par section. Les pratiques à renforcer apparaissent en premier.",
+  "section": "Section",
+  "no_answer": "Sans réponse",
+  "text_answer": "Réponse libre",
+  "support_requested": "Appui demandé"
+ },
+ "errors": {
+  "title_invalid_link": "Lien non valide",
+  "title_expired_link": "Lien expiré",
+  "title_offline": "Pas de connexion",
+  "title_generic": "Une erreur est survenue",
+  "invalid_link": "Ce lien n'existe pas ou a été remplacé. Utilisez le dernier lien reçu par e-mail, ou contactez votre accompagnateur.",
+  "expired_link": "Ce lien a expiré. Demandez un nouveau lien : il sera envoyé à l'adresse e-mail enregistrée.",
+  "offline": "Impossible de joindre le serveur. Vérifiez votre connexion puis réessayez.",
+  "link_inactive": "Ce lien de projet n'est pas actif. Contactez l'équipe du projet.",
+  "invalid_form": "Vérifiez le nom et l'adresse e-mail.",
+  "consent_required": "Cochez la case pour continuer.",
+  "captcha_failed": "La vérification anti-robot a échoué. Réessayez.",
+  "too_many_attempts": "Trop de tentatives depuis cette connexion. Réessayez dans une heure.",
+  "server_error": "Le serveur n'a pas pu enregistrer. Réessayez dans un instant.",
+  "locked": "La session est clôturée : modification impossible.",
+  "incomplete": "Toutes les sections doivent être complètes avant l'envoi.",
+  "forbidden": "Vous n'avez pas accès à ce dossier.",
+  "not_signed_in": "Votre session a expiré. Reconnectez-vous.",
+  "email_exists": "Une OSC avec cette adresse existe déjà dans ce projet.",
+  "need_exists": "Ce besoin existe déjà dans la liste.",
+  "no_framework": "Aucune banque de questions chargée. Lancez le script de seed.",
+  "last_admin": "Il doit rester au moins un administrateur.",
+  "link_failed": "Ce lien de connexion n'est plus valable (il ne sert qu'une fois et dure une heure). Demandez-en un nouveau.",
+  "no_account": "Aucun compte n'est associé à cette adresse.",
+  "method": "Requête non valide.",
+  "not_found": "Action inconnue.",
+  "invalid_profile": "Vérifiez les informations saisies (prénom et nom obligatoires)."
+ },
+ "login": {
+  "title": "Connexion de l'équipe",
+  "submit": "Recevoir un lien de connexion",
+  "sent": "Si un compte existe pour cette adresse, un lien de connexion vient d'y être envoyé. Il est valable une heure."
+ },
+ "staff": {
+  "title": "Espace équipe",
+  "sign_out": "Se déconnecter",
+  "project": "Projet",
+  "no_project": "Vous n'êtes rattaché à aucun projet pour l'instant.",
+  "tab_cohort": "Cohorte",
+  "tab_needs": "Besoins",
+  "tab_team": "Équipe",
+  "tab_project": "Projet",
+  "tab_journal": "Journal",
+  "tab_duplicates": "Doublons",
+  "tab_admin": "Administration",
+  "profile": "Mon profil",
+  "complete_name": "Complétez votre prénom et votre nom : ils s'affichent en haut à droite."
+ },
+ "role": {
+  "owner": "Owner de projet",
+  "coach": "Coach",
+  "admin": "Administrateur"
+ },
+ "cohort": {
+  "filter_coach": "Coach",
+  "all_coaches": "Tous les coachs",
+  "no_coach": "Sans coach",
+  "add_osc": "Ajouter une OSC",
+  "create": "Créer et envoyer le lien",
+  "osc": "OSC",
+  "coach": "Coach",
+  "evaluation": "Évaluation",
+  "completion": "Complétion",
+  "global": "Score global",
+  "empty": "Aucune OSC pour l'instant. Partagez le lien public du projet, ou ajoutez une OSC à la main.",
+  "contact": "Contact",
+  "empty_coach": "Aucune OSC ne vous est affectée pour l'instant. Demandez à l'owner du projet de vous en affecter : vous verrez alors chaque OSC, même si elle n'a pas terminé son questionnaire."
+ },
+ "needs": {
+  "title": "Besoins agrégés",
+  "need": "Besoin",
+  "count": "Nombre d'OSC",
+  "oscs": "OSC concernées",
+  "empty": "Aucun besoin tagué pour l'instant. Les coachs taguent les besoins pendant la session.",
+  "weakest": "Questions les plus faibles",
+  "weakest_hint": "Les 10 questions qui reçoivent le plus de réponses « 1 » dans la cohorte.",
+  "weakest_empty": "Aucune réponse « 1 » pour l'instant."
+ },
+ "team": {
+  "coaches": "Coachs du projet",
+  "owners": "Owners du projet",
+  "no_coach": "Aucun coach. Invitez-en un ci-dessous.",
+  "name": "Nom",
+  "invite_coach": "Inviter comme coach",
+  "invited": "Invitation envoyée.",
+  "offered": "Proposé aux OSC",
+  "revoke": "Révoquer",
+  "revoke_confirm": "Révoquer l'accès de {name} à ce projet ? Il perd l'accès immédiatement. Pensez à réaffecter ses OSC."
+ },
+ "project": {
+  "public_link": "Lien public du projet",
+  "link_disabled": "Le lien public est désactivé : personne ne peut créer de dossier.",
+  "disable": "Désactiver le lien",
+  "enable": "Activer le lien",
+  "renew": "Renouveler le lien",
+  "renew_confirm": "Renouveler le lien public ? L'ancien lien cessera de fonctionner. Les liens personnels des OSC ne changent pas.",
+  "offer_coach_choice": "Proposer la liste des coachs à l'OSC",
+  "welcome_fr": "Texte d'accueil (français)",
+  "welcome_en": "Texte d'accueil (anglais)",
+  "needs": "Liste des besoins",
+  "need_new": "Nouveau besoin, ex. « Finances : comptabilité analytique »",
+  "need_delete_confirm": "Supprimer le besoin « {label} » ? Il sera retiré de toutes les réponses.",
+  "needs_hint": "Les coachs peuvent aussi ajouter un besoin pendant la session."
+ },
+ "journal": {
+  "empty": "Aucune modification enregistrée.",
+  "date": "Date",
+  "author": "Auteur",
+  "what": "Élément",
+  "field": "Champ",
+  "old": "Ancienne valeur",
+  "new": "Nouvelle valeur",
+  "table_answers": "Réponse",
+  "table_assessments": "Évaluation",
+  "table_subjects": "OSC",
+  "table_action_plans": "Plan"
+ },
+ "dup": {
+  "empty": "Aucun doublon probable.",
+  "keep_left": "Garder le premier",
+  "keep_right": "Garder le second",
+  "confirm": "Fusionner « {drop} » dans « {keep} » ? Les évaluations passent sur le dossier conservé et l'autre dossier est supprimé."
+ },
+ "admin": {
+  "projects": "Projets",
+  "accounts": "Comptes et rôles",
+  "project_name": "Nom du projet",
+  "cohort": "Promotion",
+  "create_project": "Créer le projet",
+  "archive": "Archiver",
+  "unarchive": "Réactiver",
+  "archived": "Archivé",
+  "active": "Actif",
+  "project": "Projet",
+  "role": "Rôle",
+  "invite": "Inviter"
+ },
+ "subject": {
+  "back": "Retour à la cohorte",
+  "new_link": "Générer un nouveau lien",
+  "send_link": "Renvoyer un lien par e-mail",
+  "revoke_link": "Révoquer le lien",
+  "revoke_confirm": "Révoquer le lien personnel ? L'OSC ne pourra plus ouvrir son diagnostic tant qu'un nouveau lien n'est pas généré.",
+  "lock": "Clôturer la session",
+  "unlock": "Rouvrir",
+  "lock_confirm": "Clôturer la session ? L'OSC ne pourra plus modifier ses réponses.",
+  "share_notes": "Montrer mes notes à l'OSC",
+  "new_assessment": "Nouvelle évaluation",
+  "new_assessment_confirm": "Créer une nouvelle évaluation pour cette OSC ? Un lien lui sera envoyé par e-mail.",
+  "tab_session": "Session",
+  "tab_sheet": "Fiche",
+  "tab_plan": "Plan d'accompagnement"
+ },
+ "sheet": {
+  "progress": "Réponses",
+  "score": "Score",
+  "scores": "Scores par section",
+  "global": "Global",
+  "score_rule": "Score d'une section : moyenne des réponses 1 à 3, N/A exclues, calculée quand la section est complète. Global : moyenne des 9 sections. Visible par l'équipe uniquement."
+ },
+ "session": {
+  "filter": "Filtrer les questions",
+  "f_all": "Toutes",
+  "f_low": "Réponses 1 et 2",
+  "f_support": "Appui demandé",
+  "f_empty": "Sans réponse",
+  "discussed": "{n} questions avec notes ou besoins",
+  "osc_comment": "Commentaire de l'OSC :",
+  "notes": "Notes du coach",
+  "new_need": "Autre besoin…",
+  "edited": "Modifiée par le coach",
+  "added": "Ajoutée",
+  "add_question": "Ajouter une question à cette évaluation",
+  "question_text": "Question",
+  "format": "Format",
+  "format_text": "Texte libre",
+  "format_yesno": "Oui / non",
+  "format_scale": "Échelle 1 à 3",
+  "deepen_badge": "Approfondissement souhaité"
+ },
+ "plan": {
+  "title": "Plan d'accompagnement",
+  "actions": "Actions",
+  "propose": "Proposer les priorités",
+  "add_free": "Ajouter une action libre",
+  "status": "Statut",
+  "status_draft": "Brouillon",
+  "status_validated": "Validé",
+  "status_shared": "Partagé avec l'OSC",
+  "export_fr": "PDF français",
+  "export_en": "PDF anglais",
+  "hint": "Les priorités proposées : réponses 1 ou 2 avec appui demandé, puis les autres 1, puis les autres 2. Le plan est visible par l'OSC seulement au statut « Partagé ».",
+  "empty": "Aucune priorité. Cliquez sur « Proposer les priorités » pour partir des réponses.",
+  "keep": "Retenue",
+  "free": "Action libre",
+  "up": "Monter",
+  "down": "Descendre",
+  "priority": "Priorité",
+  "action": "Action",
+  "owner": "Responsable",
+  "due": "Échéance",
+  "need": "Besoin associé"
+ },
+ "email": {
+  "personal_link": {
+   "subject": "Votre lien personnel pour le diagnostic",
+   "body": "{hello}\n\nVotre dossier de diagnostic est prêt. Ouvrez ce lien pour répondre, en une ou plusieurs fois :\n{url}\n\nGardez ce message. Toute personne qui a ce lien peut voir votre diagnostic : ne le transférez pas.\n\n{org}"
   },
-  "link": { "label": "Votre lien personnel", "warning": "Toute personne qui a ce lien peut voir et modifier votre diagnostic. Ne le partagez pas." },
-  "save": { "saved": "Enregistré", "saving": "Enregistrement…", "offline": "En attente de connexion", "error": "Non enregistré" },
-  "status": { "not_started": "Non commencée", "in_progress": "En cours", "complete": "Complète" },
-  "astatus": { "in_progress": "En cours", "submitted": "Soumise", "locked": "Verrouillée" },
-  "eval": { "baseline": "Baseline", "followup": "Suivi intermédiaire", "endline": "Endline" },
-  "answer": {
-    "NA": "Non applicable (N/A)", "1": "1 - Non mis en place / Non fonctionnel", "2": "2 - Partiellement mis en place / fonctionnel", "3": "3 - Documenté et opérationnel/fonctionnel", "yes": "Oui", "no": "Non",
-    "short_NA": "N/A", "short_1": "Non en place", "short_2": "Partiel", "short_3": "En place", "short_yes": "Oui", "short_no": "Non"
+  "resume_link": {
+   "subject": "Votre nouveau lien pour reprendre le diagnostic",
+   "body": "{hello}\n\nVoici votre nouveau lien pour reprendre votre diagnostic. Les liens précédents ne fonctionnent plus.\n{url}\n\nSi vous n'avez rien demandé, vous pouvez ignorer ce message.\n\n{org}"
   },
-  "osc": {
-    "home_title": "Diagnostic de {name}",
-    "home_intro": "Le diagnostic compte 9 sections. Remplissez-les dans l'ordre que vous voulez, en une ou plusieurs fois : chaque réponse est enregistrée aussitôt.",
-    "submit": "Envoyer mon diagnostic", "submit_hint": "Le bouton d'envoi apparaît quand les 9 sections sont complètes.",
-    "submit_confirm": "Envoyer votre diagnostic ? Vous pourrez encore modifier vos réponses tant que votre accompagnateur n'a pas clôturé la session.",
-    "see_report": "Voir mon rapport", "see_sections": "Voir les sections", "back_home": "Toutes les sections",
-    "next_section": "Section suivante : {name}", "section_comment": "Commentaire sur cette section (facultatif)",
-    "guide": "Guide de réponse",
-    "guide_generic": "N/A : la pratique ne concerne pas votre organisation.\n1 : la pratique n'est pas mise en place.\n2 : la pratique est partiellement ou informellement en place.\n3 : la pratique est documentée et pleinement opérationnelle.",
-    "support_question": "Souhaitez-vous un appui de la structure pour la mise en place ?",
-    "edited_by_coach": "Réponse modifiée par votre accompagnateur", "coach_note": "Note de l'accompagnateur :",
-    "locked_banner": "Votre accompagnateur a clôturé la session : les réponses ne peuvent plus être modifiées.",
-    "resend": "Recevoir un nouveau lien par e-mail", "resent": "Si ce dossier existe, un nouveau lien a été envoyé à l'adresse enregistrée."
+  "login": {
+   "subject": "Votre lien de connexion",
+   "body": "{hello}\n\nCliquez sur ce lien pour vous connecter à l'espace équipe. Il est valable une heure et ne sert qu'une fois :\n{url}\n\n{org}"
   },
-  "report": {
-    "title": "Rapport de {name}", "intro": "Voici la synthèse de vos réponses, section par section. Les pratiques à renforcer apparaissent en premier.",
-    "section": "Section", "no_answer": "Sans réponse", "text_answer": "Réponse libre", "support_requested": "Appui demandé"
+  "submitted": {
+   "subject": "Diagnostic soumis : {name}",
+   "body": "{hello}\n\n{name} vient de soumettre son diagnostic. Ouvrez sa fiche :\n{url}\n\n{org}"
   },
-  "errors": {
-    "title_invalid_link": "Lien non valide", "title_expired_link": "Lien expiré", "title_offline": "Pas de connexion", "title_generic": "Une erreur est survenue",
-    "invalid_link": "Ce lien n'existe pas ou a été remplacé. Utilisez le dernier lien reçu par e-mail, ou contactez votre accompagnateur.",
-    "expired_link": "Ce lien a expiré. Demandez un nouveau lien : il sera envoyé à l'adresse e-mail enregistrée.",
-    "offline": "Impossible de joindre le serveur. Vérifiez votre connexion puis réessayez.",
-    "link_inactive": "Ce lien de projet n'est pas actif. Contactez l'équipe du projet.",
-    "invalid_form": "Vérifiez le nom et l'adresse e-mail.", "consent_required": "Cochez la case pour continuer.",
-    "captcha_failed": "La vérification anti-robot a échoué. Réessayez.", "too_many_attempts": "Trop de tentatives depuis cette connexion. Réessayez dans une heure.",
-    "server_error": "Le serveur n'a pas pu enregistrer. Réessayez dans un instant.", "locked": "La session est clôturée : modification impossible.",
-    "incomplete": "Toutes les sections doivent être complètes avant l'envoi.", "forbidden": "Vous n'avez pas accès à ce dossier.",
-    "not_signed_in": "Votre session a expiré. Reconnectez-vous.", "email_exists": "Une OSC avec cette adresse existe déjà dans ce projet.",
-    "need_exists": "Ce besoin existe déjà dans la liste.", "no_framework": "Aucune banque de questions chargée. Lancez le script de seed.",
-    "last_admin": "Il doit rester au moins un administrateur.", "link_failed": "Ce lien de connexion n'est plus valable (il ne sert qu'une fois et dure une heure). Demandez-en un nouveau.", "no_account": "Aucun compte n'est associé à cette adresse.",
-    "method": "Requête non valide.", "not_found": "Action inconnue."
+  "hello": "Bonjour {name},",
+  "hello_anon": "Bonjour,"
+ },
+ "profile": {
+  "title": "Informations de l'organisation",
+  "edit": "Modifier",
+  "save": "Enregistrer",
+  "cancel": "Annuler",
+  "saved": "Informations enregistrées",
+  "missing": "Non renseigné",
+  "to_complete": "À compléter",
+  "choose": "Choisir…",
+  "label": {
+   "first_name": "Prénom",
+   "last_name": "Nom",
+   "contact": "Personne de contact",
+   "email": "E-mail",
+   "country": "Pays",
+   "org_type": "Type de structure",
+   "org_size": "Taille (nombre d'employés)"
   },
-  "login": { "title": "Connexion de l'équipe", "submit": "Recevoir un lien de connexion", "sent": "Si un compte existe pour cette adresse, un lien de connexion vient d'y être envoyé. Il est valable une heure." },
-  "staff": {
-    "title": "Espace équipe", "sign_out": "Se déconnecter", "project": "Projet", "no_project": "Vous n'êtes rattaché à aucun projet pour l'instant.",
-    "tab_cohort": "Cohorte", "tab_needs": "Besoins", "tab_team": "Équipe", "tab_project": "Projet", "tab_journal": "Journal", "tab_duplicates": "Doublons", "tab_admin": "Administration"
-  },
-  "role": { "owner": "Owner de projet", "coach": "Coach", "admin": "Administrateur" },
-  "cohort": {
-    "filter_coach": "Coach", "all_coaches": "Tous les coachs", "no_coach": "Sans coach", "add_osc": "Ajouter une OSC", "create": "Créer et envoyer le lien",
-    "osc": "OSC", "coach": "Coach", "evaluation": "Évaluation", "completion": "Complétion", "global": "Score global",
-    "empty": "Aucune OSC pour l'instant. Partagez le lien public du projet, ou ajoutez une OSC à la main."
-  },
-  "needs": {
-    "title": "Besoins agrégés", "need": "Besoin", "count": "Nombre d'OSC", "oscs": "OSC concernées",
-    "empty": "Aucun besoin tagué pour l'instant. Les coachs taguent les besoins pendant la session.",
-    "weakest": "Questions les plus faibles", "weakest_hint": "Les 10 questions qui reçoivent le plus de réponses « 1 » dans la cohorte.",
-    "weakest_empty": "Aucune réponse « 1 » pour l'instant."
-  },
-  "team": {
-    "coaches": "Coachs du projet", "owners": "Owners du projet", "no_coach": "Aucun coach. Invitez-en un ci-dessous.", "name": "Nom",
-    "invite_coach": "Inviter comme coach", "invited": "Invitation envoyée.", "offered": "Proposé aux OSC", "revoke": "Révoquer",
-    "revoke_confirm": "Révoquer l'accès de {name} à ce projet ? Il perd l'accès immédiatement. Pensez à réaffecter ses OSC."
-  },
-  "project": {
-    "public_link": "Lien public du projet", "link_disabled": "Le lien public est désactivé : personne ne peut créer de dossier.",
-    "disable": "Désactiver le lien", "enable": "Activer le lien", "renew": "Renouveler le lien",
-    "renew_confirm": "Renouveler le lien public ? L'ancien lien cessera de fonctionner. Les liens personnels des OSC ne changent pas.",
-    "offer_coach_choice": "Proposer la liste des coachs à l'OSC", "welcome_fr": "Texte d'accueil (français)", "welcome_en": "Texte d'accueil (anglais)",
-    "needs": "Liste des besoins", "need_new": "Nouveau besoin, ex. « Finances : comptabilité analytique »",
-    "need_delete_confirm": "Supprimer le besoin « {label} » ? Il sera retiré de toutes les réponses.",
-    "needs_hint": "Les coachs peuvent aussi ajouter un besoin pendant la session."
-  },
-  "journal": {
-    "empty": "Aucune modification enregistrée.", "date": "Date", "author": "Auteur", "what": "Élément", "field": "Champ", "old": "Ancienne valeur", "new": "Nouvelle valeur",
-    "table_answers": "Réponse", "table_assessments": "Évaluation", "table_subjects": "OSC", "table_action_plans": "Plan"
-  },
-  "dup": {
-    "empty": "Aucun doublon probable.", "keep_left": "Garder le premier", "keep_right": "Garder le second",
-    "confirm": "Fusionner « {drop} » dans « {keep} » ? Les évaluations passent sur le dossier conservé et l'autre dossier est supprimé."
-  },
-  "admin": {
-    "projects": "Projets", "accounts": "Comptes et rôles", "project_name": "Nom du projet", "cohort": "Promotion", "create_project": "Créer le projet",
-    "archive": "Archiver", "unarchive": "Réactiver", "archived": "Archivé", "active": "Actif", "project": "Projet", "role": "Rôle", "invite": "Inviter"
-  },
-  "subject": {
-    "back": "Retour à la cohorte", "new_link": "Générer un nouveau lien", "send_link": "Renvoyer un lien par e-mail", "revoke_link": "Révoquer le lien",
-    "revoke_confirm": "Révoquer le lien personnel ? L'OSC ne pourra plus ouvrir son diagnostic tant qu'un nouveau lien n'est pas généré.",
-    "lock": "Clôturer la session", "unlock": "Rouvrir", "lock_confirm": "Clôturer la session ? L'OSC ne pourra plus modifier ses réponses.",
-    "share_notes": "Montrer mes notes à l'OSC", "new_assessment": "Nouvelle évaluation",
-    "new_assessment_confirm": "Créer une nouvelle évaluation pour cette OSC ? Un lien lui sera envoyé par e-mail.",
-    "tab_session": "Session", "tab_sheet": "Fiche", "tab_plan": "Plan d'accompagnement"
-  },
-  "sheet": {
-    "progress": "Réponses", "score": "Score", "scores": "Scores par section", "global": "Global",
-    "score_rule": "Score d'une section : moyenne des réponses 1 à 3, N/A exclues, calculée quand la section est complète. Global : moyenne des 9 sections. Visible par l'équipe uniquement."
-  },
-  "session": {
-    "filter": "Filtrer les questions", "f_all": "Toutes", "f_low": "Réponses 1 et 2", "f_support": "Appui demandé", "f_empty": "Sans réponse",
-    "discussed": "{n} questions avec notes ou besoins", "osc_comment": "Commentaire de l'OSC :", "notes": "Notes du coach", "new_need": "Autre besoin…",
-    "edited": "Modifiée par le coach", "added": "Ajoutée", "add_question": "Ajouter une question à cette évaluation",
-    "question_text": "Question", "format": "Format", "format_text": "Texte libre", "format_yesno": "Oui / non", "format_scale": "Échelle 1 à 3"
-  },
-  "plan": {
-    "title": "Plan d'accompagnement", "actions": "Actions", "propose": "Proposer les priorités", "add_free": "Ajouter une action libre",
-    "status": "Statut", "status_draft": "Brouillon", "status_validated": "Validé", "status_shared": "Partagé avec l'OSC",
-    "export_fr": "PDF français", "export_en": "PDF anglais",
-    "hint": "Les priorités proposées : réponses 1 ou 2 avec appui demandé, puis les autres 1, puis les autres 2. Le plan est visible par l'OSC seulement au statut « Partagé ».",
-    "empty": "Aucune priorité. Cliquez sur « Proposer les priorités » pour partir des réponses.",
-    "keep": "Retenue", "free": "Action libre", "up": "Monter", "down": "Descendre",
-    "priority": "Priorité", "action": "Action", "owner": "Responsable", "due": "Échéance", "need": "Besoin associé"
-  },
-  "email": {
-    "personal_link": { "subject": "Votre lien personnel pour le diagnostic", "body": "Bonjour,\n\nVotre dossier de diagnostic est prêt. Ouvrez ce lien pour répondre, en une ou plusieurs fois :\n{url}\n\nGardez ce message. Toute personne qui a ce lien peut voir votre diagnostic : ne le transférez pas.\n\n{org}" },
-    "resume_link": { "subject": "Votre nouveau lien pour reprendre le diagnostic", "body": "Bonjour,\n\nVoici votre nouveau lien pour reprendre votre diagnostic. Les liens précédents ne fonctionnent plus.\n{url}\n\nSi vous n'avez rien demandé, vous pouvez ignorer ce message.\n\n{org}" },
-    "login": { "subject": "Votre lien de connexion", "body": "Bonjour,\n\nCliquez sur ce lien pour vous connecter à l'espace équipe. Il est valable une heure et ne sert qu'une fois :\n{url}\n\n{org}" },
-    "submitted": { "subject": "Diagnostic soumis : {name}", "body": "Bonjour,\n\n{name} vient de soumettre son diagnostic. Ouvrez sa fiche :\n{url}\n\n{org}" }
+  "opt": {
+   "country": {
+    "morocco": "Maroc",
+    "algeria": "Algérie",
+    "tunisia": "Tunisie",
+    "libya": "Libye",
+    "egypt": "Égypte",
+    "mauritania": "Mauritanie",
+    "south_africa": "Afrique du Sud",
+    "other": "Autre"
+   },
+   "org_type": {
+    "association": "Association",
+    "ngo": "ONG",
+    "cooperative": "Coopérative",
+    "social_enterprise": "Entreprise sociale",
+    "foundation": "Fondation",
+    "network": "Réseau / Network"
+   },
+   "org_size": {
+    "1-5": "1 à 5",
+    "6-20": "6 à 20",
+    "21-50": "21 à 50",
+    "50+": "Plus de 50"
+   }
   }
+ },
+ "dashboard": {
+  "title": "Dashboard de {name}",
+  "subtitle": "Retrouvez ici les informations de votre organisation et vos outils.",
+  "tools": "Outils",
+  "project": "Projet",
+  "coach": "Accompagnateur",
+  "evaluation": "Évaluation",
+  "progress": "{done} questions sur {total}",
+  "start": "Commencer le diagnostic",
+  "continue": "Continuer le diagnostic",
+  "report": "Voir mon rapport",
+  "live_title": "Votre profil en direct",
+  "live_hint": "Le graphique se met à jour à chaque réponse. Une section devient définitive quand toutes ses questions ont une réponse.",
+  "live_empty": "Répondez à quelques questions : votre profil apparaîtra ici.",
+  "radar_title": "Profil par section",
+  "dist_title": "Répartition de vos réponses",
+  "provisional": "provisoire",
+  "complete": "définitive"
+ },
+ "tools": {
+  "ocat": {
+   "title": "Diagnostic organisationnel",
+   "desc": "Auto-évaluation en 9 sections pour identifier vos forces et vos axes de développement."
+  }
+ },
+ "intro": {
+  "toggle": "Introduction au diagnostic",
+  "title": "Bienvenue dans l'outil de diagnostic organisationnel {org}",
+  "p1": "Cet outil vous accompagne dans une auto-évaluation de vos besoins organisationnels. Il s'agit d'un point de départ pour identifier ensemble vos forces et vos axes de développement prioritaires pour mieux vous accompagner.",
+  "p2": "Le diagnostic est organisé en 9 sections thématiques. Vous pouvez les remplir dans l'ordre que vous souhaitez, en une ou plusieurs séances.",
+  "p3": "Pour chaque question, choisissez le niveau qui correspond le mieux à la réalité actuelle de votre organisation :",
+  "levels": [
+   "Non applicable (N/A) ;",
+   "1 (pratique non mise en place) ;",
+   "2 (pratique partiellement ou informellement en place) ;",
+   "3 (pratique documentée et pleinement opérationnelle)."
+  ],
+  "p4": "Lorsque vous répondez 1 ou 2, une question complémentaire vous demande si vous souhaitez un appui de la structure pour vous aider à progresser. Cela nous permet d'identifier vos besoins mais ne garantit pas automatiquement un appui : la décision sera prise en commun accord.",
+  "p5": "La sincérité de vos réponses est la condition d'un accompagnement adapté à vos besoins réels."
+ },
+ "myprofile": {
+  "title": "Mon profil",
+  "intro": "Ces informations s'affichent en haut à droite de chaque page.",
+  "saved": "Profil enregistré",
+  "back": "Retour à l'espace équipe"
+ }
 }

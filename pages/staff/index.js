@@ -7,6 +7,8 @@ import { useStaff } from '../../lib/useStaff';
 import { sb } from '../../lib/supabase';
 import { loadCohort, loadNeeds } from '../../lib/cohort';
 import { safeStr } from '../../lib/safe';
+import { fullName } from '../../lib/names';
+import appConfig from '../../app.config';
 import Cohort from '../../components/staff/Cohort';
 import Needs from '../../components/staff/Needs';
 import Team from '../../components/staff/Team';
@@ -44,7 +46,7 @@ export default function Staff() {
       try {
         const cohort = await loadCohort(project);
         const needs = await loadNeeds(project, cohort);
-        const { data: mems } = await sb().from('memberships').select('user_id, role, offered_to_osc, profile:profiles(name, email)').eq('project_id', project.id);
+        const { data: mems } = await sb().from('memberships').select('user_id, role, offered_to_osc, profile:profiles(name, first_name, last_name, email)').eq('project_id', project.id);
         if (alive) { setData({ cohort, needs, members: mems || [] }); setError(''); }
       } catch { if (alive) setError('server_error'); }
     })();
@@ -58,7 +60,9 @@ export default function Staff() {
   const signOut = async () => { await staff.signOut(); router.replace('/login'); };
 
   return (
-    <Layout wide title={t('staff.title')} right={<button className="btn ghost" onClick={signOut}>{t('staff.sign_out')}</button>}>
+    <Layout wide title={t('staff.title')} home="/staff" identity={{ org: appConfig.orgName, person: fullName(staff.profile), href: '/staff/profile' }}
+      right={<button className="btn ghost" onClick={signOut}>{t('staff.sign_out')}</button>}>
+      {!staff.profile.first_name || !staff.profile.last_name ? <p className="banner"><a href="/staff/profile">{t('staff.complete_name')}</a></p> : null}
       <div className="toolbar">
         <h1 className="h1-small">{project ? safeStr(project.name) : t('staff.title')}</h1>
         {projects.length > 1 ? (
