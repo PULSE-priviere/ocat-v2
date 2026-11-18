@@ -364,6 +364,124 @@ select.notion { background-color: var(--panel); padding-right: 2rem; max-width: 
 @media print { .plandoc-wrap { padding: 0; max-width: none; } .plantoolbar { display: none !important; } }
 
 
+/* ── Mise en page avec menu latéral (espace équipe, parcours OSC) ── */
+.shell { max-width: 1320px; margin: 0 auto; display: grid; grid-template-columns: 232px minmax(0, 1fr); gap: 2.4rem; padding: 1.8rem clamp(1rem, 3vw, 2rem) 5rem; }
+.side { position: sticky; top: 78px; align-self: start; max-height: calc(100vh - 96px); overflow: auto; }
+.shell-main { min-width: 0; }
+.sidenav { display: flex; flex-direction: column; gap: 2px; }
+.sideitem { display: flex; align-items: center; gap: 0.6rem; width: 100%; padding: 0.46rem 0.65rem; border: 0; background: none; border-radius: 8px; font: inherit; font-size: 0.87rem; color: var(--t2); text-decoration: none; cursor: pointer; text-align: left; }
+.sideitem .icon { flex: 0 0 auto; color: var(--t3); }
+.sideitem:hover { background: #F1F1F1; color: var(--t1); }
+.sideitem.on { background: #fff; color: var(--t1); font-weight: 500; box-shadow: 0 0 0 1px var(--b1), var(--shadow); }
+.sideitem.on .icon { color: var(--brand); }
+.sidehead { display: flex; align-items: center; gap: 0.5rem; margin: 1.2rem 0 0.35rem; padding: 0 0.65rem; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--t3); }
+.sidedot { width: 9px; height: 9px; border-radius: 3px; flex: 0 0 auto; }
+.sidefoot { margin-top: 1.3rem; padding-top: 0.8rem; border-top: 1px solid var(--b1); display: flex; flex-direction: column; gap: 2px; }
+.sideitem.sec { font-size: 0.82rem; align-items: flex-start; }
+.sidename { flex: 1; line-height: 1.35; }
+.sidecount { font-family: var(--mono); font-size: 0.7rem; color: var(--t4); padding-top: 0.12rem; }
+.sidestat { width: 8px; height: 8px; border-radius: 50%; background: #D6D6D6; margin-top: 0.4rem; flex: 0 0 auto; }
+.sidestat.in_progress { background: #E2A33B; }
+.sidestat.complete { background: #3F9A63; }
+@media (max-width: 960px) {
+  .shell { grid-template-columns: 1fr; gap: 1rem; padding-top: 1rem; }
+  .side { position: static; max-height: none; overflow-x: auto; padding-bottom: 0.2rem; }
+  .sidenav { flex-direction: row; flex-wrap: nowrap; gap: 0.35rem; }
+  .sideitem { width: auto; white-space: nowrap; border: 1px solid var(--b1); background: #fff; border-radius: 999px; padding: 0.35rem 0.75rem; }
+  .sidehead, .sideitem.sec { display: none; }
+  .sidefoot { flex-direction: row; margin: 0; padding: 0; border: 0; gap: 0.35rem; }
+}
+
+/* ── En-tête de page en deux tons ── */
+.hero2 { display: grid; grid-template-columns: 1.2fr 1fr; gap: 2.4rem; align-items: end; margin: 0.4rem 0 2.2rem; }
+.hero2.compact { align-items: center; margin-bottom: 1.7rem; }
+.eyebrow { margin: 0 0 0.55rem; font-size: 0.74rem; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: var(--t3); }
+.display { font-size: clamp(2rem, 4.2vw, 3.1rem); font-weight: 500; letter-spacing: -0.035em; line-height: 1.05; margin: 0; }
+.display.sm { font-size: clamp(1.6rem, 3vw, 2.3rem); }
+.display .accent { color: var(--brand); }
+.hero2-side { display: grid; gap: 1rem; justify-items: start; }
+.hero2-side .lead { margin: 0; font-size: 1.02rem; }
+@media (max-width: 860px) { .hero2 { grid-template-columns: 1fr; gap: 1rem; } }
+
+/* ── Chiffres clés ── */
+.kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.9rem; margin: 0 0 1.8rem; }
+.kpis.mini { grid-template-columns: repeat(3, 1fr); margin: 0; gap: 0.6rem; }
+.kpi { background: #fff; border: 1px solid var(--b1); border-radius: 14px; padding: 1rem 1.15rem; display: grid; gap: 0.15rem; }
+.kpis.mini .kpi { padding: 0.7rem 0.85rem; border-radius: 12px; }
+.kpi .v { font-size: 1.95rem; font-weight: 500; letter-spacing: -0.03em; line-height: 1.1; }
+.kpis.mini .kpi .v { font-size: 1.35rem; }
+.kpi .l { font-size: 0.8rem; color: var(--t3); }
+.kpi.grad { background: linear-gradient(135deg, #E8505B 0%, #F59E4C 100%); border-color: transparent; color: #fff; }
+.kpi.grad .l { color: rgba(255, 255, 255, 0.86); }
+@media (max-width: 760px) { .kpis { grid-template-columns: 1fr 1fr; } .kpis.mini { grid-template-columns: repeat(3, 1fr); } }
+
+/* ── Cartes de projet ── */
+.projgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 1rem; }
+.projcard { display: flex; flex-direction: column; background: #fff; border: 1px solid var(--b1); border-radius: 16px; overflow: hidden; text-decoration: none; color: var(--t1); transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s; }
+.projcard:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08); border-color: var(--b2); }
+.projcard-top { height: 108px; padding: 1rem 1.15rem; display: flex; align-items: flex-start; justify-content: space-between; }
+.projcard-initials { font-size: 1.55rem; font-weight: 600; color: #fff; letter-spacing: -0.02em; }
+.projcard-body { padding: 1rem 1.15rem 1.1rem; display: grid; gap: 0.35rem; }
+.projcard-body h3 { font-size: 1.05rem; }
+.projcard-body p { margin: 0; }
+.projcard-stats { display: flex; flex-wrap: wrap; gap: 0.35rem 1rem; font-size: 0.82rem; color: var(--t3); margin-top: 0.35rem; }
+.projcard-stats b { color: var(--t1); font-weight: 600; }
+.projcard-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 0.65rem; }
+.projcard-open { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.84rem; font-weight: 500; color: var(--t2); }
+.projcard:hover .projcard-open { color: var(--brand); }
+.pill.glass { background: rgba(255, 255, 255, 0.16); border-color: rgba(255, 255, 255, 0.32); color: #fff; }
+
+/* ── Bloc en couleur pleine (lien public du projet) ── */
+.feature { border-radius: 18px; padding: 1.45rem 1.55rem; margin: 0 0 1.6rem; color: #fff; }
+.feature.grad-coral { background: linear-gradient(135deg, #E8505B 0%, #F59E4C 100%); }
+.feature.grad-off { background: linear-gradient(135deg, #3A3F4B 0%, #5B6170 100%); }
+.feature-head { display: flex; gap: 0.9rem; align-items: flex-start; }
+.feature-icon { width: 38px; height: 38px; border-radius: 10px; background: rgba(255, 255, 255, 0.2); display: grid; place-items: center; flex: 0 0 auto; }
+.feature h2 { margin: 0 0 0.2rem; font-size: 1.15rem; color: #fff; }
+.feature p { margin: 0; color: rgba(255, 255, 255, 0.9); font-size: 0.88rem; }
+.feature-off { margin: 1rem 0 0.9rem !important; font-weight: 500; }
+.feature-link { display: flex; gap: 0.6rem; align-items: center; margin: 1.15rem 0 0.95rem; }
+.feature-link code { flex: 1; overflow-wrap: anywhere; font-family: var(--mono); font-size: 0.82rem; background: rgba(255, 255, 255, 0.96); color: var(--t1); border-radius: 9px; padding: 0.6rem 0.75rem; }
+.feature-actions { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; }
+.btn.white { background: #fff; border-color: #fff; color: var(--t1); }
+.btn.white:hover { background: #F4F4F4; border-color: #F4F4F4; }
+.btn.glass { background: rgba(255, 255, 255, 0.14); border-color: rgba(255, 255, 255, 0.38); color: #fff; box-shadow: none; }
+.btn.glass:hover { background: rgba(255, 255, 255, 0.24); }
+.check.light { color: #fff; font-size: 0.86rem; margin-left: 0.3rem; }
+.check.light input { accent-color: #fff; }
+
+/* ── Carte d'outil sombre (dashboard OSC) ── */
+.toolcard.dark { background: linear-gradient(160deg, #141A2E 0%, #26305A 100%); border: 0; color: #fff; border-radius: 16px; padding: 1.4rem 1.5rem; gap: 0.8rem; }
+.toolcard.dark h3 { color: #fff; font-size: 1.05rem; }
+.tool-desc { margin: 0; color: #B9C0D4; font-size: 0.88rem; }
+.tool-big { display: flex; align-items: baseline; gap: 0.7rem; flex-wrap: wrap; }
+.tool-big .v { font-size: 2.5rem; font-weight: 500; letter-spacing: -0.04em; line-height: 1; }
+.tool-big .l { color: #B9C0D4; font-size: 0.84rem; }
+.toolcard.dark .bar { background: rgba(255, 255, 255, 0.14); height: 6px; }
+.toolcard.dark .bar span { background: linear-gradient(90deg, #E8505B, #F59E4C); }
+
+/* ── Encadré pastel (guide de session) ── */
+.guide-card { background: #F4F2FF; border: 1px solid #E2DDFF; color: #3F3A6B; }
+.guide-card summary { display: flex; align-items: center; gap: 0.5rem; color: #4A3FD0; font-weight: 600; list-style: none; }
+.guide-card summary::-webkit-details-marker { display: none; }
+.guide-card summary .icon { color: #6C5CE7; }
+.guide-card ol { color: #3F3A6B; }
+
+/* ── Sections de projet repliables ── */
+.psec-card { background: #fff; border: 1px solid var(--b1); border-radius: 14px; margin: 0.6rem 0; }
+.psec-card > summary { display: flex; align-items: center; gap: 0.7rem; padding: 0.85rem 1.05rem; cursor: pointer; list-style: none; border-radius: 14px; }
+.psec-card > summary::-webkit-details-marker { display: none; }
+.psec-card > summary:hover { background: #FCFCFC; }
+.psec-card[open] > summary .acc2-chev { transform: rotate(45deg); }
+.psec-title { font-weight: 500; flex: 1; }
+.psec-body { padding: 0 1.05rem 1rem; }
+
+/* ── Corrections : boutons à leur taille naturelle, cases à cocher dans les barres d'outils ── */
+.form > .btn, .form > button, .form > a.btn, .card > .btn, .form > div > .btn:only-child { justify-self: start; }
+.toolbar input[type="checkbox"], .toolbar input[type="radio"] { flex: 0 0 auto; width: auto; min-width: 0; }
+summary:focus-visible { outline: none; text-decoration: underline; text-underline-offset: 3px; }
+.icon { display: inline-block; vertical-align: -3px; flex: 0 0 auto; }
+
 @media (max-width: 760px) {
   .dash, .charts, .two, .prop, .planlist li, .psec-head, .kindpick, .qrow, .qrow-opts { grid-template-columns: 1fr; }
   .qrow-opts { grid-column: 1; }

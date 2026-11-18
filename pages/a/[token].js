@@ -5,6 +5,7 @@ import Layout from '../../components/Layout';
 import LinkBox from '../../components/LinkBox';
 import Intro from '../../components/Intro';
 import OscDashboard from '../../components/OscDashboard';
+import Icon from '../../components/Icon';
 import { useI18n, pick } from '../../lib/i18n';
 import { safeStr } from '../../lib/safe';
 import { contactName } from '../../lib/names';
@@ -161,7 +162,8 @@ export default function OscPage() {
   const status = <SaveStatus state={save} error={saveError} />;
 
   return (
-    <Layout title={safeStr(data.subject.name)} right={status} identity={identity} onHome={() => { setView('dashboard'); toTop(); }}>
+    <Layout title={safeStr(data.subject.name)} right={status} identity={identity} onHome={() => { setView('dashboard'); toTop(); }}
+      sidebar={<OscNav data={data} progress={progress} view={view} go={v => { setView(v); toTop(); }} />}>
       {locked ? <p className="banner">{t('osc.locked_banner')}</p> : null}
       {view === 'dashboard' ? (
         <>
@@ -396,5 +398,26 @@ function DataInput({ q, a, locked, onChange, lang }) {
         </label>
       ))}
     </fieldset>
+  );
+}
+
+// Menu latéral du parcours OSC : accès direct à chaque section, avec son avancement
+function OscNav({ data, progress, view, go }) {
+  const { t, lang } = useI18n();
+  const submitted = data.assessment.status !== 'in_progress';
+  return (
+    <nav className="sidenav" aria-label={t('staff.menu')}>
+      <button type="button" className={`sideitem ${view === 'dashboard' ? 'on' : ''}`} onClick={() => go('dashboard')}><Icon name="home" />{t('osc.nav_dashboard')}</button>
+      <button type="button" className={`sideitem ${view === 'home' ? 'on' : ''}`} onClick={() => go('home')}><Icon name="list" />{t('osc.nav_diagnostic')}</button>
+      {submitted ? <button type="button" className={`sideitem ${view === 'report' ? 'on' : ''}`} onClick={() => go('report')}><Icon name="file" />{t('osc.nav_report')}</button> : null}
+      <p className="sidehead">{t('osc.nav_sections')}</p>
+      {progress.map(p => (
+        <button type="button" key={p.section.id} className={`sideitem sec ${view === p.section.id ? 'on' : ''}`} onClick={() => go(p.section.id)}>
+          <span className={`sidestat ${p.status}`} />
+          <span className="sidename">{p.section.idx}. {pick(p.section, 'name', lang)}</span>
+          <span className="sidecount">{p.done}/{p.total}</span>
+        </button>
+      ))}
+    </nav>
   );
 }

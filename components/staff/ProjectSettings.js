@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useI18n } from '../../lib/i18n';
 import { sb } from '../../lib/supabase';
 import { safeStr } from '../../lib/safe';
-import LinkBox from '../LinkBox';
+import Icon from '../Icon';
 import ScoresExport from './ScoresExport';
 
 const randomSlug = () => Array.from(crypto.getRandomValues(new Uint8Array(9))).map(b => b.toString(16).padStart(2, '0')).join('');
@@ -14,6 +14,7 @@ export default function ProjectSettings({ project, needs, reload }) {
   const [newNeed, setNewNeed] = useState('');
   const [saved, setSaved] = useState(false);
   const [origin, setOrigin] = useState('');
+  const [copied, setCopied] = useState(false);
   useEffect(() => { setP(project); setOrigin(window.location.origin); }, [project]);
 
   const update = async patch => {
@@ -27,13 +28,24 @@ export default function ProjectSettings({ project, needs, reload }) {
 
   return (
     <>
-      <h2>{t('project.public_link')}</h2>
-      {p.public_active ? <LinkBox kind="public" url={`${origin}/p/${p.public_slug}`} /> : <p className="banner">{t('project.link_disabled')}</p>}
-      <div className="toolbar">
-        <button className={`btn ${p.public_active ? 'warn' : 'ok'}`} onClick={() => update({ public_active: !p.public_active })}>{p.public_active ? t('project.disable') : t('project.enable')}</button>
-        <button className="btn info" onClick={renew}>{t('project.renew')}</button>
-        <label className="check"><input type="checkbox" checked={p.offer_coach_choice} onChange={e => update({ offer_coach_choice: e.target.checked })} /><span>{t('project.offer_coach_choice')}</span></label>
-      </div>
+      <section className={`feature ${p.public_active ? 'grad-coral' : 'grad-off'}`}>
+        <div className="feature-head">
+          <span className="feature-icon"><Icon name="link" size={19} /></span>
+          <div><h2>{t('project.public_link')}</h2><p>{t('link.note_public')}</p></div>
+        </div>
+        {p.public_active ? (
+          <div className="feature-link">
+            <code>{`${origin}/p/${p.public_slug}`}</code>
+            <button className="btn white" onClick={async () => { try { await navigator.clipboard.writeText(`${origin}/p/${p.public_slug}`); setCopied(true); setTimeout(() => setCopied(false), 2000); } catch {} }}>{copied ? t('common.copied') : t('common.copy')}</button>
+          </div>
+        ) : <p className="feature-off">{t('project.link_disabled')}</p>}
+        <div className="feature-actions">
+          <button className="btn glass" onClick={() => update({ public_active: !p.public_active })}>{p.public_active ? t('project.disable') : t('project.enable')}</button>
+          <button className="btn glass" onClick={renew}>{t('project.renew')}</button>
+          <label className="check light"><input type="checkbox" checked={p.offer_coach_choice} onChange={e => update({ offer_coach_choice: e.target.checked })} /><span>{t('project.offer_coach_choice')}</span></label>
+        </div>
+      </section>
+      <h2>{t('project.welcome_title')}</h2>
       <div className="card form">
         <label>{t('project.welcome_fr')}<textarea rows={3} value={p.welcome_fr || ''} onChange={e => setP({ ...p, welcome_fr: e.target.value })} /></label>
         <label>{t('project.welcome_en')}<textarea rows={3} value={p.welcome_en || ''} onChange={e => setP({ ...p, welcome_en: e.target.value })} /></label>

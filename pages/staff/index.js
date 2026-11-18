@@ -1,7 +1,17 @@
-// Espace staff : projet, cohorte, besoins, équipe, réglages, journal, doublons, administration
+// Espace équipe : « Tous les projets », administration, puis un projet (cohorte, besoins, équipe, réglages…) via le menu latéral
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Layout from '../../components/Layout';
+import StaffNav from '../../components/staff/StaffNav';
+import ProjectsHome from '../../components/staff/ProjectsHome';
+import Cohort from '../../components/staff/Cohort';
+import Needs from '../../components/staff/Needs';
+import Team from '../../components/staff/Team';
+import ProjectSettings from '../../components/staff/ProjectSettings';
+import ProjectSections from '../../components/staff/ProjectSections';
+import Journal from '../../components/staff/Journal';
+import Duplicates from '../../components/staff/Duplicates';
+import Admin from '../../components/staff/Admin';
 import { useI18n } from '../../lib/i18n';
 import { useStaff } from '../../lib/useStaff';
 import { sb } from '../../lib/supabase';
@@ -9,39 +19,32 @@ import { loadCohort, loadNeeds } from '../../lib/cohort';
 import { safeStr } from '../../lib/safe';
 import { fullName } from '../../lib/names';
 import appConfig from '../../app.config';
-import Cohort from '../../components/staff/Cohort';
-import Needs from '../../components/staff/Needs';
-import Team from '../../components/staff/Team';
-import ProjectSettings from '../../components/staff/ProjectSettings';
-import Journal from '../../components/staff/Journal';
-import Duplicates from '../../components/staff/Duplicates';
-import Admin from '../../components/staff/Admin';
-import ProjectSections from '../../components/staff/ProjectSections';
 
 export default function Staff() {
   const { t } = useI18n();
   const router = useRouter();
   const staff = useStaff();
-  const [projectId, setProjectId] = useState('');
-  const [tab, setTab] = useState('cohort');
+  const pid = typeof router.query.p === 'string' ? router.query.p : '';
+  const tab = typeof router.query.tab === 'string' ? router.query.tab : '';
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
   const [tick, setTick] = useState(0);
   const reload = useCallback(() => setTick(x => x + 1), []);
 
   const projects = (staff.projects || []).filter(p => !p.archived || staff.profile?.is_admin);
-  const project = projects.find(p => p.id === projectId);
+  const project = pid ? projects.find(p => p.id === pid) : null;
   const owner = project ? staff.isOwner(project.id) : false;
+  const allowed = ['cohort', 'needs', ...(owner ? ['team', 'project', 'sections', 'journal', 'duplicates'] : [])];
+  const cur = project ? (allowed.includes(tab) ? tab : 'cohort') : (tab === 'admin' && staff.profile?.is_admin ? 'admin' : 'home');
+
+  // Un coach qui n'a qu'un projet arrive directement dessus
+  useEffect(() => {
+    if (staff.loading || pid || tab || staff.profile?.is_admin || projects.length !== 1) return;
+    router.replace(`/staff?p=${projects[0].id}&tab=cohort`);
+  }, [staff.loading, pid, tab, projects.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    if (staff.loading || projectId) return;
-    const saved = typeof window !== 'undefined' ? localStorage.getItem('ocat:project') : '';
-    const first = projects.find(p => p.id === saved) || projects[0];
-    if (first) setProjectId(first.id); else if (staff.profile?.is_admin) setTab('admin');
-  }, [staff.loading, projectId, projects, staff.profile]);
-
-  useEffect(() => {
-    if (!project) return;
+    if (!project) { setData(null); return; }
     let alive = true;
     (async () => {
       try {
@@ -52,43 +55,61 @@ export default function Staff() {
       } catch { if (alive) setError('server_error'); }
     })();
     return () => { alive = false; };
-  }, [project, tick]);
+  }, [project?.id, tick]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (staff.loading) return <Layout><p className="muted">{t('common.loading')}</p></Layout>;
 
-  const coaches = (data?.members || []).filter(m => m.role === 'coach').map(m => ({ id: m.user_id, ...m.profile }));
-  const tabs = ['cohort', 'needs', ...(owner ? ['team', 'project', 'sections', 'journal', 'duplicates'] : []), ...(staff.profile.is_admin ? ['admin'] : [])];
   const signOut = async () => { await staff.signOut(); router.replace('/login'); };
+  const coaches = (data?.members || []).filter(m => m.role === 'coach').map(m => ({ id: m.user_id, ...m.profile }));
+  const rows = data?.cohort.rows || [];
+  const identity = { org: appConfig.orgName, person: fullName(staff.profile), href: '/staff/profile' };
+  const nav = <StaffNav staff={staff} project={project} active={cur} onSignOut={signOut} />;
 
-  return (
-    <Layout wide title={t('staff.title')} home="/staff" identity={{ org: appConfig.orgName, person: fullName(staff.profile), href: '/staff/profile' }}
-      right={<button className="btn ghost" onClick={signOut}>{t('staff.sign_out')}</button>}>
-      {!staff.profile.first_name || !staff.profile.last_name ? <p className="banner"><a href="/staff/profile">{t('staff.complete_name')}</a></p> : null}
-      <div className="toolbar">
-        <h1 className="h1-small">{project ? safeStr(project.name) : t('staff.title')}</h1>
-        {projects.length > 1 ? (
-          <select aria-label={t('staff.project')} value={projectId} onChange={e => { setProjectId(e.target.value); setData(null); localStorage.setItem('ocat:project', e.target.value); }}>
-            {projects.map(p => <option key={p.id} value={p.id}>{safeStr(p.name)}</option>)}
-          </select>
-        ) : null}
-      </div>
-      <nav className="tabs" role="tablist">
-        {tabs.map(k => <button key={k} role="tab" aria-selected={tab === k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{t(`staff.tab_${k}`)}</button>)}
-      </nav>
-      {error ? <p className="error">{t(`errors.${error}`)}</p> : null}
-      {tab === 'admin' ? <Admin projects={staff.projects} reload={staff.refresh} /> :
-        !project ? <p className="empty-inline">{t('staff.no_project')}</p> :
-        !data ? <p className="muted">{t('common.loading')}</p> : (
+  let body;
+  if (cur === 'admin') {
+    body = (
+      <>
+        <section className="hero2 compact"><div><p className="eyebrow">{appConfig.orgName}</p><h1 className="display sm">{t('staff.tab_admin')}<br /><span className="accent">{t('staff.admin_accent')}</span></h1></div></section>
+        <Admin projects={staff.projects} reload={staff.refresh} />
+      </>
+    );
+  } else if (!project) {
+    body = <ProjectsHome staff={staff} projects={projects} />;
+  } else {
+    body = (
+      <>
+        <section className="hero2 compact">
+          <div>
+            <p className="eyebrow">{safeStr(project.cohort) || t('staff.project')}</p>
+            <h1 className="display sm">{safeStr(project.name)}<br /><span className="accent">{t(`staff.tab_${cur}`)}</span></h1>
+          </div>
+          {data ? (
+            <div className="kpis mini">
+              <div className="kpi"><span className="v">{rows.length}</span><span className="l">{t('staff.kpi_osc')}</span></div>
+              <div className="kpi"><span className="v">{rows.filter(r => r.current && r.current.status !== 'in_progress').length}</span><span className="l">{t('staff.kpi_submitted')}</span></div>
+              <div className="kpi"><span className="v">{rows.length ? Math.round(rows.reduce((a, r) => a + r.completion, 0) / rows.length) : 0} %</span><span className="l">{t('staff.kpi_completion')}</span></div>
+            </div>
+          ) : null}
+        </section>
+        {error ? <p className="error">{t(`errors.${error}`)}</p> : null}
+        {!data ? <p className="muted">{t('common.loading')}</p> : (
           <>
-            {tab === 'cohort' && <Cohort project={project} cohort={data.cohort} coaches={coaches} owner={owner} reload={reload} />}
-            {tab === 'needs' && <Needs project={project} cohort={data.cohort} needs={data.needs} />}
-            {tab === 'team' && <Team project={project} members={data.members} isAdmin={staff.profile.is_admin} reload={reload} />}
-            {tab === 'project' && <ProjectSettings project={project} needs={data.needs.needs} reload={() => { staff.refresh(); reload(); }} />}
-            {tab === 'sections' && <ProjectSections project={project} reload={reload} />}
-            {tab === 'journal' && <Journal project={project} cohort={data.cohort} />}
-            {tab === 'duplicates' && <Duplicates cohort={data.cohort} reload={reload} />}
+            {cur === 'cohort' && <Cohort project={project} cohort={data.cohort} coaches={coaches} owner={owner} reload={reload} />}
+            {cur === 'needs' && <Needs project={project} cohort={data.cohort} needs={data.needs} />}
+            {cur === 'team' && <Team project={project} members={data.members} isAdmin={staff.profile.is_admin} reload={reload} />}
+            {cur === 'project' && <ProjectSettings project={project} needs={data.needs.needs} reload={() => { staff.refresh(); reload(); }} />}
+            {cur === 'sections' && <ProjectSections project={project} reload={reload} />}
+            {cur === 'journal' && <Journal project={project} cohort={data.cohort} />}
+            {cur === 'duplicates' && <Duplicates cohort={data.cohort} reload={reload} />}
           </>
         )}
+      </>
+    );
+  }
+  return (
+    <Layout wide title={project ? safeStr(project.name) : t('staff.title')} home="/staff" identity={identity} sidebar={nav}>
+      {!staff.profile.first_name || !staff.profile.last_name ? <p className="banner"><a href="/staff/profile">{t('staff.complete_name')}</a></p> : null}
+      {body}
     </Layout>
   );
 }

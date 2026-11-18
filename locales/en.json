@@ -110,7 +110,11 @@
   "deepen_asked": "Deeper review requested",
   "optional": "Optional",
   "data_hint": "This information completes the assessment: it is not scored.",
-  "choose": "Choose…"
+  "choose": "Choose…",
+  "nav_dashboard": "Dashboard",
+  "nav_diagnostic": "Assessment",
+  "nav_report": "My report",
+  "nav_sections": "Sections"
  },
  "report": {
   "title": "{name} report",
@@ -170,7 +174,23 @@
   "tab_admin": "Administration",
   "profile": "My profile",
   "complete_name": "Complete your first and last name: they appear at the top right.",
-  "tab_sections": "Project sections"
+  "tab_sections": "Project sections",
+  "all_projects": "All projects",
+  "menu": "Menu",
+  "hero_eyebrow": "Team area",
+  "hero_title": "All projects",
+  "hero_accent": "your assessments at a glance",
+  "hero_text": "Open a project to follow its cohort and needs, and manage its public link, team and sections.",
+  "kpi_projects": "Projects",
+  "kpi_osc": "CSOs",
+  "kpi_submitted": "Submitted assessments",
+  "kpi_submitted_short": "submitted",
+  "kpi_coaches": "coaches",
+  "kpi_nocoach": "CSOs without a coach",
+  "kpi_completion": "Average completion",
+  "open": "Open",
+  "new_project": "New project",
+  "admin_accent": "projects, accounts and roles"
  },
  "role": {
   "owner": "Project owner",
@@ -226,7 +246,8 @@
   "needs": "List of needs",
   "need_new": "New need, e.g. \"Finance: cost accounting\"",
   "need_delete_confirm": "Delete the need \"{label}\"? It will be removed from all answers.",
-  "needs_hint": "Coaches can also add a need during the session."
+  "needs_hint": "Coaches can also add a need during the session.",
+  "welcome_title": "Welcome text"
  },
  "journal": {
   "empty": "No changes recorded.",
@@ -447,7 +468,11 @@
   "dist_title": "Breakdown of answers",
   "provisional": "provisional",
   "complete": "final",
-  "fill_hint": "The profile is drawn as you answer: the coloured area appears as soon as 3 sections have at least one answer."
+  "fill_hint": "The profile is drawn as you answer: the coloured area appears as soon as 3 sections have at least one answer.",
+  "hello": "Hello {name},",
+  "hello_anon": "Hello,",
+  "hero_accent": "welcome to your space",
+  "hero_text": "Fill in the assessment at your own pace, complete your organisation's details and watch your profile take shape as you answer."
  },
  "tools": {
   "ocat": {

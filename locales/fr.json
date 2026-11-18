@@ -110,7 +110,11 @@
   "deepen_asked": "Approfondissement souhaité",
   "optional": "Facultatif",
   "data_hint": "Ces informations complètent le diagnostic : elles ne sont pas notées.",
-  "choose": "Choisir…"
+  "choose": "Choisir…",
+  "nav_dashboard": "Tableau de bord",
+  "nav_diagnostic": "Diagnostic",
+  "nav_report": "Mon rapport",
+  "nav_sections": "Sections"
  },
  "report": {
   "title": "Rapport de {name}",
@@ -170,7 +174,23 @@
   "tab_admin": "Administration",
   "profile": "Mon profil",
   "complete_name": "Complétez votre prénom et votre nom : ils s'affichent en haut à droite.",
-  "tab_sections": "Sections du projet"
+  "tab_sections": "Sections du projet",
+  "all_projects": "Tous les projets",
+  "menu": "Menu",
+  "hero_eyebrow": "Espace équipe",
+  "hero_title": "Tous les projets",
+  "hero_accent": "vos diagnostics en un coup d'œil",
+  "hero_text": "Ouvrez un projet pour suivre sa cohorte et ses besoins, et gérer son lien public, son équipe et ses sections.",
+  "kpi_projects": "Projets",
+  "kpi_osc": "OSC",
+  "kpi_submitted": "Diagnostics soumis",
+  "kpi_submitted_short": "soumis",
+  "kpi_coaches": "coachs",
+  "kpi_nocoach": "OSC sans coach",
+  "kpi_completion": "Complétion moyenne",
+  "open": "Ouvrir",
+  "new_project": "Nouveau projet",
+  "admin_accent": "projets, comptes et rôles"
  },
  "role": {
   "owner": "Owner de projet",
@@ -226,7 +246,8 @@
   "needs": "Liste des besoins",
   "need_new": "Nouveau besoin, ex. « Finances : comptabilité analytique »",
   "need_delete_confirm": "Supprimer le besoin « {label} » ? Il sera retiré de toutes les réponses.",
-  "needs_hint": "Les coachs peuvent aussi ajouter un besoin pendant la session."
+  "needs_hint": "Les coachs peuvent aussi ajouter un besoin pendant la session.",
+  "welcome_title": "Texte d'accueil"
  },
  "journal": {
   "empty": "Aucune modification enregistrée.",
@@ -447,7 +468,11 @@
   "dist_title": "Répartition des réponses",
   "provisional": "provisoire",
   "complete": "définitive",
-  "fill_hint": "Le profil se dessine au fil des réponses : la surface colorée apparaît dès que 3 sections ont au moins une réponse."
+  "fill_hint": "Le profil se dessine au fil des réponses : la surface colorée apparaît dès que 3 sections ont au moins une réponse.",
+  "hello": "Bonjour {name},",
+  "hello_anon": "Bonjour,",
+  "hero_accent": "bienvenue dans votre espace",
+  "hero_text": "Remplissez le diagnostic à votre rythme, complétez les informations de votre organisation et suivez votre profil qui se dessine au fil des réponses."
  },
  "tools": {
   "ocat": {

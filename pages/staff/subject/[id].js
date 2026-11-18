@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import Layout from '../../../components/Layout';
+import StaffNav from '../../../components/staff/StaffNav';
 import OrgInfoForm from '../../../components/OrgInfoForm';
 import Recap from '../../../components/staff/Recap';
 import SessionTab from '../../../components/staff/SessionTab';
@@ -21,7 +22,8 @@ import appConfig from '../../../app.config';
 const TABS = ['recap', 'session', 'plan', 'settings'];
 
 export default function SubjectPage() {
-  const { query } = useRouter();
+  const router = useRouter();
+  const { query } = router;
   const { t, lang } = useI18n();
   const staff = useStaff();
   const [subject, setSubject] = useState(null);
@@ -112,8 +114,9 @@ export default function SubjectPage() {
 
   const identity = { org: appConfig.orgName, person: fullName(staff.profile), href: '/staff/profile' };
   return (
-    <Layout wide title={safeStr(subject.name)} home="/staff" identity={identity}>
-      <Link className="link" href="/staff">← {t('subject.back')}</Link>
+    <Layout wide title={safeStr(subject.name)} home="/staff" identity={identity}
+      sidebar={<StaffNav staff={staff} project={subject.project} active="cohort" onSignOut={async () => { await staff.signOut(); router.replace('/login'); }} />}>
+      <Link className="link" href={`/staff?p=${subject.project.id}&tab=cohort`}>← {t('subject.back')}</Link>
       <div className="subjhead">
         <h1 className="h1-small">{safeStr(subject.name)}</h1>
         {current ? <span className="pill">{t(`eval.${current.type}`)}</span> : null}

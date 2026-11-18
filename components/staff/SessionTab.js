@@ -1,6 +1,7 @@
 // Session d'accompagnement : par question avec besoin d'accompagnement → Notes, Action, Responsable
 import { useState } from 'react';
 import Field from './Field';
+import Icon from '../Icon';
 import { useI18n, pick } from '../../lib/i18n';
 import { sb } from '../../lib/supabase';
 import { safeStr } from '../../lib/safe';
@@ -30,7 +31,7 @@ export default function SessionTab({ bank, answers, comments, needs, assessment,
   return (
     <>
       <details className="guide-card" open={!started}>
-        <summary>{t('session.guide_title')}</summary>
+        <summary><Icon name="bulb" />{t('session.guide_title')}</summary>
         <ol>{[1, 2, 3, 4, 5].map(n => <li key={n}>{t(`session.guide_${n}`)}</li>)}</ol>
       </details>
       <div className="toolbar wrap">

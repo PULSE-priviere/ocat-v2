@@ -69,7 +69,14 @@ export default function ProjectSections({ project, reload }) {
       <h2>{t('psec.title')}</h2>
       <p className="lead">{t('psec.intro')}</p>
       {!list ? <p className="muted">{t('common.loading')}</p> : list.length === 0 ? <p className="empty-inline">{t('psec.none')}</p> : list.map(s => (
-        <section key={s.id} className="card psec">
+        <details key={s.id} className="psec-card">
+          <summary>
+            <span className="acc2-chev" aria-hidden="true" />
+            <span className="psec-title">{s.name_fr}</span>
+            <span className={`pill ${s.kind === 'data' ? 'green' : ''}`}>{t(`psec.badge_${s.kind === 'data' ? 'data' : 'scored'}`)}</span>
+            <span className="muted small">{t('psec.count', { n: s.questions.length })}</span>
+          </summary>
+          <div className="psec-body">
           <div className="psec-head">
             <input className="notion strong" aria-label={t('psec.name_fr')} defaultValue={s.name_fr} onBlur={e => e.target.value.trim() && e.target.value !== s.name_fr && renameSection(s, { name_fr: e.target.value.trim() })} />
             <input className="notion" aria-label={t('psec.name_en')} placeholder={t('psec.name_en')} defaultValue={s.name_en} onBlur={e => e.target.value.trim() && e.target.value !== s.name_en && renameSection(s, { name_en: e.target.value.trim() })} />
@@ -90,7 +97,8 @@ export default function ProjectSections({ project, reload }) {
             ))}
           </ol>
           {s.kind === 'data' ? <AddDataQuestion onAdd={x => addQuestion(s, x)} /> : <AddRow placeholder={t('psec.add_question_ph')} label={t('psec.add_question')} onAdd={text => addQuestion(s, { text })} />}
-        </section>
+          </div>
+        </details>
       ))}
 
       <h2>{t('psec.add_title')}</h2>

@@ -25,7 +25,8 @@ export function LangToggle() {
 }
 
 // home : adresse du logo ; onHome : retour interne (sans rechargement) ; identity : { org, person, href }
-export default function Layout({ title, right, wide, home, onHome, identity, children }) {
+// sidebar : menu latéral (espace équipe, parcours OSC) ; masqué en haut de page sur petit écran
+export default function Layout({ title, right, wide, home, onHome, identity, sidebar, children }) {
   const { t } = useI18n();
   const brand = (
     <>
@@ -54,7 +55,12 @@ export default function Layout({ title, right, wide, home, onHome, identity, chi
           </div>
         </div>
       </header>
-      <main className={wide ? 'page wide' : 'page'}>{children}</main>
+      {sidebar ? (
+        <div className="shell">
+          <aside className="side no-print">{sidebar}</aside>
+          <main className="shell-main">{children}</main>
+        </div>
+      ) : <main className={wide ? 'page wide' : 'page'}>{children}</main>}
     </>
   );
 }

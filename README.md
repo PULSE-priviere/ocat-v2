@@ -108,3 +108,10 @@ Le logo est détecté tout seul : déposer une image dans `public/brand/` (de pr
 ## Mise à jour 2.8 (nouveau thème)
 
 Thème sobre inspiré des interfaces type Supabase : fond gris très clair, cartes blanches à bordure fine sans ombre, titres légers, police Figtree, onglets en pilules, champs gris clair. Un seul bouton plein (corail PULSE) pour l'action principale ; les autres boutons sont blancs et bordés ; les couleurs d'état (vert, ambre, rouge) restent réservées aux pastilles. Tout se règle dans `styles/globals.css` (variables en tête de fichier) et `app.config.js` (couleurs de marque, police). Les exports PDF et Word gardent leur style. Aucune migration.
+
+## Mise à jour 2.9 (navigation et mise en page)
+
+- Espace équipe : menu latéral (tous les projets, administration, rubriques du projet ouvert, profil, déconnexion) ; page d'accueil « Tous les projets » avec chiffres clés et une carte colorée par projet ; un projet s'ouvre par `/staff?p=<id>&tab=cohort`.
+- Parcours OSC : menu latéral avec chaque section et son avancement (masqué sur petit écran, où les tuiles suffisent).
+- En-têtes de page en deux tons, blocs en couleur pleine (lien public du projet, carte du diagnostic), encadré pastel pour le guide de session, sections de projet repliables.
+- Aucune migration.
