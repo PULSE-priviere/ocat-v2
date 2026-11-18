@@ -104,3 +104,7 @@ Le logo est détecté tout seul : déposer une image dans `public/brand/` (de pr
 
 - Sections de projet : **notée** (N/A, 1, 2, 3, score, radar) ou **libre** (texte long ou court, nombre, oui/non, liste de choix ; ni score ni radar ; facultative pour l'OSC).
 - Couleurs : le bleu sert aux liens, à l'onglet actif et à la sélection ; le corail reste la couleur de la marque (graphiques, accents).
+
+## Mise à jour 2.8 (nouveau thème)
+
+Thème sobre inspiré des interfaces type Supabase : fond gris très clair, cartes blanches à bordure fine sans ombre, titres légers, police Figtree, onglets en pilules, champs gris clair. Un seul bouton plein (corail PULSE) pour l'action principale ; les autres boutons sont blancs et bordés ; les couleurs d'état (vert, ambre, rouge) restent réservées aux pastilles. Tout se règle dans `styles/globals.css` (variables en tête de fichier) et `app.config.js` (couleurs de marque, police). Les exports PDF et Word gardent leur style. Aucune migration.

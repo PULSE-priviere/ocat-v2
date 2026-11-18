@@ -6,25 +6,25 @@ const appConfig = {
   languages: ['fr', 'en'],
   defaultLanguage: 'fr',
   colors: {
-    accent: '#D9694A',      // corail adouci
-    accentSoft: '#FBEBE5',  // fond de l'élément actif
-    ink: '#27323D',         // texte principal
-    muted: '#6B7680',       // texte secondaire
-    line: '#E6E2DB',        // bordures
+    accent: '#E0533D',      // corail PULSE : action principale, graphiques
+    accentSoft: '#FDF1EE',
+    ink: '#171717',         // texte principal
+    muted: '#707070',       // texte secondaire
+    line: '#EDEDED',        // bordures
     surface: '#FFFFFF',
-    page: '#F6F4F0',        // fond de page, ton chaud et reposant
-    ok: '#4E9A6C',
-    warn: '#D9A441',
-    // Boutons et pastilles : fond pastel + texte foncé, selon la fonction
-    ui: '#4A7BC4',                            // bleu d'interface : liens, onglet actif, sélection
-    coralBg: '#FBE6DF', coralFg: '#A8452B',   // action principale
-    greenBg: '#E3F1E8', greenFg: '#23683F',   // valider, partager, rouvrir
-    blueBg: '#E5EEF8', blueFg: '#2C5A92',     // liens, envois
-    amberBg: '#FBF0D8', amberFg: '#85590A',   // clôturer, attention
-    redBg: '#FBE4E2', redFg: '#A02A22',       // révoquer, supprimer
-    greyBg: '#EDEBE6', greyFg: '#454B52',     // neutre
+    page: '#FCFCFC',        // fond de page, gris très clair
+    ok: '#3F9A63',
+    warn: '#E2A33B',
+    ui: '#171717',
+    // Teintes d'état (étiquettes, pastilles)
+    coralBg: '#FDF1EE', coralFg: '#B6452D',
+    greenBg: '#EEF7F1', greenFg: '#1E6B41',
+    blueBg: '#EEF4FC', blueFg: '#1F5FA8',
+    amberBg: '#FFF6E5', amberFg: '#8A5A00',
+    redBg: '#FEF1F0', redFg: '#B42318',
+    greyBg: '#F3F3F3', greyFg: '#525252',
   },
-  font: { family: 'Manrope', googleUrl: 'https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap' },
+  font: { family: 'Figtree', googleUrl: 'https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap' },
   // Règles de calcul (staff uniquement — l'OSC ne voit jamais de score)
   scoring: {
     excludeCodes: ['NA'],          // codes exclus de la moyenne

@@ -15,7 +15,7 @@ export function RadarView({ width, height, rows, series, showNumbers }) {
   );
   return (
     <RadarChart width={width} height={height} data={rows} outerRadius="68%">
-      <PolarGrid stroke="#E3DED6" />
+      <PolarGrid stroke="#E8E8E8" />
       <PolarAngleAxis dataKey="section" tick={Tick} />
       <PolarRadiusAxis angle={90} domain={[0, 3]} tickCount={4} tick={showNumbers ? { fontSize: 9, fill: C.muted } : false} axisLine={false} />
       {series.map(s => (
