@@ -32,7 +32,7 @@ export default function Team({ project, members, isAdmin, reload }) {
           <tr key={m.user_id}>
             <td>{fullName(m.profile)}<br /><small className="muted">{safeStr(m.profile?.email)}</small></td>
             <td><label className="check"><input type="checkbox" checked={m.offered_to_osc} onChange={() => toggleOffered(m)} /><span>{t('team.offered')}</span></label></td>
-            <td className="right"><button className="btn danger" onClick={() => revoke(m)}>{t('team.revoke')}</button></td>
+            <td className="right"><button className="btn danger small" onClick={() => revoke(m)}>{t('team.revoke')}</button></td>
           </tr>
         ))}</tbody></table>
       )}

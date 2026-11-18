@@ -67,6 +67,31 @@ insert into results select 'owner voit le journal (ancienne valeur 1)',
   exists (select 1 from audit_log where field = 'code' and old_value = '1' and actor_label = 'coach1@test');
 insert into results select 'owner voit 2 coachs', (select count(*) from memberships where role = 'coach') = 2;
 
+-- Sections propres à un projet
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000b', true);
+do $$ begin
+  insert into sections(framework_id, num, name_fr, name_en, project_id)
+    values ('10000000-0000-0000-0000-000000000001', 10, 'Export', 'Export', '40000000-0000-0000-0000-000000000001');
+  insert into results values ('owner ajoute une section à son projet', true);
+exception when others then insert into results values ('owner ajoute une section à son projet', false); end $$;
+do $$ begin
+  insert into sections(framework_id, num, name_fr, name_en, project_id)
+    values ('10000000-0000-0000-0000-000000000001', 11, 'Autre', 'Other', '40000000-0000-0000-0000-000000000002');
+  insert into results values ('owner ne peut pas ajouter à un autre projet', false);
+exception when others then insert into results values ('owner ne peut pas ajouter à un autre projet', true); end $$;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000c', true);
+insert into results select 'coach voit la section de son projet', (select count(*) from sections where project_id is not null) = 1;
+do $$ begin
+  insert into sections(framework_id, num, name_fr, name_en, project_id)
+    values ('10000000-0000-0000-0000-000000000001', 12, 'Coach', 'Coach', '40000000-0000-0000-0000-000000000001');
+  insert into results values ('coach ne peut pas ajouter de section', false);
+exception when others then insert into results values ('coach ne peut pas ajouter de section', true); end $$;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000a', true);
+insert into sections(framework_id, num, name_fr, name_en, project_id)
+  values ('10000000-0000-0000-0000-000000000001', 13, 'P2', 'P2', '40000000-0000-0000-0000-000000000002');
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000b', true);
+insert into results select 'owner P1 ne voit pas les sections de P2', (select count(*) from sections where project_id = '40000000-0000-0000-0000-000000000002') = 0;
+
 -- Admin : tout
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000a', true);
 insert into results select 'admin voit 3 OSC', (select count(*) from subjects) = 3;

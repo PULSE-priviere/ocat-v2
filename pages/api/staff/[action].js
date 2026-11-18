@@ -78,6 +78,30 @@ const actions = {
     return await createAssessment(svc, s.id, body.type, s.email, body.lang);
   },
 
+  // Ajoute une section entière (et ses questions) à un projet : owner de ce projet ou administrateur
+  async add_section({ db, svc, body }) {
+    const projectId = body.projectId;
+    if (!(await rpc(db, 'is_owner', { p: projectId }))) return [403, 'forbidden'];
+    const nameFr = String(body.nameFr || '').trim().slice(0, 200);
+    const nameEn = String(body.nameEn || '').trim().slice(0, 200) || nameFr;
+    const qFr = (Array.isArray(body.questionsFr) ? body.questionsFr : []).map(s => String(s).trim().slice(0, 1000)).filter(Boolean).slice(0, 100);
+    const qEn = (Array.isArray(body.questionsEn) ? body.questionsEn : []).map(s => String(s).trim().slice(0, 1000));
+    if (!nameFr || !qFr.length) return [400, 'invalid_section'];
+    const { data: p } = await svc.from('projects').select('id, framework_id').eq('id', projectId).single();
+    const { data: all } = await svc.from('sections').select('num, project_id').eq('framework_id', p.framework_id);
+    const num = Math.max(0, ...all.map(s => s.num)) + 1;                      // numéro interne unique dans le cadre
+    const idx = all.filter(s => !s.project_id).length + all.filter(s => s.project_id === projectId).length + 1; // rang affiché
+    const { data: sec, error } = await svc.from('sections')
+      .insert({ framework_id: p.framework_id, num, name_fr: nameFr, name_en: nameEn, project_id: projectId }).select('id').single();
+    if (error) return [500, 'server_error'];
+    const rows = qFr.map((text, i) => ({ framework_id: p.framework_id, section_id: sec.id, project_id: projectId,
+      concept_id: `proj-${String(projectId).slice(0, 8)}-s${num}-q${i + 1}`, code: `${idx}.${i + 1}`, ord: i + 1,
+      format: 'scale', text_fr: text, text_en: qEn[i] || text }));
+    const { error: e2 } = await svc.from('questions').insert(rows);
+    if (e2) { await svc.from('sections').delete().eq('id', sec.id); return [500, 'server_error']; }
+    return { ok: true, sectionId: sec.id };
+  },
+
   // Fusion de doublons (F31) : les évaluations passent sur le dossier conservé
   async merge({ db, svc, body }) {
     const { data: rows } = await db.from('subjects').select('id, project_id').in('id', [body.keepId, body.dropId]);

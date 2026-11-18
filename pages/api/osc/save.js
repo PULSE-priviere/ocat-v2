@@ -15,8 +15,8 @@ export default async function handler(req, res) {
   if (op === 'answer') {
     const { questionId, code, support, valueText } = req.body;
     if (code != null && !CODES.includes(code)) return fail(res, 400, 'invalid_form');
-    const { data: q } = await db.from('questions').select('id, framework_id, assessment_id').eq('id', questionId).maybeSingle();
-    const ok = q && (q.assessment_id ? q.assessment_id === a.id : q.framework_id === a.subjects.projects.framework_id);
+    const { data: q } = await db.from('questions').select('id, framework_id, assessment_id, project_id').eq('id', questionId).maybeSingle();
+    const ok = q && (q.assessment_id ? q.assessment_id === a.id : q.framework_id === a.subjects.projects.framework_id && (!q.project_id || q.project_id === a.subjects.project_id));
     if (!ok) return fail(res, 400, 'invalid_form');
     const row = { assessment_id: a.id, question_id: questionId, code: code ?? null,
       support: typeof support === 'boolean' ? support : null,
@@ -30,7 +30,7 @@ export default async function handler(req, res) {
     if (e) return fail(res, 500, 'server_error');
   } else if (op === 'deepen') {
     const section = String(req.body.section || '');
-    if (!/^[1-9]$/.test(section)) return fail(res, 400, 'invalid_form');
+    if (!/^\d{1,4}$/.test(section)) return fail(res, 400, 'invalid_form');
     const deepen = { ...(a.section_deepen || {}), [section]: req.body.value === true };
     const { error: e } = await db.from('assessments').update({ section_deepen: deepen }).eq('id', a.id);
     if (e) return fail(res, 500, 'server_error');

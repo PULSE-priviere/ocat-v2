@@ -23,7 +23,7 @@ export default function Needs({ project, cohort, needs }) {
 
   return (
     <>
-      <div className="toolbar"><h2>{t('needs.title')}</h2>{needs.agg.length ? <button className="btn" onClick={exportCsv}>{t('common.export_csv')}</button> : null}</div>
+      <div className="toolbar"><h2>{t('needs.title')}</h2>{needs.agg.length ? <button className="btn info" onClick={exportCsv}>{t('common.export_csv')}</button> : null}</div>
       {needs.agg.every(a => !a.subjects.length) ? <p className="empty-inline">{t('needs.empty')}</p> : (
         <ul className="needs">
           {needs.agg.filter(a => a.subjects.length).map(a => (

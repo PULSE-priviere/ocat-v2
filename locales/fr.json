@@ -139,7 +139,8 @@
   "no_account": "Aucun compte n'est associé à cette adresse.",
   "method": "Requête non valide.",
   "not_found": "Action inconnue.",
-  "invalid_profile": "Vérifiez les informations saisies (prénom et nom obligatoires)."
+  "invalid_profile": "Vérifiez les informations saisies (prénom et nom obligatoires).",
+  "invalid_section": "Indiquez un nom et au moins une question."
  },
  "login": {
   "title": "Connexion de l'équipe",
@@ -159,7 +160,8 @@
   "tab_duplicates": "Doublons",
   "tab_admin": "Administration",
   "profile": "Mon profil",
-  "complete_name": "Complétez votre prénom et votre nom : ils s'affichent en haut à droite."
+  "complete_name": "Complétez votre prénom et votre nom : ils s'affichent en haut à droite.",
+  "tab_sections": "Sections du projet"
  },
  "role": {
   "owner": "Owner de projet",
@@ -262,9 +264,13 @@
   "share_notes": "Montrer mes notes à l'OSC",
   "new_assessment": "Nouvelle évaluation",
   "new_assessment_confirm": "Créer une nouvelle évaluation pour cette OSC ? Un lien lui sera envoyé par e-mail.",
-  "tab_session": "Session",
+  "tab_session": "Session d'accompagnement",
   "tab_sheet": "Fiche",
-  "tab_plan": "Plan d'accompagnement"
+  "tab_plan": "Plan d'accompagnement",
+  "tab_recap": "Récapitulatif",
+  "tab_settings": "Paramètres",
+  "start_session": "Commencer la session",
+  "no_assessment": "Aucune évaluation pour cette OSC. Créez-en une dans les paramètres."
  },
  "sheet": {
   "progress": "Réponses",
@@ -275,13 +281,13 @@
  },
  "session": {
   "filter": "Filtrer les questions",
-  "f_all": "Toutes",
+  "f_all": "Toutes les questions",
   "f_low": "Réponses 1 et 2",
-  "f_support": "Appui demandé",
+  "f_support": "Besoin d'accompagnement",
   "f_empty": "Sans réponse",
   "discussed": "{n} questions avec notes ou besoins",
   "osc_comment": "Commentaire de l'OSC :",
-  "notes": "Notes du coach",
+  "notes": "Notes",
   "new_need": "Autre besoin…",
   "edited": "Modifiée par le coach",
   "added": "Ajoutée",
@@ -291,7 +297,26 @@
   "format_text": "Texte libre",
   "format_yesno": "Oui / non",
   "format_scale": "Échelle 1 à 3",
-  "deepen_badge": "Approfondissement souhaité"
+  "deepen_badge": "Approfondissement souhaité",
+  "guide_title": "Comment mener la session",
+  "guide_1": "Commencez par le récapitulatif avec l'OSC : repérez les sections les plus faibles.",
+  "guide_2": "Ici, chaque carte est une question pour laquelle l'OSC demande un accompagnement. Demandez-lui pourquoi, ce qu'elle a déjà essayé, ce qui bloque.",
+  "guide_3": "Écrivez vos observations dans Notes, ce qui sera mis en place dans Action, et qui s'en charge dans Responsable. Tout s'enregistre automatiquement.",
+  "guide_4": "Une question mérite un appui que l'OSC n'a pas demandé ? Passez au filtre « Toutes les questions » et cochez « Besoin d'accompagnement ».",
+  "guide_5": "Pour finir, ouvrez le Plan d'accompagnement : vos actions y sont déjà, il ne reste qu'à choisir les échéances.",
+  "stats": "{n} questions avec besoin d'accompagnement · {m} avec une action définie",
+  "empty_support": "Aucune question n'est marquée « besoin d'accompagnement ». L'OSC n'a rien demandé ou n'a pas fini : essayez le filtre « Réponses 1 et 2 ».",
+  "empty_low": "Aucune réponse 1 ou 2.",
+  "empty_all": "Aucune question.",
+  "action": "Action à mettre en place",
+  "owner": "Responsable",
+  "ph_notes": "Ce que dit l'OSC, les blocages, ce qui a déjà été essayé…",
+  "ph_action": "Ce qui sera mis en place…",
+  "ph_owner": "Qui s'en charge ?",
+  "needs_flag": "Besoin d'accompagnement",
+  "more": "Modifier la réponse, taguer des besoins, guide",
+  "answer_label": "Réponse de l'OSC",
+  "needs_label": "Besoins du projet"
  },
  "plan": {
   "title": "Plan d'accompagnement",
@@ -304,8 +329,8 @@
   "status_shared": "Partagé avec l'OSC",
   "export_fr": "PDF français",
   "export_en": "PDF anglais",
-  "hint": "Les priorités proposées : réponses 1 ou 2 avec appui demandé, puis les autres 1, puis les autres 2. Le plan est visible par l'OSC seulement au statut « Partagé ».",
-  "empty": "Aucune priorité. Cliquez sur « Proposer les priorités » pour partir des réponses.",
+  "hint": "Les actions et responsables viennent de la session : modifiez-les dans l'onglet Session. Ici, choisissez seulement l'échéance de chaque action.",
+  "empty": "Aucune ligne pour l'instant : le plan reprend les questions avec besoin d'accompagnement ou une action définie en session.",
   "keep": "Retenue",
   "free": "Action libre",
   "up": "Monter",
@@ -314,7 +339,11 @@
   "action": "Action",
   "owner": "Responsable",
   "due": "Échéance",
-  "need": "Besoin associé"
+  "need": "Besoin associé",
+  "notes": "Notes",
+  "in_plan": "Dans le plan",
+  "missing_action": "Action non renseignée : à compléter dans la session",
+  "edit_in_session": "Modifier dans la session"
  },
  "email": {
   "personal_link": {
@@ -426,5 +455,34 @@
   "intro": "Ces informations s'affichent en haut à droite de chaque page.",
   "saved": "Profil enregistré",
   "back": "Retour à l'espace équipe"
+ },
+ "settings": {
+  "link_title": "Lien personnel de l'OSC",
+  "link_desc": "L'OSC ouvre son diagnostic avec ce lien. Générer un nouveau lien invalide l'ancien. Révoquer le lien coupe l'accès jusqu'à ce que vous en génériez un autre.",
+  "session_title": "Clôture de la session",
+  "session_desc": "Une fois la session clôturée, l'OSC ne peut plus modifier ses réponses. Vous pouvez la rouvrir à tout moment.",
+  "share_title": "Partage avec l'OSC",
+  "share_desc": "Vos notes ne sont visibles par l'OSC que si vous cochez cette case. Le plan est partagé depuis l'onglet « Plan d'accompagnement » (statut « Partagé »).",
+  "eval_title": "Nouvelle évaluation",
+  "eval_desc": "Créez une évaluation de suivi ou de fin d'accompagnement : l'OSC reçoit un nouveau lien par e-mail."
+ },
+ "psec": {
+  "title": "Sections propres à ce projet",
+  "intro": "Ajoutez une section entière avec ses questions, spécifique à ce projet (par exemple « Appui à l'export »). Elle apparaît à la suite des 9 sections pour toutes les OSC du projet.",
+  "note": "Ses questions se répondent comme les autres (N/A, 1, 2, 3 et appui). La section a son propre score mais n'entre pas dans le score global, qui reste comparable entre projets.",
+  "add_title": "Ajouter une section",
+  "name_fr": "Nom de la section (français)",
+  "name_en": "Nom de la section (anglais, facultatif)",
+  "questions_fr": "Questions (une par ligne)",
+  "questions_en": "Version anglaise (une par ligne, facultatif)",
+  "create": "Ajouter la section",
+  "none": "Ce projet n'a pas encore de section propre.",
+  "delete_section": "Supprimer la section",
+  "delete_section_confirm": "Supprimer la section « {name} » avec toutes ses questions ? Les réponses déjà données seront supprimées. Cette action est irréversible.",
+  "delete_question_confirm": "Supprimer cette question ? Les réponses déjà données seront supprimées.",
+  "add_question": "Ajouter une question",
+  "add_question_ph": "Nouvelle question",
+  "count": "{n} questions",
+  "created": "Section ajoutée."
  }
 }

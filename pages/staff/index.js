@@ -16,6 +16,7 @@ import ProjectSettings from '../../components/staff/ProjectSettings';
 import Journal from '../../components/staff/Journal';
 import Duplicates from '../../components/staff/Duplicates';
 import Admin from '../../components/staff/Admin';
+import ProjectSections from '../../components/staff/ProjectSections';
 
 export default function Staff() {
   const { t } = useI18n();
@@ -56,7 +57,7 @@ export default function Staff() {
   if (staff.loading) return <Layout><p className="muted">{t('common.loading')}</p></Layout>;
 
   const coaches = (data?.members || []).filter(m => m.role === 'coach').map(m => ({ id: m.user_id, ...m.profile }));
-  const tabs = ['cohort', 'needs', ...(owner ? ['team', 'project', 'journal', 'duplicates'] : []), ...(staff.profile.is_admin ? ['admin'] : [])];
+  const tabs = ['cohort', 'needs', ...(owner ? ['team', 'project', 'sections', 'journal', 'duplicates'] : []), ...(staff.profile.is_admin ? ['admin'] : [])];
   const signOut = async () => { await staff.signOut(); router.replace('/login'); };
 
   return (
@@ -83,6 +84,7 @@ export default function Staff() {
             {tab === 'needs' && <Needs project={project} cohort={data.cohort} needs={data.needs} />}
             {tab === 'team' && <Team project={project} members={data.members} isAdmin={staff.profile.is_admin} reload={reload} />}
             {tab === 'project' && <ProjectSettings project={project} needs={data.needs.needs} reload={() => { staff.refresh(); reload(); }} />}
+            {tab === 'sections' && <ProjectSections project={project} reload={reload} />}
             {tab === 'journal' && <Journal project={project} cohort={data.cohort} />}
             {tab === 'duplicates' && <Duplicates cohort={data.cohort} reload={reload} />}
           </>

@@ -139,7 +139,8 @@
   "no_account": "No account is linked to this address.",
   "method": "Invalid request.",
   "not_found": "Unknown action.",
-  "invalid_profile": "Check the details entered (first and last name are required)."
+  "invalid_profile": "Check the details entered (first and last name are required).",
+  "invalid_section": "Enter a name and at least one question."
  },
  "login": {
   "title": "Team sign-in",
@@ -159,7 +160,8 @@
   "tab_duplicates": "Duplicates",
   "tab_admin": "Administration",
   "profile": "My profile",
-  "complete_name": "Complete your first and last name: they appear at the top right."
+  "complete_name": "Complete your first and last name: they appear at the top right.",
+  "tab_sections": "Project sections"
  },
  "role": {
   "owner": "Project owner",
@@ -262,9 +264,13 @@
   "share_notes": "Show my notes to the CSO",
   "new_assessment": "New assessment",
   "new_assessment_confirm": "Create a new assessment for this CSO? A link will be sent by email.",
-  "tab_session": "Session",
+  "tab_session": "Support session",
   "tab_sheet": "Overview",
-  "tab_plan": "Support plan"
+  "tab_plan": "Support plan",
+  "tab_recap": "Overview",
+  "tab_settings": "Settings",
+  "start_session": "Start the session",
+  "no_assessment": "No assessment for this CSO. Create one in the settings."
  },
  "sheet": {
   "progress": "Answers",
@@ -275,13 +281,13 @@
  },
  "session": {
   "filter": "Filter questions",
-  "f_all": "All",
+  "f_all": "All questions",
   "f_low": "Answers 1 and 2",
-  "f_support": "Support requested",
+  "f_support": "Needs support",
   "f_empty": "No answer",
   "discussed": "{n} questions with notes or needs",
   "osc_comment": "CSO comment:",
-  "notes": "Coach notes",
+  "notes": "Notes",
   "new_need": "Other need…",
   "edited": "Changed by the coach",
   "added": "Added",
@@ -291,7 +297,26 @@
   "format_text": "Free text",
   "format_yesno": "Yes / no",
   "format_scale": "Scale 1 to 3",
-  "deepen_badge": "Deeper review requested"
+  "deepen_badge": "Deeper review requested",
+  "guide_title": "How to run the session",
+  "guide_1": "Start with the overview together with the CSO: spot the weakest sections.",
+  "guide_2": "Here, each card is a question for which the CSO asks for support. Ask why, what it already tried, what is blocking.",
+  "guide_3": "Write your observations in Notes, what will be put in place in Action, and who takes charge in Owner. Everything saves automatically.",
+  "guide_4": "A question deserves support the CSO did not ask for? Switch to the \"All questions\" filter and tick \"Needs support\".",
+  "guide_5": "Finally, open the Support plan: your actions are already there, you only need to choose due dates.",
+  "stats": "{n} questions needing support · {m} with an action defined",
+  "empty_support": "No question is marked \"needs support\". The CSO either asked for nothing or has not finished: try the \"Answers 1 and 2\" filter.",
+  "empty_low": "No answer 1 or 2.",
+  "empty_all": "No questions.",
+  "action": "Action to put in place",
+  "owner": "Owner",
+  "ph_notes": "What the CSO says, blockers, what has already been tried…",
+  "ph_action": "What will be put in place…",
+  "ph_owner": "Who takes charge?",
+  "needs_flag": "Needs support",
+  "more": "Change the answer, tag needs, guide",
+  "answer_label": "CSO answer",
+  "needs_label": "Project needs"
  },
  "plan": {
   "title": "Support plan",
@@ -304,8 +329,8 @@
   "status_shared": "Shared with the CSO",
   "export_fr": "French PDF",
   "export_en": "English PDF",
-  "hint": "Suggested priorities: answers 1 or 2 with support requested, then the other 1s, then the other 2s. The CSO sees the plan only when its status is \"Shared\".",
-  "empty": "No priorities. Click \"Suggest priorities\" to start from the answers.",
+  "hint": "Actions and owners come from the session: edit them in the Session tab. Here, only choose each action's due date.",
+  "empty": "No rows yet: the plan picks up questions that need support or have an action defined in the session.",
   "keep": "Kept",
   "free": "Free action",
   "up": "Move up",
@@ -314,7 +339,11 @@
   "action": "Action",
   "owner": "Owner",
   "due": "Due date",
-  "need": "Related need"
+  "need": "Related need",
+  "notes": "Notes",
+  "in_plan": "In the plan",
+  "missing_action": "Action not filled in: complete it in the session",
+  "edit_in_session": "Edit in the session"
  },
  "email": {
   "personal_link": {
@@ -426,5 +455,34 @@
   "intro": "These details appear at the top right of every page.",
   "saved": "Profile saved",
   "back": "Back to the team area"
+ },
+ "settings": {
+  "link_title": "CSO personal link",
+  "link_desc": "The CSO opens its assessment with this link. Generating a new link invalidates the old one. Revoking the link cuts access until you generate another.",
+  "session_title": "Closing the session",
+  "session_desc": "Once the session is closed, the CSO can no longer change its answers. You can reopen it at any time.",
+  "share_title": "Sharing with the CSO",
+  "share_desc": "Your notes are visible to the CSO only if you tick this box. The plan is shared from the \"Support plan\" tab (status \"Shared\").",
+  "eval_title": "New assessment",
+  "eval_desc": "Create a follow-up or end-of-support assessment: the CSO receives a new link by email."
+ },
+ "psec": {
+  "title": "Sections specific to this project",
+  "intro": "Add a whole section with its questions, specific to this project (for example \"Export support\"). It appears after the 9 sections for every CSO in the project.",
+  "note": "Its questions are answered like the others (N/A, 1, 2, 3 and support). The section has its own score but does not enter the overall score, which stays comparable across projects.",
+  "add_title": "Add a section",
+  "name_fr": "Section name (French)",
+  "name_en": "Section name (English, optional)",
+  "questions_fr": "Questions (one per line)",
+  "questions_en": "English version (one per line, optional)",
+  "create": "Add the section",
+  "none": "This project has no specific section yet.",
+  "delete_section": "Delete the section",
+  "delete_section_confirm": "Delete the section \"{name}\" with all its questions? Answers already given will be deleted. This cannot be undone.",
+  "delete_question_confirm": "Delete this question? Answers already given will be deleted.",
+  "add_question": "Add a question",
+  "add_question_ph": "New question",
+  "count": "{n} questions",
+  "created": "Section added."
  }
 }

@@ -11,7 +11,7 @@ export default async function handler(req, res) {
   if (a.status === 'locked') return fail(res, 423, 'locked');
   if (a.status === 'submitted') return res.json({ ok: true });
 
-  const { questions } = await loadBank(db, a.subjects.projects.framework_id, null);
+  const { questions } = await loadBank(db, a.subjects.projects.framework_id, null, a.subjects.project_id);
   const scale = questions.filter(q => q.format === 'scale');
   const { data: answers } = await db.from('answers').select('question_id, code').eq('assessment_id', a.id);
   const done = new Set((answers || []).filter(x => x.code).map(x => x.question_id));

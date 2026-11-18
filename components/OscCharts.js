@@ -11,8 +11,8 @@ export default function OscCharts({ progress, evalKey }) {
   if (!live.some(x => x.v !== null)) return <p className="empty-inline">{t('dashboard.live_empty')}</p>;
   const { radar, distribution, liveBeforeComplete } = appConfig.oscView;
   // dataKey = clé normalisée du type d'évaluation (baseline, followup, endline)
-  const radarData = live.map(({ p, v }) => ({ section: `S${p.section.num}`, [evalKey]: liveBeforeComplete || p.status === 'complete' ? (v ?? 0) : 0 }));
-  const dist = progress.map(p => ({ section: `S${p.section.num}`, c3: p.counts['3'], c2: p.counts['2'], c1: p.counts['1'], na: p.counts.NA }));
+  const radarData = live.map(({ p, v }) => ({ section: `S${p.section.idx}`, [evalKey]: liveBeforeComplete || p.status === 'complete' ? (v ?? 0) : 0 }));
+  const dist = progress.map(p => ({ section: `S${p.section.idx}`, c3: p.counts['3'], c2: p.counts['2'], c1: p.counts['1'], na: p.counts.NA }));
   return (
     <div className="charts">
       {radar ? (
@@ -46,7 +46,7 @@ export default function OscCharts({ progress, evalKey }) {
       ) : null}
       <ul className="seclegend">
         {progress.map(p => (
-          <li key={p.section.id}><b>S{p.section.num}</b> {pick(p.section, 'name', lang)}
+          <li key={p.section.id}><b>S{p.section.idx}</b> {pick(p.section, 'name', lang)}
             <span className={`dot ${p.status}`}>{t(`status.${p.status}`)}</span></li>
         ))}
       </ul>

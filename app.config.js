@@ -6,15 +6,22 @@ const appConfig = {
   languages: ['fr', 'en'],
   defaultLanguage: 'fr',
   colors: {
-    accent: '#E0503A',      // corail
-    accentSoft: '#FBEDEA',  // fond de l'élément actif
-    ink: '#13222F',         // texte principal
-    muted: '#66727F',       // texte secondaire
-    line: '#E4E7EB',        // bordures
+    accent: '#D9694A',      // corail adouci
+    accentSoft: '#FBEBE5',  // fond de l'élément actif
+    ink: '#27323D',         // texte principal
+    muted: '#6B7680',       // texte secondaire
+    line: '#E6E2DB',        // bordures
     surface: '#FFFFFF',
-    page: '#FFFFFF',
-    ok: '#2F8F5B',
-    warn: '#C7861A',
+    page: '#F6F4F0',        // fond de page, ton chaud et reposant
+    ok: '#4E9A6C',
+    warn: '#D9A441',
+    // Boutons et pastilles : fond pastel + texte foncé, selon la fonction
+    coralBg: '#FBE6DF', coralFg: '#A8452B',   // action principale
+    greenBg: '#E3F1E8', greenFg: '#23683F',   // valider, partager, rouvrir
+    blueBg: '#E5EEF8', blueFg: '#2C5A92',     // liens, envois
+    amberBg: '#FBF0D8', amberFg: '#85590A',   // clôturer, attention
+    redBg: '#FBE4E2', redFg: '#A02A22',       // révoquer, supprimer
+    greyBg: '#EDEBE6', greyFg: '#454B52',     // neutre
   },
   font: { family: 'Manrope', googleUrl: 'https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap' },
   // Règles de calcul (staff uniquement — l'OSC ne voit jamais de score)
@@ -22,6 +29,7 @@ const appConfig = {
     excludeCodes: ['NA'],          // codes exclus de la moyenne
     global: 'mean_of_sections',    // ou 'mean_of_questions'
     requireCompleteSection: true,  // F5 : score seulement si la section est complète
+    globalIncludesProjectSections: false, // les sections propres à un projet ont leur score mais n'entrent pas dans le global (comparabilité)
   },
   // Listes de choix de la fiche organisation (libellés FR/EN dans locales/*.json, clés profile.opt.*)
   profileOptions: {

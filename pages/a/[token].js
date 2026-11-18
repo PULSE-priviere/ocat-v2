@@ -211,7 +211,7 @@ function DiagnosticHome({ data, progress, allComplete, hasAnswers, onOpen, onSub
       <div className="grid">
         {progress.map(p => (
           <button key={p.section.id} type="button" className={`tile ${p.status}`} onClick={() => onOpen(p.section)}>
-            <span className="tile-num">{p.section.num}</span>
+            <span className="tile-num">{p.section.idx}</span>
             <span className="tile-title">{pick(p.section, 'name', lang)}</span>
             <span className="tile-meta">
               <span className="bar"><span style={{ width: `${p.total ? (p.done / p.total) * 100 : 0}%` }} /></span>
@@ -223,7 +223,7 @@ function DiagnosticHome({ data, progress, allComplete, hasAnswers, onOpen, onSub
       <div className="submitbar">
         {st === 'in_progress' ? (
           allComplete
-            ? <button className="btn primary big" onClick={onSubmit}>{t('osc.submit')}</button>
+            ? <button className="btn ok big" onClick={onSubmit}>{t('osc.submit')}</button>
             : <p className="muted">{t('osc.submit_hint')}</p>
         ) : <button className="btn primary" onClick={onReport}>{t('osc.see_report')}</button>}
       </div>

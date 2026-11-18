@@ -29,8 +29,8 @@ export default function ProjectSettings({ project, needs, reload }) {
       <h2>{t('project.public_link')}</h2>
       {p.public_active ? <LinkBox url={`${origin}/p/${p.public_slug}`} /> : <p className="banner">{t('project.link_disabled')}</p>}
       <div className="toolbar">
-        <button className="btn" onClick={() => update({ public_active: !p.public_active })}>{p.public_active ? t('project.disable') : t('project.enable')}</button>
-        <button className="btn" onClick={renew}>{t('project.renew')}</button>
+        <button className={`btn ${p.public_active ? 'warn' : 'ok'}`} onClick={() => update({ public_active: !p.public_active })}>{p.public_active ? t('project.disable') : t('project.enable')}</button>
+        <button className="btn info" onClick={renew}>{t('project.renew')}</button>
         <label className="check"><input type="checkbox" checked={p.offer_coach_choice} onChange={e => update({ offer_coach_choice: e.target.checked })} /><span>{t('project.offer_coach_choice')}</span></label>
       </div>
       <div className="card form">

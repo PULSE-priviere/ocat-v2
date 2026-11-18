@@ -70,3 +70,9 @@ Voir `.env.example`. `SUPABASE_SERVICE_ROLE_KEY` reste côté serveur : ne jamai
 1. Supabase > SQL Editor : exécuter `supabase/migrations/0003_profile_fields.sql` (une seule fois).
 2. Vercel > Settings > Environment Variables : vérifier `APP_URL` (adresse complète en https, sans slash final) et `NEXT_PUBLIC_ORG_NAME` (nom affiché dans les e-mails et le texte d'introduction). Ces variables sont figées au build : **Redeploy** après toute modification.
 3. `git push`, puis se connecter une fois et compléter son prénom et son nom sur `/staff/profile`.
+
+## Mise à jour 2.2 (fiche coach en onglets, sections de projet, nouveau design)
+
+1. Supabase > SQL Editor : exécuter `supabase/migrations/0004_session_and_project_sections.sql` (une seule fois ; `0003` d'abord si ce n'est pas déjà fait).
+2. `git push` : Vercel redéploie.
+3. Sections propres à un projet : espace équipe > onglet « Sections du projet » (owner du projet ou administrateur).

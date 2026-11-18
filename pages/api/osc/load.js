@@ -1,6 +1,7 @@
 // POST {token} : données de l'évaluation pour l'OSC (jamais de score)
 import { admin, fail, assessmentFromToken } from '../../../lib/server';
 import { loadBank } from '../../../lib/bank';
+import { planRows } from '../../../lib/plan';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return fail(res, 405, 'method');
@@ -8,12 +9,17 @@ export default async function handler(req, res) {
   const { assessment: a, error } = await assessmentFromToken(db, req.body?.token);
   if (error) return fail(res, error === 'expired_link' ? 410 : 404, error);
   const s = a.subjects;
-  const { sections, questions } = await loadBank(db, s.projects.framework_id, a.id);
+  const { sections, questions } = await loadBank(db, s.projects.framework_id, a.id, s.project_id);
   const { data: answers } = await db.from('answers')
-    .select('question_id, code, value_text, support, edited_by_coach, coach_notes').eq('assessment_id', a.id);
+    .select('question_id, code, value_text, support, edited_by_coach, coach_notes, coach_action, coach_owner').eq('assessment_id', a.id);
   let plan = null;
   const { data: p } = await db.from('action_plans').select('items, status').eq('assessment_id', a.id).maybeSingle();
-  if (p && p.status === 'shared') plan = p.items;
+  // Plan partagé : lignes dérivées de la session (action, responsable) + échéances choisies par le coach
+  if (p && p.status === 'shared') {
+    const byQ = Object.fromEntries((answers || []).map(x => [x.question_id, x]));
+    plan = planRows(questions, byQ, p.items).filter(r => r.kept).map(r => ({
+      id: r.q.id, questionId: r.q.id, title: '', action: r.a.coach_action || '', owner: r.a.coach_owner || '', due: r.due }));
+  }
   let coach = null;
   if (s.coach_id) {
     const { data: c } = await db.from('profiles').select('first_name, last_name, name').eq('id', s.coach_id).maybeSingle();
@@ -26,7 +32,7 @@ export default async function handler(req, res) {
     project: { name: s.projects.name }, coach,
     sections, questions,
     // Notes du coach visibles seulement si partagées
-    answers: (answers || []).map(x => ({ ...x, coach_notes: a.notes_shared ? x.coach_notes : null })),
+    answers: (answers || []).map(({ coach_action, coach_owner, ...x }) => ({ ...x, coach_notes: a.notes_shared ? x.coach_notes : null })),
     plan,
   });
 }

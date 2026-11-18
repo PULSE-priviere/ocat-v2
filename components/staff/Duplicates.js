@@ -30,8 +30,8 @@ export default function Duplicates({ cohort, reload }) {
         <td>{safeStr(a.name)}<br /><small className="muted">{safeStr(a.email)}</small></td>
         <td>{safeStr(b.name)}<br /><small className="muted">{safeStr(b.email)}</small></td>
         <td className="right">
-          <button className="btn" onClick={() => merge(a, b)}>{t('dup.keep_left')}</button>{' '}
-          <button className="btn" onClick={() => merge(b, a)}>{t('dup.keep_right')}</button>
+          <button className="btn warn small" onClick={() => merge(a, b)}>{t('dup.keep_left')}</button>{' '}
+          <button className="btn warn small" onClick={() => merge(b, a)}>{t('dup.keep_right')}</button>
         </td>
       </tr>
     ))}</tbody></table>
