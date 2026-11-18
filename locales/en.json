@@ -52,7 +52,7 @@
     "incomplete": "All sections must be complete before sending.", "forbidden": "You do not have access to this file.",
     "not_signed_in": "Your session has expired. Sign in again.", "email_exists": "A CSO with this address already exists in this project.",
     "need_exists": "This need is already in the list.", "no_framework": "No question bank loaded. Run the seed script.",
-    "last_admin": "At least one administrator must remain.", "no_account": "No account is linked to this address.",
+    "last_admin": "At least one administrator must remain.", "link_failed": "This sign-in link is no longer valid (it works once and lasts one hour). Request a new one.", "no_account": "No account is linked to this address.",
     "method": "Invalid request.", "not_found": "Unknown action."
   },
   "login": { "title": "Team sign-in", "submit": "Get a sign-in link", "sent": "If an account exists for this address, a sign-in link was just sent to it. It is valid for one hour." },

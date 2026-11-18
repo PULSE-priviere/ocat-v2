@@ -52,7 +52,7 @@
     "incomplete": "Toutes les sections doivent être complètes avant l'envoi.", "forbidden": "Vous n'avez pas accès à ce dossier.",
     "not_signed_in": "Votre session a expiré. Reconnectez-vous.", "email_exists": "Une OSC avec cette adresse existe déjà dans ce projet.",
     "need_exists": "Ce besoin existe déjà dans la liste.", "no_framework": "Aucune banque de questions chargée. Lancez le script de seed.",
-    "last_admin": "Il doit rester au moins un administrateur.", "no_account": "Aucun compte n'est associé à cette adresse.",
+    "last_admin": "Il doit rester au moins un administrateur.", "link_failed": "Ce lien de connexion n'est plus valable (il ne sert qu'une fois et dure une heure). Demandez-en un nouveau.", "no_account": "Aucun compte n'est associé à cette adresse.",
     "method": "Requête non valide.", "not_found": "Action inconnue."
   },
   "login": { "title": "Connexion de l'équipe", "submit": "Recevoir un lien de connexion", "sent": "Si un compte existe pour cette adresse, un lien de connexion vient d'y être envoyé. Il est valable une heure." },
