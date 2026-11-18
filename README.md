@@ -86,3 +86,7 @@ Voir `.env.example`. `SUPABASE_SERVICE_ROLE_KEY` reste côté serveur : ne jamai
 ## Mise à jour 2.4 (graphiques avec valeurs provisoires)
 
 Les graphiques de l'équipe (radar, barres, score global du Récapitulatif, de la cohorte et du plan PDF/Word) affichent une valeur **provisoire**, marquée `*`, tant qu'une section est incomplète (moyenne des réponses déjà données). Elle devient définitive quand la section est complète. Réglable avec `scoring.showProvisional` dans `app.config.js`. Aucune migration.
+
+## Mise à jour 2.5 (profil en direct pour toute l'équipe)
+
+Le bloc « profil en direct » (radar + répartition des réponses + état des sections) est partagé par `components/ProfileCharts.js` : tableau de bord de l'OSC (sans chiffres) et onglet Récapitulatif de la fiche (coach, owner, administrateur : chiffres au survol, une série par évaluation). Le radar relie seulement les sections renseignées (`components/radarShape.js`). Aucune migration.

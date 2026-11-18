@@ -435,7 +435,8 @@
   "radar_title": "Profil par section",
   "dist_title": "Répartition de vos réponses",
   "provisional": "provisoire",
-  "complete": "définitive"
+  "complete": "définitive",
+  "fill_hint": "Le profil se dessine au fil des réponses : la surface colorée apparaît dès que 3 sections ont au moins une réponse."
  },
  "tools": {
   "ocat": {
@@ -522,5 +523,9 @@
   "baseline": "Baseline",
   "followup": "Midline",
   "endline": "Endline"
+ },
+ "recap": {
+  "profile_title": "Profil en direct de l'OSC",
+  "profile_hint": "Se met à jour à chaque réponse. Les repères creux et les valeurs marquées * sont provisoires tant qu'une section n'est pas complète. Survolez le radar pour voir les valeurs."
  }
 }

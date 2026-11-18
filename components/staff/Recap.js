@@ -1,32 +1,36 @@
 // Récapitulatif : radar, scores par section, réponses triées (réservé à l'équipe)
 import { useI18n, pick } from '../../lib/i18n';
-import ScoreRadar from '../Radar';
+import dynamic from 'next/dynamic';
 import { safeStr, safeNum } from '../../lib/safe';
 import { sectionDisplay, globalDisplay, completion, byAnswer } from '../../lib/scoring';
 
-export default function Recap({ bank, progress, answers, radarData, series, assessment, onStartSession }) {
+const ProfileCharts = dynamic(() => import('../ProfileCharts'), { ssr: false });
+
+export default function Recap({ bank, progress, answers, series, assessment, onStartSession }) {
   const { t, lang } = useI18n();
   const g = globalDisplay(progress);
   const anyProvisional = g.provisional || progress.some(p => sectionDisplay(p).provisional);
   const fmt = x => (safeNum(x.value) !== null ? <>{x.value.toFixed(2)}{x.provisional ? <span className="prov" title={t('sheet.provisional_note')}>*</span> : null}</> : '—');
   return (
     <>
-      <div className="two">
-        <ScoreRadar data={radarData} series={series} />
-        <div>
-          <table className="table">
-            <thead><tr><th>{t('report.section')}</th><th>{t('sheet.progress')}</th><th>{t('sheet.score')}</th></tr></thead>
-            <tbody>
-              {progress.map(p => (
-                <tr key={p.section.id}><td>{p.section.idx}. {pick(p.section, 'name', lang)}</td><td>{p.done}/{p.total}</td><td>{fmt(sectionDisplay(p))}</td></tr>
-              ))}
-              <tr className="total"><td>{t('sheet.global')}</td><td>{completion(progress)} %</td><td>{fmt(g)}</td></tr>
-            </tbody>
-          </table>
-          <p className="muted small">{t('sheet.score_rule')}{anyProvisional ? ` ${t('sheet.provisional_note')}` : ''}</p>
-          <button className="btn primary" onClick={onStartSession}>{t('subject.start_session')} →</button>
-        </div>
-      </div>
+      <section className="card">
+        <h2>{t('recap.profile_title')}</h2>
+        <p className="muted small">{t('recap.profile_hint')}</p>
+        <ProfileCharts progress={progress} series={series} showNumbers />
+      </section>
+      <section className="card">
+        <table className="table">
+          <thead><tr><th>{t('report.section')}</th><th>{t('sheet.progress')}</th><th>{t('sheet.score')}</th></tr></thead>
+          <tbody>
+            {progress.map(p => (
+              <tr key={p.section.id}><td>{p.section.idx}. {pick(p.section, 'name', lang)}</td><td>{p.done}/{p.total}</td><td>{fmt(sectionDisplay(p))}</td></tr>
+            ))}
+            <tr className="total"><td>{t('sheet.global')}</td><td>{completion(progress)} %</td><td>{fmt(g)}</td></tr>
+          </tbody>
+        </table>
+        <p className="muted small">{t('sheet.score_rule')}{anyProvisional ? ` ${t('sheet.provisional_note')}` : ''}</p>
+        <button className="btn primary" onClick={onStartSession}>{t('subject.start_session')} →</button>
+      </section>
       {bank.sections.map(s => (
         <details key={s.id} className="acc">
           <summary>{s.idx}. {pick(s, 'name', lang)}{assessment.section_deepen?.[s.num] ? <span className="tag">{t('session.deepen_badge')}</span> : null}</summary>

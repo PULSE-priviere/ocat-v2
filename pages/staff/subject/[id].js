@@ -12,9 +12,10 @@ import { useI18n } from '../../../lib/i18n';
 import { useStaff } from '../../../lib/useStaff';
 import { sb, staffApi, fetchIn } from '../../../lib/supabase';
 import { loadBank } from '../../../lib/bank';
+import { buildSeries } from '../../../lib/planData';
 import { fullName } from '../../../lib/names';
 import { safeStr } from '../../../lib/safe';
-import { sectionProgress, sectionDisplay, EVAL_KEY, EVAL_ORDER } from '../../../lib/scoring';
+import { sectionProgress, EVAL_ORDER } from '../../../lib/scoring';
 import appConfig from '../../../app.config';
 
 const TABS = ['recap', 'session', 'plan', 'settings'];
@@ -106,13 +107,8 @@ export default function SubjectPage() {
   if (msg === 'forbidden') return <Layout><p className="error">{t('errors.forbidden')}</p></Layout>;
   if (!subject || !bank) return <Layout><p className="muted">{t('common.loading')}</p></Layout>;
 
-  // Radar : une série par type d'évaluation (clés normalisées), axes S1… dans l'ordre affiché
-  const series = assessments.map(a => EVAL_KEY[a.type]).filter((k, i, arr) => arr.indexOf(k) === i);
-  const radarData = bank.sections.map((s, i) => {
-    const row = { section: `S${s.idx}` };
-    assessments.forEach(a => { row[EVAL_KEY[a.type]] = sectionDisplay(sectionProgress(bank.sections, bank.questions, allAnswers[a.id] || {})[i]).value; });
-    return row;
-  });
+  // Profil : une série par type d'évaluation (clés normalisées), valeurs provisoires incluses
+  const series = buildSeries({ assessments, allAnswers, bank, t });
 
   const identity = { org: appConfig.orgName, person: fullName(staff.profile), href: '/staff/profile' };
   return (
@@ -147,7 +143,7 @@ export default function SubjectPage() {
         <SettingsTab assessment={current} link={link} onAction={action} onUpdate={updateAssessment}
           onCreateAssessment={type => action('create_assessment', { subjectId: subject.id, type })} />
       ) : tab === 'recap' ? (
-        <Recap bank={bank} progress={progress} answers={answers} radarData={radarData} series={series} assessment={current} onStartSession={() => setTab('session')} />
+        <Recap bank={bank} progress={progress} answers={answers} series={series} assessment={current} onStartSession={() => setTab('session')} />
       ) : tab === 'session' ? (
         <SessionTab bank={bank} answers={answers} comments={current.section_comments || {}} needs={needs} assessment={current}
           saveAnswer={saveAnswer} toggleNeed={toggleNeed} addNeed={addNeed} onQuestionAdded={reload} />

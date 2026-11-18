@@ -435,7 +435,8 @@
   "radar_title": "Profile by section",
   "dist_title": "Breakdown of your answers",
   "provisional": "provisional",
-  "complete": "final"
+  "complete": "final",
+  "fill_hint": "The profile is drawn as you answer: the coloured area appears as soon as 3 sections have at least one answer."
  },
  "tools": {
   "ocat": {
@@ -522,5 +523,9 @@
   "baseline": "Baseline",
   "followup": "Midline",
   "endline": "Endline"
+ },
+ "recap": {
+  "profile_title": "Live profile of the CSO",
+  "profile_hint": "Updates with every answer. Hollow markers and values marked * are provisional until a section is complete. Hover the radar to see the values."
  }
 }

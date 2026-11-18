@@ -1,11 +1,12 @@
 // Dashboard : informations de l'organisation + outils (point d'entrée) + graphiques en direct
 import dynamic from 'next/dynamic';
 import OrgInfoForm from './OrgInfoForm';
+import { sectionLive, sectionScore } from '../lib/scoring';
 import { useI18n } from '../lib/i18n';
 import { safeStr } from '../lib/safe';
 import appConfig from '../app.config';
 
-const OscCharts = dynamic(() => import('./OscCharts'), { ssr: false });
+const ProfileCharts = dynamic(() => import('./ProfileCharts'), { ssr: false });
 
 export default function OscDashboard({ data, progress, onStart, onReport, saveProfile, locked }) {
   const { t } = useI18n();
@@ -13,6 +14,10 @@ export default function OscDashboard({ data, progress, onStart, onReport, savePr
   const done = progress.reduce((a, p) => a + p.done, 0);
   const st = data.assessment.status;
   const cta = st !== 'in_progress' ? 'report' : done > 0 ? 'continue' : 'start';
+  // Profil de l'OSC : valeurs provisoires dès les premières réponses (aucun chiffre affiché)
+  const type = data.assessment.type;
+  const series = [{ key: type, label: t(`eval_short.${type}`), color: appConfig.colors.accent,
+    values: progress.map(p => (appConfig.oscView.liveBeforeComplete ? sectionLive(p) : sectionScore(p))), provisional: progress.map(p => p.status !== 'complete') }];
   const rows = [
     { label: t('dashboard.project'), value: data.project.name },
     { label: t('dashboard.coach'), value: data.coach },
@@ -44,7 +49,7 @@ export default function OscDashboard({ data, progress, onStart, onReport, savePr
         <section className="card span2">
           <h2>{t('dashboard.live_title')}</h2>
           <p className="muted small">{t('dashboard.live_hint')}</p>
-          <OscCharts progress={progress} evalKey={data.assessment.type} />
+          <ProfileCharts progress={progress} series={series} />
         </section>
       </div>
     </>
