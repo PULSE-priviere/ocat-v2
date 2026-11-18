@@ -6,8 +6,6 @@ import { safeStr } from '../../lib/safe';
 import { planRows } from '../../lib/plan';
 import { timelineSvg } from '../../lib/planCharts';
 
-const STATUS_PILL = { draft: 'grey', validated: 'green', shared: 'blue' };
-
 export default function PlanEditor({ assessment, bank, answers, goSession }) {
   const { t, lang } = useI18n();
   const [plan, setPlan] = useState(null);   // { status, items: [{ questionId, due, kept }] }
@@ -31,7 +29,7 @@ export default function PlanEditor({ assessment, bank, answers, goSession }) {
 
   let k = 0;
   const rows = planRows(bank.questions, answers, plan.items).map(r => ({ ...r, n: r.kept ? ++k : null }));
-  const lineText = r => r.a.coach_action || pick(r.q, 'text', lang);
+  const lineText = r => String(r.a.coach_action || '').split('\n')[0].trim() || pick(r.q, 'text', lang);
   const cal = timelineSvg({ rows: rows.filter(r => r.kept).map(r => ({ n: r.n, label: lineText(r), due: r.due })), today: new Date(), lang, labels: { today: t('planx.today') }, responsive: true });
   const undated = rows.filter(r => r.kept && !r.due).length;
   const setRow = (qid, patch) => {
@@ -48,10 +46,13 @@ export default function PlanEditor({ assessment, bank, answers, goSession }) {
             {['draft', 'validated', 'shared'].map(s => <option key={s} value={s}>{t(`plan.status_${s}`)}</option>)}
           </select>
         </label>
-        <span className={`pill ${STATUS_PILL[plan.status]}`}>{t(`plan.status_${plan.status}`)}</span>
         <span className="grow" />
-        {['fr', 'en'].map(l => <a key={`p${l}`} className="btn info" href={`/staff/plan/${assessment.id}?lang=${l}&format=pdf`} target="_blank" rel="noreferrer">{t(`plan.export_${l}`)}</a>)}
-        {['fr', 'en'].map(l => <a key={`w${l}`} className="btn ok" href={`/staff/plan/${assessment.id}?lang=${l}&format=docx`} target="_blank" rel="noreferrer">{t(`planx.word_${l}`)}</a>)}
+        {['pdf', 'word'].map(kind => (
+          <span key={kind} className={`exp ${kind}`}>
+            <b>{t(`plan.${kind}`)}</b>
+            {['fr', 'en'].map(l => <a key={l} href={`/staff/plan/${assessment.id}?lang=${l}&format=${kind === 'pdf' ? 'pdf' : 'docx'}`} target="_blank" rel="noreferrer">{l.toUpperCase()}</a>)}
+          </span>
+        ))}
         {state ? <span className="muted small">{t(`save.${state}`)}</span> : null}
       </div>
       <section className="card pcal">
@@ -67,7 +68,7 @@ export default function PlanEditor({ assessment, bank, answers, goSession }) {
           {rows.map(({ q, a, due, kept, n }) => (
             <li key={q.id} className={kept ? '' : 'dropped'}>
               <div className="planrow-main">
-                <p className="q-text">{n ? <span className="pill">{n}</span> : null}{q.code ? <span className="q-code">{q.code}</span> : null}{pick(q, 'text', lang)}
+                <p className="q-text">{n ? <span className="numbadge">{n}</span> : null}{q.code ? <span className="q-code">{q.code}</span> : null}{pick(q, 'text', lang)}
                   {a.code ? <span className={`chip c${a.code}`}>{t(`answer.short_${a.code}`)}</span> : null}</p>
                 <dl className="planrow-fields">
                   <dt>{t('plan.action')}</dt>

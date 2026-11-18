@@ -44,7 +44,10 @@
  },
  "link": {
   "label": "Your personal link",
-  "warning": "Anyone with this link can see and change your assessment. Do not share it."
+  "warning": "Anyone with this link can see and change your assessment. Do not share it.",
+  "label_public": "Project public link",
+  "note_personal": "This link gives access to your organisation's assessment. Anyone who has it can fill it in and edit it: share it with the colleagues involved, not outside your organisation.",
+  "note_public": "Share this link with the project's organisations. Anyone who opens it can start an assessment; they then receive their own personal link by email."
  },
  "save": {
   "saved": "Saved",
@@ -104,7 +107,10 @@
   "back_dashboard": "Dashboard",
   "deepen_question": "Would you like to go deeper on this section?",
   "deepen_hint": "If yes, your coach will come back to this section with you in more detail.",
-  "deepen_asked": "Deeper review requested"
+  "deepen_asked": "Deeper review requested",
+  "optional": "Optional",
+  "data_hint": "This information completes the assessment: it is not scored.",
+  "choose": "Choose…"
  },
  "report": {
   "title": "{name} report",
@@ -141,7 +147,9 @@
   "method": "Invalid request.",
   "not_found": "Unknown action.",
   "invalid_profile": "Check the details entered (first and last name are required).",
-  "invalid_section": "Enter a name and at least one question."
+  "invalid_section": "Enter a name and at least one question.",
+  "airtable_not_configured": "Airtable is not configured.",
+  "airtable_error": "Airtable rejected the request."
  },
  "login": {
   "title": "Team sign-in",
@@ -324,7 +332,8 @@
   "collapse_all": "Collapse all",
   "sec_needs": "{n} needing support",
   "sec_actions": "{n} with an action",
-  "sec_none": "No question for this filter in this section."
+  "sec_none": "No question for this filter in this section.",
+  "add_notes": "Add notes or an action"
  },
  "plan": {
   "title": "Support plan",
@@ -351,7 +360,9 @@
   "notes": "Notes",
   "in_plan": "In the plan",
   "missing_action": "Action not filled in: complete it in the session",
-  "edit_in_session": "Edit in the session"
+  "edit_in_session": "Edit in the session",
+  "pdf": "PDF",
+  "word": "Word"
  },
  "email": {
   "personal_link": {
@@ -433,7 +444,7 @@
   "live_hint": "The chart updates with every answer. A section becomes final once all its questions are answered.",
   "live_empty": "Answer a few questions: your profile will appear here.",
   "radar_title": "Profile by section",
-  "dist_title": "Breakdown of your answers",
+  "dist_title": "Breakdown of answers",
   "provisional": "provisional",
   "complete": "final",
   "fill_hint": "The profile is drawn as you answer: the coloured area appears as soon as 3 sections have at least one answer."
@@ -441,14 +452,14 @@
  "tools": {
   "ocat": {
    "title": "Organisational assessment",
-   "desc": "Self-assessment in 9 sections to identify your strengths and priority areas for development."
+   "desc": "Self-assessment in {n} sections to identify your strengths and priority areas for development."
   }
  },
  "intro": {
   "toggle": "Introduction to the assessment",
   "title": "Welcome to the {org} organisational assessment tool",
   "p1": "This tool supports you in a self-assessment of your organisational needs. It is a starting point to identify together your strengths and your priority areas for development, so that we can support you better.",
-  "p2": "The assessment is organised in 9 thematic sections. You can fill them in in any order, in one or several sittings.",
+  "p2": "The assessment is organised in {n} thematic sections. You can fill them in in any order, in one or several sittings.",
   "p3": "For each question, choose the level that best matches the current reality of your organisation:",
   "levels": [
    "Not applicable (N/A);",
@@ -492,7 +503,35 @@
   "add_question": "Add a question",
   "add_question_ph": "New question",
   "count": "{n} questions",
-  "created": "Section added."
+  "created": "Section added.",
+  "kind_title": "Which type of section do you want to add?",
+  "kind_scored": "Scored section",
+  "kind_scored_desc": "Questions on 4 levels (N/A, 1, 2, 3) with support requested. The section has its own score and radar axis; it does not enter the overall score, which stays comparable across projects.",
+  "kind_data": "Free section",
+  "kind_data_desc": "To collect data or free answers: text, number, yes / no, list of choices. No score, no radar.",
+  "content_title": "Section content",
+  "help_scored": "Paste your questions, one per line: they are answered with the usual labels (N/A, 1, 2, 3).",
+  "help_data": "Add your questions one by one and choose the expected type of answer for each.",
+  "q_type": "Answer type",
+  "t_scale": "Scored (N/A, 1, 2, 3)",
+  "t_text": "Long text",
+  "t_short": "Short text",
+  "t_number": "Number",
+  "t_yesno": "Yes / no",
+  "t_choice": "Choice from a list",
+  "q_text_fr": "Question (French)",
+  "q_text_en": "Question (English, optional)",
+  "q_options": "Possible choices, separated by commas",
+  "q_options_en": "Choices in English (optional)",
+  "add_row": "Add a question",
+  "remove": "Remove",
+  "badge_scored": "Scored",
+  "badge_data": "Free",
+  "no_score": "This section is not scored: it does not appear on the radar and does not enter the scores.",
+  "need_question": "Add at least one question with a text.",
+  "need_choices": "A \"choice\" question needs at least two possible choices.",
+  "step1": "1. Section type",
+  "step2": "2. Name and questions"
  },
  "planx": {
   "overview": "Overview",
@@ -526,6 +565,24 @@
  },
  "recap": {
   "profile_title": "Live profile of the CSO",
-  "profile_hint": "Updates with every answer. Hollow markers and values marked * are provisional until a section is complete. Hover the radar to see the values."
+  "profile_hint": "Updates with every answer. Hollow markers and values marked * are provisional until a section is complete. Hover the radar to see the values.",
+  "data_title": "Additional data"
+ },
+ "mex": {
+  "title": "Monitoring & evaluation: export to Airtable",
+  "intro": "Each assessment (baseline, midline, endline) becomes a row in an Airtable table: CSO context, overall score, section scores, completion. A section's score appears there only once the section is complete.",
+  "not_configured": "Airtable is not configured: set AIRTABLE_TOKEN and AIRTABLE_BASE_ID in Vercel, then redeploy.",
+  "setup": "Create the table in Airtable",
+  "setup_hint": "Do this once. The Airtable token needs the schema.bases:write scope.",
+  "sync": "Synchronise now",
+  "sync_hint": "Creates new rows and updates the others. This also happens automatically each time an assessment is submitted.",
+  "csv": "Download as CSV",
+  "csv_hint": "Same content, without going through Airtable.",
+  "progress": "{done} / {total} assessments",
+  "done_sync": "Synchronisation complete: {n} assessments sent.",
+  "done_setup": "Table created in Airtable.",
+  "exists": "The table already exists: you can synchronise.",
+  "running": "Running…",
+  "error": "Error: {msg}"
  }
 }

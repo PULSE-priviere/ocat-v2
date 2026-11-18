@@ -143,7 +143,7 @@ export default function SubjectPage() {
         <SettingsTab assessment={current} link={link} onAction={action} onUpdate={updateAssessment}
           onCreateAssessment={type => action('create_assessment', { subjectId: subject.id, type })} />
       ) : tab === 'recap' ? (
-        <Recap bank={bank} progress={progress} answers={answers} series={series} assessment={current} onStartSession={() => setTab('session')} />
+        <Recap bank={bank} progress={progress} answers={answers} series={series} assessment={current} saveAnswer={saveAnswer} onStartSession={() => setTab('session')} />
       ) : tab === 'session' ? (
         <SessionTab bank={bank} answers={answers} comments={current.section_comments || {}} needs={needs} assessment={current}
           saveAnswer={saveAnswer} toggleNeed={toggleNeed} addNeed={addNeed} onQuestionAdded={reload} />

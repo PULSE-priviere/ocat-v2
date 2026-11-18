@@ -10,8 +10,9 @@ const ProfileCharts = dynamic(() => import('./ProfileCharts'), { ssr: false });
 
 export default function OscDashboard({ data, progress, onStart, onReport, saveProfile, locked }) {
   const { t } = useI18n();
-  const total = progress.reduce((a, p) => a + p.total, 0);
-  const done = progress.reduce((a, p) => a + p.done, 0);
+  const scored = progress.filter(p => p.section.kind !== 'data');   // les sections libres sont facultatives
+  const total = scored.reduce((a, p) => a + p.total, 0);
+  const done = scored.reduce((a, p) => a + p.done, 0);
   const st = data.assessment.status;
   const cta = st !== 'in_progress' ? 'report' : done > 0 ? 'continue' : 'start';
   // Profil de l'OSC : valeurs provisoires dès les premières réponses (aucun chiffre affiché)
@@ -38,7 +39,7 @@ export default function OscDashboard({ data, progress, onStart, onReport, savePr
             {appConfig.tools.map(key => key === 'ocat' ? (
               <article key={key} className="toolcard">
                 <div className="toolhead"><h3>{t('tools.ocat.title')}</h3><span className="pill">{t(`eval.${data.assessment.type}`)}</span></div>
-                <p className="muted small">{t('tools.ocat.desc')}</p>
+                <p className="muted small">{t('tools.ocat.desc', { n: scored.length })}</p>
                 <span className="bar"><span style={{ width: `${total ? (done / total) * 100 : 0}%` }} /></span>
                 <p className="small muted">{t('dashboard.progress', { done, total })} · {t(`astatus.${st}`)}</p>
                 <button className="btn primary" onClick={cta === 'report' ? onReport : onStart}>{t(`dashboard.${cta}`)}</button>

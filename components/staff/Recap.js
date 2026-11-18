@@ -1,13 +1,16 @@
 // Récapitulatif : radar, scores par section, réponses triées (réservé à l'équipe)
 import { useI18n, pick } from '../../lib/i18n';
 import dynamic from 'next/dynamic';
+import DataAnswers from './DataAnswers';
 import { safeStr, safeNum } from '../../lib/safe';
 import { sectionDisplay, globalDisplay, completion, byAnswer } from '../../lib/scoring';
 
 const ProfileCharts = dynamic(() => import('../ProfileCharts'), { ssr: false });
 
-export default function Recap({ bank, progress, answers, series, assessment, onStartSession }) {
+export default function Recap({ bank, progress, answers, series, assessment, onStartSession, saveAnswer }) {
   const { t, lang } = useI18n();
+  const scored = progress.filter(p => p.section.kind !== 'data');
+  const dataSecs = bank.sections.filter(s => s.kind === 'data');
   const g = globalDisplay(progress);
   const anyProvisional = g.provisional || progress.some(p => sectionDisplay(p).provisional);
   const fmt = x => (safeNum(x.value) !== null ? <>{x.value.toFixed(2)}{x.provisional ? <span className="prov" title={t('sheet.provisional_note')}>*</span> : null}</> : '—');
@@ -22,7 +25,7 @@ export default function Recap({ bank, progress, answers, series, assessment, onS
         <table className="table">
           <thead><tr><th>{t('report.section')}</th><th>{t('sheet.progress')}</th><th>{t('sheet.score')}</th></tr></thead>
           <tbody>
-            {progress.map(p => (
+            {scored.map(p => (
               <tr key={p.section.id}><td>{p.section.idx}. {pick(p.section, 'name', lang)}</td><td>{p.done}/{p.total}</td><td>{fmt(sectionDisplay(p))}</td></tr>
             ))}
             <tr className="total"><td>{t('sheet.global')}</td><td>{completion(progress)} %</td><td>{fmt(g)}</td></tr>
@@ -31,7 +34,8 @@ export default function Recap({ bank, progress, answers, series, assessment, onS
         <p className="muted small">{t('sheet.score_rule')}{anyProvisional ? ` ${t('sheet.provisional_note')}` : ''}</p>
         <button className="btn primary" onClick={onStartSession}>{t('subject.start_session')} →</button>
       </section>
-      {bank.sections.map(s => (
+      {dataSecs.length ? <DataAnswers sections={dataSecs} questions={bank.questions} answers={answers} saveAnswer={saveAnswer} /> : null}
+      {bank.sections.filter(s => s.kind !== 'data').map(s => (
         <details key={s.id} className="acc">
           <summary>{s.idx}. {pick(s, 'name', lang)}{assessment.section_deepen?.[s.num] ? <span className="tag">{t('session.deepen_badge')}</span> : null}</summary>
           <ul className="rlist">{bank.questions.filter(q => q.section_id === s.id).sort(byAnswer(answers)).map(q => (

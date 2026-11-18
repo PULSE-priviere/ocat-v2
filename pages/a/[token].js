@@ -118,7 +118,8 @@ export default function OscPage() {
   };
 
   const progress = useMemo(() => data ? sectionProgress(data.sections, data.questions, answers) : [], [data, answers]);
-  const allComplete = progress.length > 0 && progress.every(p => p.status === 'complete');
+  const scoredProgress = progress.filter(p => p.section.kind !== 'data');   // les sections libres sont facultatives
+  const allComplete = scoredProgress.length > 0 && scoredProgress.every(p => p.status === 'complete');
   const toTop = () => window.scrollTo(0, 0);
 
   // Reprise : première question sans réponse (F4) ; sans aucune réponse, page d'introduction
@@ -207,11 +208,11 @@ function DiagnosticHome({ data, progress, allComplete, hasAnswers, onOpen, onSub
     <>
       <button className="link" onClick={onBack}>← {t('osc.back_dashboard')}</button>
       <div className="toolbar"><h1>{t('tools.ocat.title')}</h1><span className="pill">{t(`eval.${data.assessment.type}`)}</span></div>
-      <Intro open={!hasAnswers} />
+      <Intro open={!hasAnswers} n={progress.filter(p => p.section.kind !== 'data').length} />
       <div className="grid">
         {progress.map(p => (
           <button key={p.section.id} type="button" className={`tile ${p.status}`} onClick={() => onOpen(p.section)}>
-            <span className="tile-num">{p.section.idx}</span>
+            <span className="tile-num">{p.section.idx}{p.section.kind === 'data' ? <span className="pill grey">{t('osc.optional')}</span> : null}</span>
             <span className="tile-title">{pick(p.section, 'name', lang)}</span>
             <span className="tile-meta">
               <span className="bar"><span style={{ width: `${p.total ? (p.done / p.total) * 100 : 0}%` }} /></span>
@@ -235,6 +236,7 @@ function DiagnosticHome({ data, progress, allComplete, hasAnswers, onOpen, onSub
 function SectionView({ data, section, answers, comment, deepen, setDeepen, locked, setAnswer, setComment, progress, onHome, next, onNext }) {
   const { t, lang } = useI18n();
   const qs = data.questions.filter(q => q.section_id === section.id);
+  const isData = section.kind === 'data';
   return (
     <>
       <button className="link" onClick={onHome}>← {t('osc.back_home')}</button>
@@ -243,20 +245,26 @@ function SectionView({ data, section, answers, comment, deepen, setDeepen, locke
       <ol className="questions">
         {qs.map(q => <Question key={q.id} q={q} a={answers[q.id]} locked={locked} onChange={p => setAnswer(q, p)} />)}
       </ol>
-      <fieldset className="card deepen" disabled={locked}>
-        <legend className="h3">{t('osc.deepen_question')}</legend>
-        <p className="muted small">{t('osc.deepen_hint')}</p>
-        {[true, false].map(v => (
-          <label key={String(v)} className={`opt small ${deepen === v ? 'on' : ''}`}>
-            <input type="radio" name={`deepen-${section.id}`} checked={deepen === v} onChange={() => setDeepen(v)} />
-            <span>{t(v ? 'common.yes' : 'common.no')}</span>
-          </label>
-        ))}
-      </fieldset>
-      <label className="card comment">
-        <span className="h3">{t('osc.section_comment')}</span>
-        <textarea rows={4} value={comment} disabled={locked} onChange={e => setComment(section.num, e.target.value)} />
-      </label>
+      {isData ? <p className="muted small">{t('osc.data_hint')}</p> : (
+        <div className="card deepen" role="group" aria-labelledby={`dp-${section.id}`}>
+          <p className="h3" id={`dp-${section.id}`}>{t('osc.deepen_question')}</p>
+          <p className="muted small">{t('osc.deepen_hint')}</p>
+          <div className="deepen-opts">
+            {[true, false].map(v => (
+              <label key={String(v)} className={`opt small ${deepen === v ? 'on' : ''}`}>
+                <input type="radio" name={`deepen-${section.id}`} checked={deepen === v} disabled={locked} onChange={() => setDeepen(v)} />
+                <span>{t(v ? 'common.yes' : 'common.no')}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
+      {isData ? null : (
+        <div className="card comment">
+          <label className="h3" htmlFor={`cm-${section.id}`}>{t('osc.section_comment')}</label>
+          <textarea id={`cm-${section.id}`} rows={4} value={comment} disabled={locked} onChange={e => setComment(section.num, e.target.value)} />
+        </div>
+      )}
       <div className="navrow">
         <button className="btn" onClick={onHome}>{t('osc.back_home')}</button>
         {next ? <button className="btn primary" onClick={() => onNext(next)}>{t('osc.next_section', { name: pick(next, 'name', lang) })}</button> : null}
@@ -274,8 +282,8 @@ function Question({ q, a, locked, onChange }) {
     <li id={name} className={`q ${code ? 'answered' : ''}`}>
       <p className="q-text">{q.code ? <span className="q-code">{q.code}</span> : null}{pick(q, 'text', lang)}</p>
       {a?.edited_by_coach ? <p className="tag">{t('osc.edited_by_coach')}</p> : null}
-      {q.format === 'text' ? (
-        <textarea rows={3} disabled={locked} value={a?.value_text || ''} onChange={e => onChange({ value_text: e.target.value })} />
+      {['text', 'short', 'number', 'choice'].includes(q.format) ? (
+        <DataInput q={q} a={a} locked={locked} onChange={onChange} lang={lang} />
       ) : (
         <fieldset className="opts" disabled={locked}>
           <legend className="sr">{pick(q, 'text', lang)}</legend>
@@ -368,5 +376,25 @@ function PlanView({ items, questions }) {
         ))}</tbody>
       </table>
     </section>
+  );
+}
+
+// Réponses des questions de section libre : texte long, texte court, nombre, choix dans une liste
+function DataInput({ q, a, locked, onChange, lang }) {
+  const label = pick(q, 'text', lang);
+  if (q.format === 'text') return <textarea aria-label={label} rows={3} disabled={locked} value={a?.value_text || ''} onChange={e => onChange({ value_text: e.target.value })} />;
+  if (q.format === 'short') return <input aria-label={label} maxLength={300} disabled={locked} value={a?.value_text || ''} onChange={e => onChange({ value_text: e.target.value })} />;
+  if (q.format === 'number') return <input aria-label={label} type="number" inputMode="decimal" step="any" disabled={locked} value={a?.value_text ?? ''} onChange={e => onChange({ value_text: e.target.value })} />;
+  const opts = Array.isArray(q.options) ? q.options : [];
+  return (
+    <fieldset className="opts" disabled={locked}>
+      <legend className="sr">{label}</legend>
+      {opts.map(o => (
+        <label key={o.key} className={`opt ${a?.value_text === o.key ? 'on' : ''}`}>
+          <input type="radio" name={`q-${q.id}`} checked={a?.value_text === o.key} onChange={() => onChange({ value_text: o.key })} />
+          <span>{(lang === 'en' && o.en) || o.fr}</span>
+        </label>
+      ))}
+    </fieldset>
   );
 }

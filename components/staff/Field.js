@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import AutoTextarea from '../AutoTextarea';
 import { useI18n } from '../../lib/i18n';
 
-export default function Field({ label, value, onSave, placeholder, multiline = true }) {
+export default function Field({ label, value, onSave, placeholder, multiline = true, type = 'text' }) {
   const { t } = useI18n();
   const [v, setV] = useState(value || '');
   const [state, setState] = useState('');
@@ -30,7 +30,7 @@ export default function Field({ label, value, onSave, placeholder, multiline = t
       <span className="prop-label">{label}{state ? <em> · {t(`save.${state}`)}</em> : null}</span>
       {multiline
         ? <AutoTextarea value={v} onChange={change} onBlur={flush} placeholder={placeholder} />
-        : <input className="notion" value={v} onChange={e => change(e.target.value)} onBlur={flush} placeholder={placeholder} />}
+        : <input className="notion" type={type} step={type === 'number' ? 'any' : undefined} value={v} onChange={e => change(e.target.value)} onBlur={flush} placeholder={placeholder} />}
     </div>
   );
 }

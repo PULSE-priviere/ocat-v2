@@ -17,7 +17,7 @@ export function RadarView({ width, height, rows, series, showNumbers }) {
     <RadarChart width={width} height={height} data={rows} outerRadius="68%">
       <PolarGrid stroke="#E3DED6" />
       <PolarAngleAxis dataKey="section" tick={Tick} />
-      <PolarRadiusAxis domain={[0, 3]} tickCount={4} tick={showNumbers ? { fontSize: 9, fill: C.muted } : false} axisLine={false} />
+      <PolarRadiusAxis angle={90} domain={[0, 3]} tickCount={4} tick={showNumbers ? { fontSize: 9, fill: C.muted } : false} axisLine={false} />
       {series.map(s => (
         <Radar key={s.key} name={s.label} dataKey={s.key} stroke={s.color} fill={s.color} isAnimationActive={false} shape={filledShape({ dataKey: s.key, color: s.color })} />
       ))}
@@ -27,8 +27,12 @@ export function RadarView({ width, height, rows, series, showNumbers }) {
   );
 }
 
-export default function ProfileCharts({ progress, series, showNumbers = false }) {
+export default function ProfileCharts({ progress: allProgress, series: allSeries, showNumbers = false }) {
   const { t, lang } = useI18n();
+  // Les sections libres (données) n'ont ni score ni axe sur le radar
+  const keep = allProgress.map((p, i) => (p.section.kind === 'data' ? -1 : i)).filter(i => i >= 0);
+  const progress = keep.map(i => allProgress[i]);
+  const series = allSeries.map(s => ({ ...s, values: keep.map(i => s.values[i]), provisional: keep.map(i => s.provisional?.[i]) }));
   const rows = progress.map((p, i) => {
     const row = { section: `S${p.section.idx}` };
     series.forEach(s => { row[s.key] = s.values[i] ?? null; row[`${s.key}_p`] = !!s.provisional?.[i]; });

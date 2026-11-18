@@ -90,3 +90,17 @@ Les graphiques de l'équipe (radar, barres, score global du Récapitulatif, de l
 ## Mise à jour 2.5 (profil en direct pour toute l'équipe)
 
 Le bloc « profil en direct » (radar + répartition des réponses + état des sections) est partagé par `components/ProfileCharts.js` : tableau de bord de l'OSC (sans chiffres) et onglet Récapitulatif de la fiche (coach, owner, administrateur : chiffres au survol, une série par évaluation). Le radar relie seulement les sections renseignées (`components/radarShape.js`). Aucune migration.
+
+## Mise à jour 2.6 (logo automatique)
+
+Le logo est détecté tout seul : déposer une image dans `public/brand/` (de préférence `logo.svg`, `logo.png`…), la committer, redéployer. `NEXT_PUBLIC_LOGO_URL` reste possible et prioritaire. Le logo apparaît dans l'en-tête, le PDF et le fichier Word du plan. Vérification : ouvrir `https://votre-app/brand/logo.svg` (ou le nom de votre fichier) ; si la page affiche l'image, le fichier est bien déployé.
+
+## Mise à jour 2.7 (sections libres, export suivi-évaluation, nouvelle palette)
+
+**Ordre de déploiement : d'abord la base, ensuite le code.**
+1. Supabase > SQL Editor : exécuter `supabase/migrations/0005_section_kinds.sql` (sinon l'application ne trouve pas la colonne `kind`).
+2. Vercel : ajouter `AIRTABLE_SCORES_TABLE=Scores` (et facultativement `AIRTABLE_SCORES_AUTO=true`), puis `git push`.
+3. Espace équipe > onglet Projet > « Suivi-évaluation » > « Créer la table dans Airtable » (jeton avec le droit `schema.bases:write`), puis « Synchroniser maintenant ». Détails : `docs/AIRTABLE_SCORES.md`.
+
+- Sections de projet : **notée** (N/A, 1, 2, 3, score, radar) ou **libre** (texte long ou court, nombre, oui/non, liste de choix ; ni score ni radar ; facultative pour l'OSC).
+- Couleurs : le bleu sert aux liens, à l'onglet actif et à la sélection ; le corail reste la couleur de la marque (graphiques, accents).

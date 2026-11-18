@@ -2,8 +2,18 @@
 import { admin, fail, isEmail, staffFromReq, newToken, hashToken, tokenExpiry, personalUrl, rotateToken } from '../../../lib/server';
 import { sendMail } from '../../../lib/mail';
 import { sendLoginLink } from '../../../lib/login';
+import { airtableReady, buildRows, pushToAirtable, createScoresTable, FIELD_DEFS } from '../../../lib/scoresExport';
 
 const rpc = async (db, fn, args) => (await db.rpc(fn, args)).data === true;
+
+// Une page de 40 évaluations d'un projet, dans un ordre stable
+async function assessmentPage(svc, body) {
+  const offset = Math.max(0, Number(body.offset) || 0), limit = 40;
+  const { data, count, error } = await svc.from('assessments').select('id, subjects!inner(project_id)', { count: 'exact' })
+    .eq('subjects.project_id', body.projectId).order('created_at').order('id').range(offset, offset + limit - 1);
+  if (error) throw new Error(error.message);
+  return { ids: (data || []).map(x => x.id), total: count || 0, offset };
+}
 
 async function createAssessment(svc, subjectId, type, email, lang) {
   const token = newToken();
@@ -78,28 +88,71 @@ const actions = {
     return await createAssessment(svc, s.id, body.type, s.email, body.lang);
   },
 
-  // Ajoute une section entière (et ses questions) à un projet : owner de ce projet ou administrateur
+  // Ajoute une section entière (et ses questions) à un projet : owner de ce projet ou administrateur.
+  // kind 'scored' : questions notées (N/A, 1, 2, 3) ; kind 'data' : section libre, questions de type texte, nombre, oui/non, choix.
   async add_section({ db, svc, body }) {
     const projectId = body.projectId;
     if (!(await rpc(db, 'is_owner', { p: projectId }))) return [403, 'forbidden'];
+    const kind = body.kind === 'data' ? 'data' : 'scored';
     const nameFr = String(body.nameFr || '').trim().slice(0, 200);
     const nameEn = String(body.nameEn || '').trim().slice(0, 200) || nameFr;
-    const qFr = (Array.isArray(body.questionsFr) ? body.questionsFr : []).map(s => String(s).trim().slice(0, 1000)).filter(Boolean).slice(0, 100);
-    const qEn = (Array.isArray(body.questionsEn) ? body.questionsEn : []).map(s => String(s).trim().slice(0, 1000));
-    if (!nameFr || !qFr.length) return [400, 'invalid_section'];
+    let items;
+    if (kind === 'scored') {
+      const qFr = (Array.isArray(body.questionsFr) ? body.questionsFr : []).map(s => String(s).trim().slice(0, 1000)).filter(Boolean).slice(0, 100);
+      const qEn = (Array.isArray(body.questionsEn) ? body.questionsEn : []).map(s => String(s).trim().slice(0, 1000));
+      items = qFr.map((text, i) => ({ format: 'scale', fr: text, en: qEn[i] || text, options: null }));
+    } else {
+      const FORMATS = ['text', 'short', 'number', 'yesno', 'choice'];
+      items = [];
+      for (const q of (Array.isArray(body.questions) ? body.questions : []).slice(0, 100)) {
+        const fr = String(q?.fr || '').trim().slice(0, 1000);
+        if (!FORMATS.includes(q?.type) || !fr) continue;
+        let options = null;
+        if (q.type === 'choice') {
+          const o = (Array.isArray(q.options) ? q.options : []).map(x => String(x).trim().slice(0, 200)).filter(Boolean).slice(0, 30);
+          const oe = (Array.isArray(q.optionsEn) ? q.optionsEn : []).map(x => String(x).trim().slice(0, 200));
+          if (o.length < 2) return [400, 'invalid_section'];
+          options = o.map((x, i) => ({ key: `o${i + 1}`, fr: x, en: oe[i] || x }));
+        }
+        items.push({ format: q.type, fr, en: String(q.en || '').trim().slice(0, 1000) || fr, options });
+      }
+    }
+    if (!nameFr || !items.length) return [400, 'invalid_section'];
     const { data: p } = await svc.from('projects').select('id, framework_id').eq('id', projectId).single();
     const { data: all } = await svc.from('sections').select('num, project_id').eq('framework_id', p.framework_id);
     const num = Math.max(0, ...all.map(s => s.num)) + 1;                      // numéro interne unique dans le cadre
     const idx = all.filter(s => !s.project_id).length + all.filter(s => s.project_id === projectId).length + 1; // rang affiché
     const { data: sec, error } = await svc.from('sections')
-      .insert({ framework_id: p.framework_id, num, name_fr: nameFr, name_en: nameEn, project_id: projectId }).select('id').single();
+      .insert({ framework_id: p.framework_id, num, name_fr: nameFr, name_en: nameEn, project_id: projectId, kind }).select('id').single();
     if (error) return [500, 'server_error'];
-    const rows = qFr.map((text, i) => ({ framework_id: p.framework_id, section_id: sec.id, project_id: projectId,
+    const rows = items.map((it, i) => ({ framework_id: p.framework_id, section_id: sec.id, project_id: projectId,
       concept_id: `proj-${String(projectId).slice(0, 8)}-s${num}-q${i + 1}`, code: `${idx}.${i + 1}`, ord: i + 1,
-      format: 'scale', text_fr: text, text_en: qEn[i] || text }));
+      format: it.format, text_fr: it.fr, text_en: it.en, options: it.options }));
     const { error: e2 } = await svc.from('questions').insert(rows);
     if (e2) { await svc.from('sections').delete().eq('id', sec.id); return [500, 'server_error']; }
     return { ok: true, sectionId: sec.id };
+  },
+
+  // Suivi-évaluation : crée la table Airtable, envoie les scores, ou renvoie les lignes pour un CSV (par lots de 40 évaluations)
+  async scores_setup({ db, body }) {
+    if (!(await rpc(db, 'is_owner', { p: body.projectId }))) return [403, 'forbidden'];
+    if (!airtableReady()) return [400, 'airtable_not_configured'];
+    try { return await createScoresTable(); } catch (e) { return [502, 'airtable_error', e.message]; }
+  },
+  async scores_sync({ db, svc, body }) {
+    if (!(await rpc(db, 'is_owner', { p: body.projectId }))) return [403, 'forbidden'];
+    if (!airtableReady()) return [400, 'airtable_not_configured'];
+    const { ids, total, offset } = await assessmentPage(svc, body);
+    try { await pushToAirtable(await buildRows(svc, ids)); } catch (e) { return [502, 'airtable_error', e.message]; }
+    const done = offset + ids.length;
+    return { sent: ids.length, done, total, next: ids.length && done < total ? done : null };
+  },
+  async scores_csv({ db, svc, body }) {
+    if (!(await rpc(db, 'is_owner', { p: body.projectId }))) return [403, 'forbidden'];
+    const { ids, total, offset } = await assessmentPage(svc, body);
+    const rows = await buildRows(svc, ids);
+    const done = offset + ids.length;
+    return { fields: FIELD_DEFS.map(f => f.name), rows, done, total, next: ids.length && done < total ? done : null };
   },
 
   // Fusion de doublons (F31) : les évaluations passent sur le dossier conservé
@@ -121,7 +174,7 @@ export default async function handler(req, res) {
   if (!user) return fail(res, 401, 'not_signed_in');
   try {
     const out = await fn({ db, svc: admin(), body: req.body || {}, user });
-    if (Array.isArray(out)) return fail(res, out[0], out[1]);
+    if (Array.isArray(out)) return res.status(out[0]).json({ error: out[1], detail: out[2] });
     res.json(out);
   } catch (e) {
     console.error('staff action failed', req.query.action, e?.message);

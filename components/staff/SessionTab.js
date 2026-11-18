@@ -17,7 +17,7 @@ export default function SessionTab({ bank, answers, comments, needs, assessment,
   const nFlag = bank.questions.filter(flagged).length;
   const nAction = bank.questions.filter(hasAction).length;
   const started = bank.questions.some(q => answers[q.id]?.coach_notes || answers[q.id]?.coach_action);
-  const groups = bank.sections.map(s => {
+  const groups = bank.sections.filter(s => s.kind !== 'data').map(s => {
     const all = bank.questions.filter(q => q.section_id === s.id);
     return { s, qs: all.filter(keep), nFlag: all.filter(flagged).length, nAct: all.filter(hasAction).length };
   });
@@ -74,6 +74,9 @@ export default function SessionTab({ bank, answers, comments, needs, assessment,
 function SessionQuestion({ q, a, needs, saveAnswer, toggleNeed, addNeed }) {
   const { t, lang } = useI18n();
   const [newNeed, setNewNeed] = useState('');
+  // Une question sans besoin ni saisie reste repliée : moins de défilement quand on affiche toutes les questions
+  const touched = !!(a.support || a.coach_notes || a.coach_action || a.coach_owner);
+  const [open, setOpen] = useState(touched);
   const codes = q.format === 'yesno' ? ['yes', 'no'] : SCALE;
   const picked = needs.filter(n => (a.needIds || []).includes(n.id));
   return (
@@ -89,6 +92,8 @@ function SessionQuestion({ q, a, needs, saveAnswer, toggleNeed, addNeed }) {
           {picked.map(n => <span key={n.id} className="pill blue">{n.label}</span>)}
         </div>
       </header>
+      {!open ? <button type="button" className="link small addnotes" onClick={() => setOpen(true)}>+ {t('session.add_notes')}</button> : null}
+      {open ? (<>
       <div className="props">
         <Field label={t('session.notes')} value={a.coach_notes} placeholder={t('session.ph_notes')} onSave={v => saveAnswer(q, { coach_notes: v })} />
         <Field label={t('session.action')} value={a.coach_action} placeholder={t('session.ph_action')} onSave={v => saveAnswer(q, { coach_action: v })} />
@@ -124,6 +129,7 @@ function SessionQuestion({ q, a, needs, saveAnswer, toggleNeed, addNeed }) {
         </div>
         {q.format === 'scale' ? <div className="guide">{pick(q, 'guide', lang) || t('osc.guide_generic')}</div> : null}
       </details>
+      </>) : null}
     </article>
   );
 }

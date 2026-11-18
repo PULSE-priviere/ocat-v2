@@ -44,7 +44,10 @@
  },
  "link": {
   "label": "Votre lien personnel",
-  "warning": "Toute personne qui a ce lien peut voir et modifier votre diagnostic. Ne le partagez pas."
+  "warning": "Toute personne qui a ce lien peut voir et modifier votre diagnostic. Ne le partagez pas.",
+  "label_public": "Lien public du projet",
+  "note_personal": "Ce lien donne accès au diagnostic de votre organisation. Toute personne qui l'a peut le remplir et le modifier : partagez-le avec vos collègues concernés, pas en dehors de votre organisation.",
+  "note_public": "Partagez ce lien avec les organisations du projet. Toute personne qui l'ouvre peut démarrer un diagnostic ; elle reçoit ensuite son propre lien personnel par e-mail."
  },
  "save": {
   "saved": "Enregistré",
@@ -104,7 +107,10 @@
   "back_dashboard": "Dashboard",
   "deepen_question": "Souhaitez-vous approfondir cette section ?",
   "deepen_hint": "Si oui, votre accompagnateur reviendra plus en détail sur cette section avec vous.",
-  "deepen_asked": "Approfondissement souhaité"
+  "deepen_asked": "Approfondissement souhaité",
+  "optional": "Facultatif",
+  "data_hint": "Ces informations complètent le diagnostic : elles ne sont pas notées.",
+  "choose": "Choisir…"
  },
  "report": {
   "title": "Rapport de {name}",
@@ -141,7 +147,9 @@
   "method": "Requête non valide.",
   "not_found": "Action inconnue.",
   "invalid_profile": "Vérifiez les informations saisies (prénom et nom obligatoires).",
-  "invalid_section": "Indiquez un nom et au moins une question."
+  "invalid_section": "Indiquez un nom et au moins une question.",
+  "airtable_not_configured": "Airtable n'est pas configuré.",
+  "airtable_error": "Airtable a refusé la requête."
  },
  "login": {
   "title": "Connexion de l'équipe",
@@ -324,7 +332,8 @@
   "collapse_all": "Tout replier",
   "sec_needs": "{n} avec besoin",
   "sec_actions": "{n} avec action",
-  "sec_none": "Aucune question pour ce filtre dans cette section."
+  "sec_none": "Aucune question pour ce filtre dans cette section.",
+  "add_notes": "Ajouter des notes ou une action"
  },
  "plan": {
   "title": "Plan d'accompagnement",
@@ -351,7 +360,9 @@
   "notes": "Notes",
   "in_plan": "Dans le plan",
   "missing_action": "Action non renseignée : à compléter dans la session",
-  "edit_in_session": "Modifier dans la session"
+  "edit_in_session": "Modifier dans la session",
+  "pdf": "PDF",
+  "word": "Word"
  },
  "email": {
   "personal_link": {
@@ -433,7 +444,7 @@
   "live_hint": "Le graphique se met à jour à chaque réponse. Une section devient définitive quand toutes ses questions ont une réponse.",
   "live_empty": "Répondez à quelques questions : votre profil apparaîtra ici.",
   "radar_title": "Profil par section",
-  "dist_title": "Répartition de vos réponses",
+  "dist_title": "Répartition des réponses",
   "provisional": "provisoire",
   "complete": "définitive",
   "fill_hint": "Le profil se dessine au fil des réponses : la surface colorée apparaît dès que 3 sections ont au moins une réponse."
@@ -441,14 +452,14 @@
  "tools": {
   "ocat": {
    "title": "Diagnostic organisationnel",
-   "desc": "Auto-évaluation en 9 sections pour identifier vos forces et vos axes de développement."
+   "desc": "Auto-évaluation en {n} sections pour identifier vos forces et vos axes de développement."
   }
  },
  "intro": {
   "toggle": "Introduction au diagnostic",
   "title": "Bienvenue dans l'outil de diagnostic organisationnel {org}",
   "p1": "Cet outil vous accompagne dans une auto-évaluation de vos besoins organisationnels. Il s'agit d'un point de départ pour identifier ensemble vos forces et vos axes de développement prioritaires pour mieux vous accompagner.",
-  "p2": "Le diagnostic est organisé en 9 sections thématiques. Vous pouvez les remplir dans l'ordre que vous souhaitez, en une ou plusieurs séances.",
+  "p2": "Le diagnostic est organisé en {n} sections thématiques. Vous pouvez les remplir dans l'ordre que vous souhaitez, en une ou plusieurs séances.",
   "p3": "Pour chaque question, choisissez le niveau qui correspond le mieux à la réalité actuelle de votre organisation :",
   "levels": [
    "Non applicable (N/A) ;",
@@ -492,7 +503,35 @@
   "add_question": "Ajouter une question",
   "add_question_ph": "Nouvelle question",
   "count": "{n} questions",
-  "created": "Section ajoutée."
+  "created": "Section ajoutée.",
+  "kind_title": "Quel type de section voulez-vous ajouter ?",
+  "kind_scored": "Section notée",
+  "kind_scored_desc": "Questions à 4 niveaux (N/A, 1, 2, 3) avec appui souhaité. La section a son score et son axe sur le radar ; elle n'entre pas dans le score global, qui reste comparable entre projets.",
+  "kind_data": "Section libre",
+  "kind_data_desc": "Pour collecter des données ou des réponses libres : texte, nombre, oui / non, liste de choix. Pas de score, pas de radar.",
+  "content_title": "Contenu de la section",
+  "help_scored": "Collez vos questions, une par ligne : elles seront répondues avec les libellés habituels (N/A, 1, 2, 3).",
+  "help_data": "Ajoutez vos questions une par une et choisissez, pour chacune, le type de réponse attendu.",
+  "q_type": "Type de réponse",
+  "t_scale": "Notée (N/A, 1, 2, 3)",
+  "t_text": "Texte long",
+  "t_short": "Texte court",
+  "t_number": "Nombre",
+  "t_yesno": "Oui / non",
+  "t_choice": "Choix dans une liste",
+  "q_text_fr": "Question (français)",
+  "q_text_en": "Question (anglais, facultatif)",
+  "q_options": "Choix possibles, séparés par des virgules",
+  "q_options_en": "Choix en anglais (facultatif)",
+  "add_row": "Ajouter une question",
+  "remove": "Retirer",
+  "badge_scored": "Notée",
+  "badge_data": "Libre",
+  "no_score": "Cette section n'est pas notée : elle n'apparaît pas sur le radar et n'entre pas dans les scores.",
+  "need_question": "Ajoutez au moins une question avec un texte.",
+  "need_choices": "Une question « choix » demande au moins deux choix possibles.",
+  "step1": "1. Type de section",
+  "step2": "2. Nom et questions"
  },
  "planx": {
   "overview": "Vue d'ensemble",
@@ -526,6 +565,24 @@
  },
  "recap": {
   "profile_title": "Profil en direct de l'OSC",
-  "profile_hint": "Se met à jour à chaque réponse. Les repères creux et les valeurs marquées * sont provisoires tant qu'une section n'est pas complète. Survolez le radar pour voir les valeurs."
+  "profile_hint": "Se met à jour à chaque réponse. Les repères creux et les valeurs marquées * sont provisoires tant qu'une section n'est pas complète. Survolez le radar pour voir les valeurs.",
+  "data_title": "Données complémentaires"
+ },
+ "mex": {
+  "title": "Suivi-évaluation : export vers Airtable",
+  "intro": "Chaque évaluation (baseline, midline, endline) devient une ligne dans une table Airtable : contexte de l'OSC, score global, scores par section, complétion. Le score d'une section n'y figure qu'une fois la section complète.",
+  "not_configured": "Airtable n'est pas configuré : renseignez AIRTABLE_TOKEN et AIRTABLE_BASE_ID dans Vercel, puis redéployez.",
+  "setup": "Créer la table dans Airtable",
+  "setup_hint": "À faire une seule fois. Le jeton Airtable doit avoir le droit schema.bases:write.",
+  "sync": "Synchroniser maintenant",
+  "sync_hint": "Crée les nouvelles lignes et met à jour les autres. Cela se fait aussi tout seul à chaque envoi de diagnostic.",
+  "csv": "Télécharger en CSV",
+  "csv_hint": "Même contenu, sans passer par Airtable.",
+  "progress": "{done} / {total} évaluations",
+  "done_sync": "Synchronisation terminée : {n} évaluations envoyées.",
+  "done_setup": "Table créée dans Airtable.",
+  "exists": "La table existe déjà : vous pouvez synchroniser.",
+  "running": "En cours…",
+  "error": "Erreur : {msg}"
  }
 }

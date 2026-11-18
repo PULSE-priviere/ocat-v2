@@ -2,6 +2,7 @@
 import { admin, fail, assessmentFromToken, appUrl } from '../../../lib/server';
 import { loadBank } from '../../../lib/bank';
 import { sendMail } from '../../../lib/mail';
+import { airtableReady, buildRows, pushToAirtable } from '../../../lib/scoresExport';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return fail(res, 405, 'method');
@@ -18,6 +19,11 @@ export default async function handler(req, res) {
   if (scale.some(q => !done.has(q.id))) return fail(res, 400, 'incomplete');
 
   await db.from('assessments').update({ status: 'submitted', submitted_at: new Date().toISOString() }).eq('id', a.id);
+
+  // Suivi-évaluation : les scores partent vers Airtable dès l'envoi ; un échec n'empêche pas la soumission
+  if (airtableReady() && process.env.AIRTABLE_SCORES_AUTO !== 'false') {
+    try { await pushToAirtable(await buildRows(db, [a.id])); } catch (e) { console.error('[airtable] envoi des scores impossible :', e.message); }
+  }
 
   const { data: owners } = await db.from('memberships').select('profiles(email)')
     .eq('project_id', a.subjects.project_id).eq('role', 'owner');

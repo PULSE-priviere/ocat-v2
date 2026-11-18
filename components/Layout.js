@@ -1,8 +1,15 @@
 import Head from 'next/head';
 import Link from 'next/link';
+import { useState } from 'react';
 import { useI18n } from '../lib/i18n';
 import { safeStr } from '../lib/safe';
 import appConfig from '../app.config';
+
+function Logo() {
+  const [failed, setFailed] = useState(false);
+  if (!appConfig.logoUrl || failed) return null;
+  return <img src={appConfig.logoUrl} alt="" onError={() => setFailed(true)} />;
+}
 
 export function LangToggle() {
   const { lang, setLang, t } = useI18n();
@@ -22,7 +29,7 @@ export default function Layout({ title, right, wide, home, onHome, identity, chi
   const { t } = useI18n();
   const brand = (
     <>
-      {appConfig.logoUrl ? <img src={appConfig.logoUrl} alt={appConfig.orgName} /> : null}
+      <Logo />
       <span>{t('common.app_title')}</span>
     </>
   );

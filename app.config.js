@@ -16,6 +16,7 @@ const appConfig = {
     ok: '#4E9A6C',
     warn: '#D9A441',
     // Boutons et pastilles : fond pastel + texte foncé, selon la fonction
+    ui: '#4A7BC4',                            // bleu d'interface : liens, onglet actif, sélection
     coralBg: '#FBE6DF', coralFg: '#A8452B',   // action principale
     greenBg: '#E3F1E8', greenFg: '#23683F',   // valider, partager, rouvrir
     blueBg: '#E5EEF8', blueFg: '#2C5A92',     // liens, envois

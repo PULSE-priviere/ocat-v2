@@ -4,6 +4,7 @@ import { useI18n } from '../../lib/i18n';
 import { sb } from '../../lib/supabase';
 import { safeStr } from '../../lib/safe';
 import LinkBox from '../LinkBox';
+import ScoresExport from './ScoresExport';
 
 const randomSlug = () => Array.from(crypto.getRandomValues(new Uint8Array(9))).map(b => b.toString(16).padStart(2, '0')).join('');
 
@@ -27,7 +28,7 @@ export default function ProjectSettings({ project, needs, reload }) {
   return (
     <>
       <h2>{t('project.public_link')}</h2>
-      {p.public_active ? <LinkBox url={`${origin}/p/${p.public_slug}`} /> : <p className="banner">{t('project.link_disabled')}</p>}
+      {p.public_active ? <LinkBox kind="public" url={`${origin}/p/${p.public_slug}`} /> : <p className="banner">{t('project.link_disabled')}</p>}
       <div className="toolbar">
         <button className={`btn ${p.public_active ? 'warn' : 'ok'}`} onClick={() => update({ public_active: !p.public_active })}>{p.public_active ? t('project.disable') : t('project.enable')}</button>
         <button className="btn info" onClick={renew}>{t('project.renew')}</button>
@@ -50,6 +51,7 @@ export default function ProjectSettings({ project, needs, reload }) {
         <button className="btn">{t('common.add')}</button>
       </form>
       <p className="muted small">{safeStr(t('project.needs_hint'))}</p>
+      <ScoresExport project={project} />
     </>
   );
 }

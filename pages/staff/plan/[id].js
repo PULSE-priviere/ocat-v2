@@ -45,12 +45,13 @@ export default function PlanExport() {
   const makeDocx = async () => {
     setState('preparing');
     try {
-      const [{ planDocxBlob, planFileName }, { svgToPng }] = await Promise.all([import('../../../lib/planDocx'), import('../../../lib/svgToPng')]);
+      const [{ planDocxBlob, planFileName }, { svgToPng, loadLogoPng }] = await Promise.all([import('../../../lib/planDocx'), import('../../../lib/svgToPng')]);
       const radar = radarSvg({ labels: d.sections.map(s => `S${s.idx}`), series: d.series, size: 340 });
       const bars = barsSvg({ items: d.sections.map(s => ({ label: `${s.idx}. ${s.name}`, value: s.score })), width: 340 });
       const cal = timelineSvg({ rows: d.rows.map(r => ({ n: r.n, label: r.action || r.question, due: r.due })), today: new Date(`${d.today}T12:00:00`), width: 680, lang, labels: { today: t('planx.today') } });
       const png = async c => (c.svg ? { data: await svgToPng(c.svg, c.w, c.h), w: c.w, h: c.h } : null);
       const images = { radar: await png(radar), bars: await png(bars), timeline: await png(cal) };
+      if (appConfig.logoUrl) { try { images.logo = await loadLogoPng(appConfig.logoUrl, 28); } catch { /* sans logo */ } }
       const blob = await planDocxBlob({ d, t, lang, images });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');

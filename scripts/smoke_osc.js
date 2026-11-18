@@ -28,7 +28,7 @@ const check = (label, ok) => { console.log(`${ok ? 'OK    ' : 'ÉCHEC '} ${label
   check('9 sections chargées', d.sections?.length === 9);
   const bank = d.questions.filter(q => !q.assessment_id && q.format === 'scale');
   check('124 questions chargées', bank.length === 124);
-  check('aucun score envoyé à l\'OSC', !JSON.stringify(d).match(/"score/i));
+  check('aucun score envoyé à l\'OSC', !JSON.stringify(d).match(/"score\w*"\s*:/i));
 
   const bySec = n => bank.filter(q => q.section_id === d.sections.find(s => s.num === n).id);
   const codes = ['1', '2', '3', 'NA'];
