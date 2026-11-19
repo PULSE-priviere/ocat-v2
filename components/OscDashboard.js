@@ -52,7 +52,7 @@ export default function OscDashboard({ data, progress, onStart, onReport, savePr
         ) : null}
         <section className="card">
           <h2>{t('profile.title')}</h2>
-          <OrgInfoForm value={data.subject} rows={rows} onSave={saveProfile} editable={!locked} />
+          <OrgInfoForm value={data.subject} rows={rows} onSave={saveProfile} editable={!locked} countries={data.project.countries} />
         </section>
         <section className="card span2">
           <h2>{t('dashboard.live_title')}</h2>

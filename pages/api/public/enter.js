@@ -1,10 +1,12 @@
 // POST : entrée par le lien public (F0). Un nom ne rouvre jamais un dossier : seul l'e-mail reçoit le lien.
 import { admin, fail, isEmail, clientIp, verifyTurnstile, rateLimited, newToken, hashToken, tokenExpiry, personalUrl, rotateToken } from '../../../lib/server';
 import { sendMail } from '../../../lib/mail';
+import { isCountry } from '../../../lib/countries';
+import appConfig from '../../../app.config';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return fail(res, 405, 'method');
-  const { slug, name, firstName, lastName, email, coachId, consent, lang = 'fr', captcha } = req.body || {};
+  const { slug, name, firstName, lastName, email, coachId, consent, lang = 'fr', captcha, country, orgType, orgSize } = req.body || {};
   const first = String(firstName || '').trim().slice(0, 100), last = String(lastName || '').trim().slice(0, 100);
   const cleanName = String(name || '').trim().slice(0, 200);
   const cleanEmail = String(email || '').trim().toLowerCase();
@@ -14,9 +16,14 @@ export default async function handler(req, res) {
   if (!(await verifyTurnstile(captcha, ip))) return fail(res, 400, 'captcha_failed');
 
   const db = admin();
-  const { data: p } = await db.from('projects').select('id, public_active, archived')
+  const { data: p } = await db.from('projects').select('id, public_active, archived, countries')
     .eq('public_slug', String(slug || '')).maybeSingle();
   if (!p || !p.public_active || p.archived) return fail(res, 404, 'link_inactive');
+  // Profil de l'organisation, demandé au début du questionnaire : pays (parmi ceux du projet), type de structure, taille
+  const list = p.countries || [];
+  const cc = String(country || (list.length === 1 ? list[0] : '')).toUpperCase();
+  if (!isCountry(cc) || (list.length && !list.includes(cc))
+    || !appConfig.profileOptions.org_type.includes(orgType) || !appConfig.profileOptions.org_size.includes(orgSize)) return fail(res, 400, 'invalid_entry_profile');
   if (await rateLimited(db, 'public_entry', ip)) return fail(res, 429, 'too_many_attempts');
 
   // E-mail déjà connu : nouveau lien envoyé à cette adresse uniquement, rien n'est affiché
@@ -39,7 +46,7 @@ export default async function handler(req, res) {
     coach = m ? m.user_id : null;
   }
   const { data: subj, error: e1 } = await db.from('subjects')
-    .insert({ project_id: p.id, name: cleanName, contact_first_name: first, contact_last_name: last, email: cleanEmail, coach_id: coach, origin: 'public' }).select('id').single();
+    .insert({ project_id: p.id, name: cleanName, contact_first_name: first, contact_last_name: last, email: cleanEmail, coach_id: coach, origin: 'public', country: cc, org_type: orgType, org_size: orgSize }).select('id').single();
   if (e1) return fail(res, 500, 'server_error');
   const token = newToken();
   const { error: e2 } = await db.from('assessments')

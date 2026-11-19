@@ -5,6 +5,8 @@ import Script from 'next/script';
 import Layout from '../../components/Layout';
 import { useI18n, pick } from '../../lib/i18n';
 import { safeStr } from '../../lib/safe';
+import { countryName, countryOptions } from '../../lib/countries';
+import appConfig from '../../app.config';
 import LinkBox from '../../components/LinkBox';
 
 const SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
@@ -14,7 +16,7 @@ export default function PublicEntry() {
   const { t, lang } = useI18n();
   const [project, setProject] = useState(null);
   const [loadError, setLoadError] = useState('');
-  const [form, setForm] = useState({ name: '', firstName: '', lastName: '', email: '', coachId: '', consent: false });
+  const [form, setForm] = useState({ name: '', firstName: '', lastName: '', email: '', coachId: '', country: '', orgType: '', orgSize: '', consent: false });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [result, setResult] = useState(null);
@@ -25,7 +27,7 @@ export default function PublicEntry() {
     if (!query.slug) return;
     const cq = typeof query.coach === 'string' ? `&coach=${encodeURIComponent(query.coach)}` : '';
     fetch(`/api/public/project?slug=${encodeURIComponent(query.slug)}${cq}`)
-      .then(r => r.json()).then(j => { if (j.error) return setLoadError(j.error); setProject(j); if (j.presetCoach) setForm(f => ({ ...f, coachId: j.presetCoach.id })); })
+      .then(r => r.json()).then(j => { if (j.error) return setLoadError(j.error); setProject(j); setForm(f => ({ ...f, coachId: j.presetCoach ? j.presetCoach.id : f.coachId, country: j.countries?.length === 1 ? j.countries[0] : f.country })); })
       .catch(() => setLoadError('offline'));
   }, [query.slug, query.coach]);
 
@@ -63,12 +65,14 @@ export default function PublicEntry() {
         <h1>{t('entry.created_title')}</h1>
         <p className="lead">{t('entry.created_body')}</p>
         <LinkBox url={result.url} />
-        <a className="btn primary big" href={result.url}>{t('entry.start')}</a>
+        <a className="btn primary big" href={`${result.url}?start=1`}>{t('entry.start')}</a>
       </div>
     </Layout>
   );
 
   const welcome = pick(project, 'welcome', lang);
+  const countries = project.countries || [];
+  const countryChoices = countryOptions(lang, countries);
   return (
     <Layout title={safeStr(project.name)}>
       {SITE_KEY ? <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" onLoad={renderCaptcha} /> : null}
@@ -91,6 +95,32 @@ export default function PublicEntry() {
             <input required type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} autoComplete="email" />
             <small>{t('entry.email_hint')}</small>
           </label>
+          <fieldset className="entry-org">
+            <legend>{t('entry.org_legend')}</legend>
+            {countries.length === 1
+              ? <p className="presetcoach">{t('entry.country_fixed', { name: countryName(countries[0], lang) })}</p>
+              : (
+                <label>{t('profile.label.country')}
+                  <select required value={form.country} onChange={e => setForm({ ...form, country: e.target.value })} autoComplete="country">
+                    <option value="">{t('profile.choose')}</option>
+                    {countryChoices.map(o => <option key={o.code} value={o.code}>{o.name}</option>)}
+                  </select>
+                </label>
+              )}
+            <div className="form row">
+              <label>{t('profile.label.org_type')}
+                <select required value={form.orgType} onChange={e => setForm({ ...form, orgType: e.target.value })}>
+                  <option value="">{t('profile.choose')}</option>
+                  {appConfig.profileOptions.org_type.map(c => <option key={c} value={c}>{t(`profile.opt.org_type.${c}`)}</option>)}
+                </select>
+              </label>
+              <label>{t('profile.label.org_size')}
+                <select required value={form.orgSize} onChange={e => setForm({ ...form, orgSize: e.target.value })}>
+                  <option value="">{t('profile.choose')}</option>
+                  {appConfig.profileOptions.org_size.map(c => <option key={c} value={c}>{t(`profile.opt.org_size.${c}`)}</option>)}
+                </select>
+              </label>
+            </div>
           {project.presetCoach ? <p className="presetcoach">{t('entry.coach_fixed', { name: safeStr(project.presetCoach.name) })}</p> : project.coaches?.length ? (
             <label>{t('entry.coach')}
               <select value={form.coachId} onChange={e => setForm({ ...form, coachId: e.target.value })}>
@@ -99,6 +129,7 @@ export default function PublicEntry() {
               </select>
             </label>
           ) : null}
+          </fieldset>
           <label className="check">
             <input type="checkbox" required checked={form.consent} onChange={e => setForm({ ...form, consent: e.target.checked })} />
             <span>{t('entry.consent')}</span>

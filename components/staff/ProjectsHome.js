@@ -7,9 +7,51 @@ import { sb, fetchAll, fetchIn } from '../../lib/supabase';
 import { safeStr } from '../../lib/safe';
 import { fullName } from '../../lib/names';
 import { projectColor } from '../../lib/projectColor';
+import SearchBox from '../SearchBox';
+import { matches } from '../../lib/search';
+import { contactName } from '../../lib/names';
+import { countryName } from '../../lib/countries';
+
+// Recherche d'une organisation dans tous les projets accessibles (chargée à la première saisie)
+function OrgSearch({ projects, staff }) {
+  const { t, lang } = useI18n();
+  const [q, setQ] = useState('');
+  const [all, setAll] = useState(null);
+  useEffect(() => {
+    if (!q.trim() || all) return undefined;
+    let alive = true;
+    fetchAll(() => sb().from('subjects').select('id, name, email, contact_first_name, contact_last_name, country, project_id').order('name'))
+      .then(r => alive && setAll(r)).catch(() => alive && setAll([]));
+    return () => { alive = false; };
+  }, [q, all]);
+  const byProject = Object.fromEntries(projects.map(p => [p.id, p]));
+  const res = q.trim() && all ? all.filter(s => byProject[s.project_id] && matches(q, [s.name, s.email, contactName(s), countryName(s.country, lang), byProject[s.project_id].name])) : [];
+  return (
+    <section className="orgsearch">
+      <SearchBox value={q} onChange={setQ} placeholder={t('search.global')} />
+      {q.trim() ? (
+        <div className="orgsearch-res">
+          {!all ? <p className="muted small">{t('common.loading')}</p> : res.length === 0 ? <p className="muted small">{t('search.no_result')}</p> : (
+            <>
+              {res.slice(0, 8).map(s => (
+                <Link key={s.id} className="searchres" href={`/staff/subject/${s.id}`}>
+                  <span className="sq" style={{ background: projectColor(staff.projects, s.project_id) }} />
+                  <span className="sr-main"><b>{safeStr(s.name)}</b><span className="muted small">{[contactName(s), countryName(s.country, lang)].filter(Boolean).join(' · ')}</span></span>
+                  <span className="muted small">{safeStr(byProject[s.project_id].name)}</span>
+                  <Icon name="arrow" size={15} />
+                </Link>
+              ))}
+              {res.length > 8 ? <p className="muted small">{t('search.more', { n: res.length - 8 })}</p> : null}
+            </>
+          )}
+        </div>
+      ) : null}
+    </section>
+  );
+}
 
 export default function ProjectsHome({ staff, projects }) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [stats, setStats] = useState(null);
   const key = projects.map(p => p.id).join(',');
   useEffect(() => {
@@ -34,6 +76,7 @@ export default function ProjectsHome({ staff, projects }) {
   const sum = k => Object.values(stats || {}).reduce((a, s) => a + (s[k] || 0), 0);
   const role = p => (staff.profile.is_admin ? t('role.admin') : (staff.roles[p.id] || []).slice().sort().reverse().map(r => t(`role.${r}`)).join(' · '));
   const names = list => (list && list.length ? list.join(', ') : '—');
+  const cn = p => { const l = (p.countries || []).map(c => countryName(c, lang)); return l.length > 3 ? `${l.slice(0, 3).join(', ')} +${l.length - 3}` : l.join(', '); };
   return (
     <>
       <section className="hero2">
@@ -46,6 +89,7 @@ export default function ProjectsHome({ staff, projects }) {
           {staff.profile.is_admin ? <Link className="btn primary" href="/staff?tab=admin"><Icon name="plus" />{t('staff.new_project')}</Link> : null}
         </div>
       </section>
+      <OrgSearch projects={projects} staff={staff} />
       <div className="kpis">
         <div className="kpi grad"><span className="v">{projects.length}</span><span className="l">{t('staff.kpi_projects')}</span></div>
         <div className="kpi"><span className="v">{stats ? sum('osc') : '…'}</span><span className="l">{t('staff.kpi_osc')}</span></div>
@@ -67,6 +111,7 @@ export default function ProjectsHome({ staff, projects }) {
                 </div>
                 <dl className="pc-meta">
                   <dt>{t('staff.zone')}</dt><dd>{safeStr(p.zone) || '—'}</dd>
+                  <dt>{t('staff.countries')}</dt><dd>{cn(p) || '—'}</dd>
                   <dt>{t('staff.owners')}</dt><dd>{stats ? names(s.owners) : '…'}</dd>
                   <dt>{t('staff.coaches')}</dt><dd>{stats ? names(s.coaches) : '…'}</dd>
                 </dl>

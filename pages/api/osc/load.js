@@ -29,7 +29,7 @@ export default async function handler(req, res) {
     assessment: { status: a.status, type: a.type, section_comments: a.section_comments, section_deepen: a.section_deepen || {}, notes_shared: a.notes_shared },
     subject: { name: s.name, email: s.email, contact_first_name: s.contact_first_name, contact_last_name: s.contact_last_name,
       country: s.country, org_type: s.org_type, org_size: s.org_size },
-    project: { name: s.projects.name }, coach,
+    project: { name: s.projects.name, countries: s.projects.countries || [] }, coach,
     sections, questions,
     // Notes du coach visibles seulement si partagées
     answers: (answers || []).map(({ coach_action, coach_owner, ...x }) => ({ ...x, coach_notes: a.notes_shared ? x.coach_notes : null })),

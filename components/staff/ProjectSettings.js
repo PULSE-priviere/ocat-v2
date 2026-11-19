@@ -5,6 +5,7 @@ import { sb } from '../../lib/supabase';
 import { safeStr } from '../../lib/safe';
 import Icon from '../Icon';
 import Check from '../Check';
+import CountryPicker from '../CountryPicker';
 import ScoresExport from './ScoresExport';
 
 const randomSlug = () => Array.from(crypto.getRandomValues(new Uint8Array(9))).map(b => b.toString(16).padStart(2, '0')).join('');
@@ -48,6 +49,11 @@ export default function ProjectSettings({ project, needs, reload }) {
           <button className="btn glass" onClick={renew}>{t('project.renew')}</button>
           <Check className="light" checked={p.offer_coach_choice} onChange={v => update({ offer_coach_choice: v })} label={t('project.offer_coach_choice')} />
         </div>
+      </section>
+      <h2>{t('countries.title')}</h2>
+      <section className="card">
+        <p className="muted small" style={{ marginTop: 0 }}>{t('countries.hint')}</p>
+        <CountryPicker value={p.countries || []} onChange={v => update({ countries: v }).catch(() => {})} />
       </section>
       <h2>{t('project.welcome_title')}</h2>
       <div className="card form">

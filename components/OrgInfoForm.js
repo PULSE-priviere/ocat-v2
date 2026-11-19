@@ -4,6 +4,7 @@ import { Fragment, useEffect, useState } from 'react';
 import { useI18n } from '../lib/i18n';
 import { safeStr } from '../lib/safe';
 import { contactName } from '../lib/names';
+import { countryName, countryOptions } from '../lib/countries';
 import appConfig from '../app.config';
 
 const SELECTS = ['country', 'org_type', 'org_size'];
@@ -12,8 +13,8 @@ const pickFields = v => ({
   country: safeStr(v?.country), org_type: safeStr(v?.org_type), org_size: safeStr(v?.org_size),
 });
 
-export default function OrgInfoForm({ value, onSave, rows = [], editable = true, compact = false }) {
-  const { t } = useI18n();
+export default function OrgInfoForm({ value, onSave, rows = [], editable = true, compact = false, countries = [] }) {
+  const { t, lang } = useI18n();
   const [edit, setEdit] = useState(false);
   const [f, setF] = useState(pickFields(value));
   const [err, setErr] = useState('');
@@ -21,7 +22,13 @@ export default function OrgInfoForm({ value, onSave, rows = [], editable = true,
   const [busy, setBusy] = useState(false);
   useEffect(() => { if (!edit) setF(pickFields(value)); }, [value, edit]);
 
-  const label = (field, code) => (code ? t(`profile.opt.${field}.${code}`) : '');
+  const label = (field, code) => (!code ? '' : field === 'country' ? countryName(code, lang) : t(`profile.opt.${field}.${code}`));
+  // Pays : ceux du projet (ou tous si le projet n'en a pas) ; la valeur actuelle reste choisissable
+  const optionsFor = k => {
+    const list = k === 'country' ? countryOptions(lang, countries).map(o => o.code) : appConfig.profileOptions[k];
+    const cur = safeStr(f[k]);
+    return cur && !list.includes(cur) ? [cur, ...list] : list;
+  };
   const incomplete = SELECTS.some(k => !safeStr(value?.[k])) || !contactName(value);
   const save = async e => {
     e.preventDefault(); setBusy(true); setErr('');
@@ -69,7 +76,7 @@ export default function OrgInfoForm({ value, onSave, rows = [], editable = true,
         <label key={k}>{t(`profile.label.${k}`)}
           <select value={f[k]} onChange={e => setF({ ...f, [k]: e.target.value })}>
             <option value="">{t('profile.choose')}</option>
-            {appConfig.profileOptions[k].map(code => <option key={code} value={code}>{label(k, code)}</option>)}
+            {optionsFor(k).map(code => <option key={code} value={code}>{label(k, code)}</option>)}
           </select>
         </label>
       ))}

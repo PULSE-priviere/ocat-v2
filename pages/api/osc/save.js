@@ -1,5 +1,6 @@
 // POST {token, op, ...} : enregistre une réponse ou un commentaire de section (F3)
 import { admin, fail, assessmentFromToken, tokenExpiry } from '../../../lib/server';
+import { isCountry } from '../../../lib/countries';
 import appConfig from '../../../app.config';
 
 
@@ -56,6 +57,12 @@ export default async function handler(req, res) {
     for (const f of Object.keys(keys)) {
       if (!(f in patch)) continue;
       const v = patch[f] ? String(patch[f]) : null;
+      if (f === 'country') {
+        const list = a.subjects.projects.countries || [];
+        if (v && (!isCountry(v) || (list.length && !list.includes(v.toUpperCase())))) return fail(res, 400, 'invalid_profile');
+        out[f] = v ? v.toUpperCase() : null;
+        continue;
+      }
       if (v && !appConfig.profileOptions[f].includes(v)) return fail(res, 400, 'invalid_profile');
       out[f] = v;
     }

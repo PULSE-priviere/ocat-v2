@@ -148,3 +148,14 @@ Thème sobre inspiré des interfaces type Supabase : fond gris très clair, cart
 - Étape d'accompagnement de chaque organisation : questionnaire en cours, session à planifier, session planifiée, session en cours, plan en attente de validation, plan validé, plan partagé. Elle est déduite du statut de la session (choisi par le coach, avec une date), du travail déjà saisi (une note ou une action fait passer la session « en cours » toute seule) et du statut du plan (brouillon, validé, partagé) ; voir `lib/stage.js`.
 - Fiche d'une organisation : bandeau de progression, statut et date de la session (onglet Session).
 - Cohorte : colonne Étape, filtres par étape ; le filtre par coach et la colonne Coach sont réservés aux owners et à l'administrateur. Un coach ne voit que ses organisations (règle en base, inchangée).
+
+## Mise à jour 3.4 (pays du projet, profil à l'entrée, recherche)
+
+**Ordre : d'abord la base, ensuite le code.** Supabase > SQL Editor : exécuter `supabase/migrations/0009_project_countries.sql` (colonne `projects.countries`, conversion des anciens pays en codes ISO).
+
+- Pays d'un projet : plusieurs possibles, choisis à la création (Administration) et modifiables (Administration > projet, ou onglet Projet pour un owner). Stockés en codes ISO ; les noms s'affichent dans la langue de l'écran (`lib/countries.js`, via `Intl.DisplayNames`).
+- Début du questionnaire (page d'entrée) : pays (parmi ceux du projet ; appliqué d'office s'il n'y en a qu'un ; tous les pays si le projet n'en a aucun), type de structure, taille, accompagnateur. Pays, type et taille sont obligatoires et vérifiés côté serveur.
+- « Chambre de commerce » ajouté aux types de structure (`app.config.js`).
+- « Commencer le diagnostic » (page de confirmation) ouvre directement le diagnostic (`?start=1`), et non plus le tableau de bord.
+- Recherche d'une organisation : cohorte (tous rôles), accueil du coach, et recherche globale sur « Tous les projets » (administrateur, owners). Insensible aux accents.
+- L'export Airtable écrit désormais des libellés lisibles (Pays, Type de structure, Taille).

@@ -43,7 +43,9 @@
   "first_name": "First name",
   "last_name": "Last name",
   "contact_title": "Person filling in the assessment",
-  "coach_fixed": "Your coach: {name}"
+  "coach_fixed": "Your coach: {name}",
+  "org_legend": "Your organisation",
+  "country_fixed": "Country: {name}"
  },
  "link": {
   "label": "Your personal link",
@@ -122,7 +124,8 @@
   "plan_title": "Support plan",
   "plan_accent": "individual",
   "plan_intro": "This plan is set by your coach from the support session. You can view it here; only your coach can change it.",
-  "plan_empty": "Your individual support plan has not been defined yet. It will be set with your coach during the support session: feel free to get in touch with them."
+  "plan_empty": "Your individual support plan has not been defined yet. It will be set with your coach during the support session: feel free to get in touch with them.",
+  "start_first": "Start with the first section"
  },
  "report": {
   "title": "{name} report",
@@ -162,7 +165,8 @@
   "invalid_section": "Enter a name and at least one question.",
   "airtable_not_configured": "Airtable is not configured.",
   "airtable_error": "Airtable rejected the request.",
-  "last_owner_project": "The project must keep at least one owner: give the owner role to someone else first."
+  "last_owner_project": "The project must keep at least one owner: give the owner role to someone else first.",
+  "invalid_entry_profile": "Choose the country, the type of structure and the size of your organisation."
  },
  "login": {
   "title": "Team sign-in",
@@ -203,7 +207,8 @@
   "zone": "Area",
   "owners": "Owner",
   "coaches": "Coaches",
-  "home": "Home"
+  "home": "Home",
+  "countries": "Countries"
  },
  "role": {
   "owner": "Project owner",
@@ -480,23 +485,14 @@
    "org_size": "Size (number of employees)"
   },
   "opt": {
-   "country": {
-    "morocco": "Morocco",
-    "algeria": "Algeria",
-    "tunisia": "Tunisia",
-    "libya": "Libya",
-    "egypt": "Egypt",
-    "mauritania": "Mauritania",
-    "south_africa": "South Africa",
-    "other": "Other"
-   },
    "org_type": {
     "association": "Association",
     "ngo": "NGO",
     "cooperative": "Cooperative",
     "social_enterprise": "Social enterprise",
     "foundation": "Foundation",
-    "network": "Network"
+    "network": "Network",
+    "chamber_of_commerce": "Chamber of commerce"
    },
    "org_size": {
     "1-5": "1 to 5",
@@ -748,5 +744,18 @@
   "col_stage": "Stage",
   "empty": "No organisation is assigned to you yet. Share your coach link: organisations that come in through it are automatically attached to you. A project owner can also assign some to you.",
   "session_title": "How to run a support session"
+ },
+ "countries": {
+  "title": "Project countries",
+  "add": "Add a country…",
+  "none": "No country selected: organisations will choose from all countries.",
+  "remove": "Remove {name}",
+  "hint": "The project's organisations choose their country from this list, at the start of the questionnaire. If there is only one, it is applied automatically."
+ },
+ "search": {
+  "placeholder": "Search an organisation, a contact, an email…",
+  "global": "Search an organisation across all projects…",
+  "no_result": "No organisation matches this search.",
+  "more": "{n} more results: refine your search."
  }
 }

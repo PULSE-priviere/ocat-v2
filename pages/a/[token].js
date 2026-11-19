@@ -21,8 +21,10 @@ const readQueue = token => { try { return JSON.parse(localStorage.getItem(qKey(t
 const writeQueue = (token, q) => { try { localStorage.setItem(qKey(token), JSON.stringify(q)); } catch {} };
 
 export default function OscPage() {
-  const { query } = useRouter();
+  const router = useRouter();
+  const { query } = router;
   const token = query.token;
+  const startedRef = useRef(false);
   const { t, lang } = useI18n();
   const [data, setData] = useState(null);
   const [fatal, setFatal] = useState('');
@@ -133,6 +135,14 @@ export default function OscPage() {
     setTimeout(() => document.getElementById(`q-${first.q.id}`)?.scrollIntoView({ block: 'center' }), 150);
   };
 
+  // Arrivée depuis « Commencer le diagnostic » (?start=1) : on ouvre directement le questionnaire, pas le tableau de bord
+  useEffect(() => {
+    if (!data || startedRef.current || query.start !== '1') return;
+    startedRef.current = true;
+    startOrResume();
+    router.replace({ pathname: router.pathname, query: { token } }, undefined, { shallow: true });   // le lien affiché ne garde pas ?start=1
+  }); // eslint-disable-line react-hooks/exhaustive-deps
+
   const submit = async () => {
     if (!window.confirm(t('osc.submit_confirm'))) return;
     await flush();
@@ -215,6 +225,7 @@ function DiagnosticHome({ data, progress, allComplete, hasAnswers, onOpen, onSub
       <button className="link" onClick={onBack}>← {t('osc.back_dashboard')}</button>
       <div className="toolbar"><h1>{t('tools.ocat.title')}</h1><span className="pill">{t(`eval.${data.assessment.type}`)}</span></div>
       <Intro open={!hasAnswers} n={progress.filter(p => p.section.kind !== 'data').length} />
+      {!hasAnswers && st === 'in_progress' && progress[0] ? <button className="btn primary big" onClick={() => onOpen(progress[0].section)}>{t('osc.start_first')}</button> : null}
       <div className="grid">
         {progress.map(p => (
           <button key={p.section.id} type="button" className={`tile ${p.status}`} onClick={() => onOpen(p.section)}>

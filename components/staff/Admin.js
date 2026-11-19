@@ -3,6 +3,8 @@ import { useCallback, useEffect, useState } from 'react';
 import Icon from '../Icon';
 import Check from '../Check';
 import Team from './Team';
+import CountryPicker from '../CountryPicker';
+import { countryName } from '../../lib/countries';
 import { useI18n } from '../../lib/i18n';
 import { sb, staffApi } from '../../lib/supabase';
 import { safeStr } from '../../lib/safe';
@@ -44,7 +46,8 @@ export default function Admin({ projects, reload }) {
 // Liste des projets : un clic ouvre son administration
 function ProjectList({ projects, mems, onOpen, onCreated }) {
   const { t } = useI18n();
-  const [f, setF] = useState({ name: '', cohort: '', zone: '' });
+  const { lang } = useI18n();
+  const [f, setF] = useState({ name: '', cohort: '', zone: '', countries: [] });
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
   const names = (id, role) => mems.filter(m => m.project_id === id && m.role === role).map(m => fullName(m.profile));
@@ -52,10 +55,10 @@ function ProjectList({ projects, mems, onOpen, onCreated }) {
     e.preventDefault(); setBusy(true); setMsg('');
     const { data: fw } = await sb().from('frameworks').select('id').limit(1).maybeSingle();
     if (!fw) { setBusy(false); return setMsg('errors.no_framework'); }
-    const { error } = await sb().from('projects').insert({ name: f.name.trim(), cohort: f.cohort.trim() || null, zone: f.zone.trim() || null, framework_id: fw.id });
+    const { error } = await sb().from('projects').insert({ name: f.name.trim(), cohort: f.cohort.trim() || null, zone: f.zone.trim() || null, countries: f.countries, framework_id: fw.id });
     setBusy(false);
     if (error) return setMsg('errors.server_error');
-    setF({ name: '', cohort: '', zone: '' }); onCreated();
+    setF({ name: '', cohort: '', zone: '', countries: [] }); onCreated();
   };
   return (
     <>
@@ -65,7 +68,7 @@ function ProjectList({ projects, mems, onOpen, onCreated }) {
           return (
             <button key={p.id} type="button" className="adminrow" onClick={() => onOpen(p.id)}>
               <span className="sq lg" style={{ background: projectColor(projects, p.id) }} />
-              <span className="ar-main"><b>{safeStr(p.name)}</b><span className="muted small">{[p.zone, p.cohort].filter(Boolean).join(' · ') || '—'}</span></span>
+              <span className="ar-main"><b>{safeStr(p.name)}</b><span className="muted small">{[p.zone, p.cohort, (p.countries || []).map(c => countryName(c, lang)).join(', ')].filter(Boolean).join(' · ') || '—'}</span></span>
               <span className="ar-col"><span className="muted small">{t('staff.owners')}</span>{ow.join(', ') || '—'}</span>
               <span className="ar-col"><span className="muted small">{t('staff.coaches')}</span>{co.length ? `${co.length} · ${co.slice(0, 2).join(', ')}${co.length > 2 ? '…' : ''}` : '—'}</span>
               <span className={`pill ${p.archived ? 'amber' : 'green'}`}>{t(p.archived ? 'admin.archived' : 'admin.active')}</span>
@@ -79,6 +82,7 @@ function ProjectList({ projects, mems, onOpen, onCreated }) {
         <label>{t('admin.project_name')}<input required value={f.name} onChange={e => setF({ ...f, name: e.target.value })} /></label>
         <label>{t('staff.zone')}<input value={f.zone} onChange={e => setF({ ...f, zone: e.target.value })} /></label>
         <label>{t('admin.cohort')}<input value={f.cohort} onChange={e => setF({ ...f, cohort: e.target.value })} /></label>
+        <div className="span-all"><span className="fieldlabel">{t('countries.title')}</span><CountryPicker value={f.countries} onChange={countries => setF({ ...f, countries })} /><p className="muted small">{t('countries.hint')}</p></div>
         <button className="btn primary" aria-busy={busy} disabled={busy}><Icon name="plus" />{t('admin.create_project')}</button>
       </form>
       {msg ? <p className="error">{t(msg)}</p> : null}
@@ -89,13 +93,13 @@ function ProjectList({ projects, mems, onOpen, onCreated }) {
 // Administration d'un projet : informations, archivage, équipe (mêmes règles que l'onglet Équipe, sans la restriction du dernier owner)
 function ProjectAdmin({ project, projects, mems, onBack, onChanged }) {
   const { t } = useI18n();
-  const [info, setInfo] = useState({ name: project.name || '', cohort: project.cohort || '', zone: project.zone || '' });
+  const [info, setInfo] = useState({ name: project.name || '', cohort: project.cohort || '', zone: project.zone || '', countries: project.countries || [] });
   const [busy, setBusy] = useState('');
   const [msg, setMsg] = useState('');
-  useEffect(() => { setInfo({ name: project.name || '', cohort: project.cohort || '', zone: project.zone || '' }); }, [project.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { setInfo({ name: project.name || '', cohort: project.cohort || '', zone: project.zone || '', countries: project.countries || [] }); }, [project.id]); // eslint-disable-line react-hooks/exhaustive-deps
   const saveInfo = async e => {
     e.preventDefault(); setBusy('info'); setMsg('');
-    const { error } = await sb().from('projects').update({ name: info.name.trim(), cohort: info.cohort.trim() || null, zone: info.zone.trim() || null }).eq('id', project.id);
+    const { error } = await sb().from('projects').update({ name: info.name.trim(), cohort: info.cohort.trim() || null, zone: info.zone.trim() || null, countries: info.countries }).eq('id', project.id);
     setBusy(''); setMsg(error ? 'errors.server_error' : 'admin.saved'); if (!error) onChanged();
   };
   const archive = async () => { setBusy('archive'); await sb().from('projects').update({ archived: !project.archived }).eq('id', project.id); setBusy(''); onChanged(); };
@@ -118,6 +122,7 @@ function ProjectAdmin({ project, projects, mems, onBack, onChanged }) {
           <label>{t('admin.project_name')}<input required value={info.name} onChange={e => setInfo({ ...info, name: e.target.value })} /></label>
           <label>{t('staff.zone')}<input value={info.zone} onChange={e => setInfo({ ...info, zone: e.target.value })} /></label>
           <label>{t('admin.cohort')}<input value={info.cohort} onChange={e => setInfo({ ...info, cohort: e.target.value })} /></label>
+          <div className="span-all"><span className="fieldlabel">{t('countries.title')}</span><CountryPicker value={info.countries} onChange={countries => setInfo({ ...info, countries })} /><p className="muted small">{t('countries.hint')}</p></div>
           <button className="btn" aria-busy={busy === 'info'} disabled={busy === 'info'}>{t('common.save')}</button>
         </form>
       </section>

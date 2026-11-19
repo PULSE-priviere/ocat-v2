@@ -48,7 +48,7 @@ export default function SubjectPage() {
     if (!query.id || staff.loading) return;
     (async () => {
       const { data: s } = await sb().from('subjects')
-        .select('*, project:projects(id, name, framework_id), coach:profiles(name, first_name, last_name, email)').eq('id', query.id).maybeSingle();
+        .select('*, project:projects(id, name, framework_id, countries), coach:profiles(name, first_name, last_name, email)').eq('id', query.id).maybeSingle();
       if (!s) return setMsg('forbidden');
       const { data: list } = await sb().from('assessments').select('*').eq('subject_id', s.id);
       const sorted = (list || []).sort((a, b) => EVAL_ORDER.indexOf(a.type) - EVAL_ORDER.indexOf(b.type) || a.created_at.localeCompare(b.created_at));
@@ -139,7 +139,7 @@ export default function SubjectPage() {
         ) : null}
       </div>
 
-      <OrgInfoForm compact value={subject}
+      <OrgInfoForm compact countries={subject.project.countries} value={subject}
         rows={[{ label: t('dashboard.project'), value: subject.project?.name }, { label: t('dashboard.coach'), value: fullName(subject.coach) }]}
         onSave={async f => {
           const { error } = await sb().from('subjects').update({

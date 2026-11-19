@@ -35,8 +35,8 @@ const appConfig = {
   },
   // Listes de choix de la fiche organisation (libellés FR/EN dans locales/*.json, clés profile.opt.*)
   profileOptions: {
-    country: ['morocco', 'algeria', 'tunisia', 'libya', 'egypt', 'mauritania', 'south_africa', 'other'],
-    org_type: ['association', 'ngo', 'cooperative', 'social_enterprise', 'foundation', 'network'],
+    // Le pays n'a pas de liste fixe : il vient des pays du projet (codes ISO, voir lib/countries.js)
+    org_type: ['association', 'ngo', 'cooperative', 'social_enterprise', 'foundation', 'chamber_of_commerce', 'network'],
     org_size: ['1-5', '6-20', '21-50', '50+'],
   },
   // Graphiques montrés à l'OSC pendant qu'elle répond. Aucun chiffre de score n'est affiché.

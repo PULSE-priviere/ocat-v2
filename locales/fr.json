@@ -43,7 +43,9 @@
   "first_name": "Prénom",
   "last_name": "Nom",
   "contact_title": "Personne qui remplit le diagnostic",
-  "coach_fixed": "Votre accompagnateur : {name}"
+  "coach_fixed": "Votre accompagnateur : {name}",
+  "org_legend": "Votre organisation",
+  "country_fixed": "Pays : {name}"
  },
  "link": {
   "label": "Votre lien personnel",
@@ -122,7 +124,8 @@
   "plan_title": "Plan d'accompagnement",
   "plan_accent": "individuel",
   "plan_intro": "Ce plan est établi par votre coach à partir de la session d'accompagnement. Vous pouvez le consulter ici ; seul votre coach peut le modifier.",
-  "plan_empty": "Votre plan d'accompagnement individuel n'a pas encore été défini. Il sera établi avec votre coach lors de la session d'accompagnement : n'hésitez pas à vous rapprocher de lui."
+  "plan_empty": "Votre plan d'accompagnement individuel n'a pas encore été défini. Il sera établi avec votre coach lors de la session d'accompagnement : n'hésitez pas à vous rapprocher de lui.",
+  "start_first": "Commencer par la première section"
  },
  "report": {
   "title": "Rapport de {name}",
@@ -162,7 +165,8 @@
   "invalid_section": "Indiquez un nom et au moins une question.",
   "airtable_not_configured": "Airtable n'est pas configuré.",
   "airtable_error": "Airtable a refusé la requête.",
-  "last_owner_project": "Le projet doit garder au moins un owner : donnez d'abord le rôle owner à quelqu'un d'autre."
+  "last_owner_project": "Le projet doit garder au moins un owner : donnez d'abord le rôle owner à quelqu'un d'autre.",
+  "invalid_entry_profile": "Choisissez le pays, le type de structure et la taille de votre organisation."
  },
  "login": {
   "title": "Connexion de l'équipe",
@@ -203,7 +207,8 @@
   "zone": "Zone",
   "owners": "Owner",
   "coaches": "Coachs",
-  "home": "Accueil"
+  "home": "Accueil",
+  "countries": "Pays"
  },
  "role": {
   "owner": "Owner de projet",
@@ -480,23 +485,14 @@
    "org_size": "Taille (nombre d'employés)"
   },
   "opt": {
-   "country": {
-    "morocco": "Maroc",
-    "algeria": "Algérie",
-    "tunisia": "Tunisie",
-    "libya": "Libye",
-    "egypt": "Égypte",
-    "mauritania": "Mauritanie",
-    "south_africa": "Afrique du Sud",
-    "other": "Autre"
-   },
    "org_type": {
     "association": "Association",
     "ngo": "ONG",
     "cooperative": "Coopérative",
     "social_enterprise": "Entreprise sociale",
     "foundation": "Fondation",
-    "network": "Réseau / Network"
+    "network": "Réseau / Network",
+    "chamber_of_commerce": "Chambre de commerce"
    },
    "org_size": {
     "1-5": "1 à 5",
@@ -748,5 +744,18 @@
   "col_stage": "Étape",
   "empty": "Aucune organisation ne vous est affectée pour l'instant. Partagez votre lien de coach : les organisations qui entrent par ce lien vous sont rattachées automatiquement. Un owner du projet peut aussi vous en affecter.",
   "session_title": "Comment mener une session d'accompagnement"
+ },
+ "countries": {
+  "title": "Pays du projet",
+  "add": "Ajouter un pays…",
+  "none": "Aucun pays sélectionné : les organisations choisiront parmi tous les pays.",
+  "remove": "Retirer {name}",
+  "hint": "Les organisations du projet choisissent leur pays parmi cette liste, au début du questionnaire. S'il n'y en a qu'un, il est appliqué automatiquement."
+ },
+ "search": {
+  "placeholder": "Rechercher une organisation, un contact, un e-mail…",
+  "global": "Rechercher une organisation dans tous les projets…",
+  "no_result": "Aucune organisation ne correspond à cette recherche.",
+  "more": "{n} autres résultats : précisez votre recherche."
  }
 }

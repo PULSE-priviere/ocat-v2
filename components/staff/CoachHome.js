@@ -4,6 +4,9 @@ import Link from 'next/link';
 import Icon from '../Icon';
 import ShareLinks from './ShareLinks';
 import { StageBadge } from './StageBadge';
+import SearchBox from '../SearchBox';
+import { matches } from '../../lib/search';
+import { countryName } from '../../lib/countries';
 import { useI18n } from '../../lib/i18n';
 import { loadCohort } from '../../lib/cohort';
 import { safeStr } from '../../lib/safe';
@@ -33,14 +36,15 @@ export default function CoachHome({ staff }) {
 }
 
 export function CoachDashboard({ staff, projects, rows }) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [filter, setFilter] = useState('');
+  const [query, setQuery] = useState('');
   const first = safeStr(staff.profile.first_name);
   const list = rows || [];
   const count = s => list.filter(r => r.stage === s).length;
   const todo = STAGE_PRIORITY.flatMap(s => list.filter(r => r.stage === s)).slice(0, 5);
   const top = todo[0];
-  const shown = list.filter(r => !filter || r.stage === filter);
+  const shown = list.filter(r => (!filter || r.stage === filter) && matches(query, [r.subject.name, r.subject.email, contactName(r.subject), countryName(r.subject.country, lang)]));
   const fresh = list.every(r => ['questionnaire', 'to_plan'].includes(r.stage));   // aucune session commencée : la prise en main reste ouverte
   const multi = projects.length > 1;
   return (
@@ -102,6 +106,7 @@ export function CoachDashboard({ staff, projects, rows }) {
         <div className="callout"><Icon name="users" size={20} /><p>{t('coach.empty')}</p></div>
       ) : (
         <>
+          <SearchBox value={query} onChange={setQuery} />
           <div className="stagefilters" role="group" aria-label={t('coach.pipeline_title')}>
             <button type="button" className={`sf ${filter === '' ? 'on' : ''}`} onClick={() => setFilter('')}>{t('coach.pipeline_all')} <b>{list.length}</b></button>
             {STAGES.filter(s => count(s) > 0 || filter === s).map(s => (
@@ -111,7 +116,7 @@ export function CoachDashboard({ staff, projects, rows }) {
           <div className="card flush">
             <table className="table">
               <thead><tr><th>{t('coach.col_osc')}</th>{multi ? <th>{t('coach.col_project')}</th> : null}<th>{t('coach.col_questionnaire')}</th><th>{t('coach.col_stage')}</th><th /></tr></thead>
-              <tbody>{shown.map(r => (
+              <tbody>{shown.length === 0 ? <tr><td colSpan={multi ? 5 : 4} className="muted">{t('search.no_result')}</td></tr> : shown.map(r => (
                 <tr key={r.subject.id}>
                   <td><Link href={`/staff/subject/${r.subject.id}`}><b>{safeStr(r.subject.name)}</b></Link><br /><small className="muted">{contactName(r.subject) || safeStr(r.subject.email)}</small></td>
                   {multi ? <td>{safeStr(r.project.name)}</td> : null}

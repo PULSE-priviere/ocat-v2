@@ -8,11 +8,15 @@ import { fullName, contactName } from '../../lib/names';
 import { STAGES, STAGE_TAB } from '../../lib/stage';
 import { StageBadge } from './StageBadge';
 import LinkBox from '../LinkBox';
+import SearchBox from '../SearchBox';
+import { matches } from '../../lib/search';
+import { countryName } from '../../lib/countries';
 
 export default function Cohort({ project, cohort, coaches, owner, reload }) {
   const { t, lang } = useI18n();
   const [coachFilter, setCoachFilter] = useState('');
   const [stageFilter, setStageFilter] = useState('');
+  const [query, setQuery] = useState('');
   const [adding, setAdding] = useState(false);
   const [form, setForm] = useState({ name: '', firstName: '', lastName: '', email: '', coachId: '' });
   const [created, setCreated] = useState('');
@@ -20,7 +24,9 @@ export default function Cohort({ project, cohort, coaches, owner, reload }) {
   const [busy, setBusy] = useState(false);
 
   // Le filtre par coach n'existe que pour les owners et l'administrateur
-  const base = cohort.rows.filter(r => !owner || !coachFilter || (coachFilter === 'none' ? !r.subject.coach_id : r.subject.coach_id === coachFilter));
+  const base = cohort.rows
+    .filter(r => !owner || !coachFilter || (coachFilter === 'none' ? !r.subject.coach_id : r.subject.coach_id === coachFilter))
+    .filter(r => matches(query, [r.subject.name, r.subject.email, contactName(r.subject), countryName(r.subject.country, lang)]));
   const rows = base.filter(r => !stageFilter || r.stage === stageFilter);
   const count = s => base.filter(r => r.stage === s).length;
   const assign = async (subjectId, coachId) => {
@@ -38,6 +44,7 @@ export default function Cohort({ project, cohort, coaches, owner, reload }) {
   return (
     <>
       <div className="toolbar">
+        <SearchBox value={query} onChange={setQuery} />
         {owner ? (
           <label className="inline">{t('cohort.filter_coach')}
             <select value={coachFilter} onChange={e => setCoachFilter(e.target.value)}>
@@ -75,14 +82,14 @@ export default function Cohort({ project, cohort, coaches, owner, reload }) {
         </div>
       ) : null}
 
-      {rows.length === 0 ? <p className="empty-inline">{t(cohort.rows.length === 0 ? (owner ? 'cohort.empty' : 'cohort.empty_coach') : 'cohort.none_in_filter')}</p> : (
+      {rows.length === 0 ? <p className="empty-inline">{t(query.trim() ? 'search.no_result' : cohort.rows.length === 0 ? (owner ? 'cohort.empty' : 'cohort.empty_coach') : 'cohort.none_in_filter')}</p> : (
         <div className="card flush"><div className="scroll"><table className="table">
           <thead><tr>
             <th>{t('cohort.osc')}</th>{owner ? <th>{t('cohort.coach')}</th> : null}<th>{t('coach.col_questionnaire')}</th><th>{t('cohort.col_stage')}</th><th>{t('cohort.global')}</th>
           </tr></thead>
           <tbody>{rows.map(r => (
             <tr key={r.subject.id}>
-              <td><Link href={`/staff/subject/${r.subject.id}?tab=${STAGE_TAB[r.stage]}`}><b>{safeStr(r.subject.name)}</b></Link><br /><small className="muted">{contactName(r.subject) ? `${contactName(r.subject)} · ` : ''}{safeStr(r.subject.email)}</small></td>
+              <td><Link href={`/staff/subject/${r.subject.id}?tab=${STAGE_TAB[r.stage]}`}><b>{safeStr(r.subject.name)}</b></Link><br /><small className="muted">{[contactName(r.subject), safeStr(r.subject.email), countryName(r.subject.country, lang)].filter(Boolean).join(' · ')}</small></td>
               {owner ? (
                 <td>
                   <select aria-label={t('cohort.coach')} value={r.subject.coach_id || ''} onChange={e => assign(r.subject.id, e.target.value)}>
