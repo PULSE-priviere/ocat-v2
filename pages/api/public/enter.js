@@ -35,7 +35,7 @@ export default async function handler(req, res) {
   let coach = null;
   if (coachId) {
     const { data: m } = await db.from('memberships').select('user_id').eq('project_id', p.id)
-      .eq('user_id', coachId).eq('role', 'coach').eq('offered_to_osc', true).maybeSingle();
+      .eq('user_id', coachId).eq('role', 'coach').maybeSingle();
     coach = m ? m.user_id : null;
   }
   const { data: subj, error: e1 } = await db.from('subjects')

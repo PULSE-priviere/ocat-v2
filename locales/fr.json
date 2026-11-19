@@ -42,7 +42,8 @@
   "exists_body": "Un dossier existe déjà pour cette adresse dans ce projet. Nous venons d'y envoyer un nouveau lien pour le reprendre.",
   "first_name": "Prénom",
   "last_name": "Nom",
-  "contact_title": "Personne qui remplit le diagnostic"
+  "contact_title": "Personne qui remplit le diagnostic",
+  "coach_fixed": "Votre accompagnateur : {name}"
  },
  "link": {
   "label": "Votre lien personnel",
@@ -421,7 +422,13 @@
   "missing_action": "Action non renseignée : à compléter dans la session",
   "edit_in_session": "Modifier dans la session",
   "pdf": "PDF",
-  "word": "Word"
+  "word": "Word",
+  "export_title": "Exporter le plan",
+  "doc_lang": "Langue du document",
+  "lang_fr": "Français",
+  "lang_en": "English",
+  "dl_pdf": "Télécharger en PDF",
+  "dl_word": "Télécharger en Word"
  },
  "email": {
   "personal_link": {
@@ -619,7 +626,8 @@
   "back": "Retour au plan",
   "error": "Le fichier n'a pas pu être généré. Réessayez, ou utilisez l'export PDF.",
   "provisional": "* Valeur provisoire : la section n'est pas encore complète.",
-  "no_data": "Pas encore de réponses à afficher."
+  "no_data": "Pas encore de réponses à afficher.",
+  "dist_title": "Répartition des réponses"
  },
  "eval_short": {
   "baseline": "Baseline",
@@ -647,5 +655,13 @@
   "exists": "La table existe déjà : vous pouvez synchroniser.",
   "running": "En cours…",
   "error": "Erreur : {msg}"
+ },
+ "share": {
+  "title": "Lien du formulaire à partager",
+  "desc": "Envoyez ce lien aux organisations : en l'ouvrant, chacune démarre son diagnostic et reçoit son propre lien personnel par e-mail.",
+  "project_link": "Lien du projet",
+  "my_link": "Mon lien de coach",
+  "my_hint": "Les organisations qui entrent par ce lien vous sont automatiquement rattachées.",
+  "disabled": "Le lien public de ce projet est désactivé. Demandez à l'owner du projet de le réactiver."
  }
 }

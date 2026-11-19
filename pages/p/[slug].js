@@ -23,10 +23,11 @@ export default function PublicEntry() {
 
   useEffect(() => {
     if (!query.slug) return;
-    fetch(`/api/public/project?slug=${encodeURIComponent(query.slug)}`)
-      .then(r => r.json()).then(j => (j.error ? setLoadError(j.error) : setProject(j)))
+    const cq = typeof query.coach === 'string' ? `&coach=${encodeURIComponent(query.coach)}` : '';
+    fetch(`/api/public/project?slug=${encodeURIComponent(query.slug)}${cq}`)
+      .then(r => r.json()).then(j => { if (j.error) return setLoadError(j.error); setProject(j); if (j.presetCoach) setForm(f => ({ ...f, coachId: j.presetCoach.id })); })
       .catch(() => setLoadError('offline'));
-  }, [query.slug]);
+  }, [query.slug, query.coach]);
 
   const renderCaptcha = () => {
     if (!SITE_KEY || !window.turnstile || !widget.current || widget.current.dataset.done) return;
@@ -90,7 +91,7 @@ export default function PublicEntry() {
             <input required type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} autoComplete="email" />
             <small>{t('entry.email_hint')}</small>
           </label>
-          {project.coaches?.length ? (
+          {project.presetCoach ? <p className="presetcoach">{t('entry.coach_fixed', { name: safeStr(project.presetCoach.name) })}</p> : project.coaches?.length ? (
             <label>{t('entry.coach')}
               <select value={form.coachId} onChange={e => setForm({ ...form, coachId: e.target.value })}>
                 <option value="">{t('entry.coach_none')}</option>

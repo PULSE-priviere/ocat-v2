@@ -563,3 +563,21 @@ summary:focus-visible { outline: none; text-decoration: underline; text-underlin
 .callout p { margin: 0; line-height: 1.55; }
 .planlist.readonly li { grid-template-columns: 1fr 11rem; }
 .planrow-side b { font-weight: 600; }
+
+/* Export du plan : langue du document (menu) puis deux boutons de téléchargement, distincts du sélecteur FR/EN */
+.exportbar { display: inline-flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; margin-left: auto; padding: 0.3rem 0.4rem 0.3rem 0.8rem; background: #fff; border: 1px solid var(--b1); border-radius: 12px; }
+.exportlang { display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: var(--t3); font-weight: 500; }
+.exportlang select { width: auto; padding: 0.3rem 2rem 0.3rem 0.6rem; font-size: 0.84rem; }
+.pdoc-dist { margin-top: 12px; }
+.pdoc-dist h3 { font-size: 12px; margin: 0 0 6px; }
+
+/* Partage du formulaire par les coachs */
+.sharebar { border: 1px solid #CBE6D4; background: #F1F8F4; border-radius: 14px; padding: 1rem 1.15rem; margin: 0 0 1.4rem; }
+.sharebar .linktitle { margin: 0 0 0.2rem; color: var(--greenFg); }
+.sharebar .linktitle::before { background: #3F9A63; }
+.sharebar > .linknote { margin: 0 0 0.8rem; }
+.copyrow { margin-top: 0.7rem; }
+.copyrow > label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--t2); margin-bottom: 0.3rem; }
+.copyrow .hint { margin: 0.3rem 0 0; font-size: 0.78rem; color: var(--t3); }
+
+.presetcoach { margin: 0; padding: 0.65rem 0.85rem; border: 1px solid #CBE6D4; background: #F1F8F4; color: #1E6B41; border-radius: 10px; font-size: 0.88rem; font-weight: 500; }

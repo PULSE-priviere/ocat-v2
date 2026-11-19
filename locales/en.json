@@ -42,7 +42,8 @@
   "exists_body": "A file already exists for this address in this project. We just sent a new link to that address so you can resume.",
   "first_name": "First name",
   "last_name": "Last name",
-  "contact_title": "Person filling in the assessment"
+  "contact_title": "Person filling in the assessment",
+  "coach_fixed": "Your coach: {name}"
  },
  "link": {
   "label": "Your personal link",
@@ -421,7 +422,13 @@
   "missing_action": "Action not filled in: complete it in the session",
   "edit_in_session": "Edit in the session",
   "pdf": "PDF",
-  "word": "Word"
+  "word": "Word",
+  "export_title": "Export the plan",
+  "doc_lang": "Document language",
+  "lang_fr": "Français",
+  "lang_en": "English",
+  "dl_pdf": "Download as PDF",
+  "dl_word": "Download as Word"
  },
  "email": {
   "personal_link": {
@@ -619,7 +626,8 @@
   "back": "Back to the plan",
   "error": "The file could not be generated. Try again, or use the PDF export.",
   "provisional": "* Provisional value: the section is not complete yet.",
-  "no_data": "No answers to display yet."
+  "no_data": "No answers to display yet.",
+  "dist_title": "Breakdown of answers"
  },
  "eval_short": {
   "baseline": "Baseline",
@@ -647,5 +655,13 @@
   "exists": "The table already exists: you can synchronise.",
   "running": "Running…",
   "error": "Error: {msg}"
+ },
+ "share": {
+  "title": "Form link to share",
+  "desc": "Send this link to organisations: by opening it, each one starts its assessment and receives its own personal link by email.",
+  "project_link": "Project link",
+  "my_link": "My coach link",
+  "my_hint": "Organisations that come in through this link are automatically attached to you.",
+  "disabled": "This project's public link is disabled. Ask the project owner to turn it back on."
  }
 }

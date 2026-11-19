@@ -8,7 +8,7 @@ import { useI18n } from '../../../lib/i18n';
 import { sb, fetchIn } from '../../../lib/supabase';
 import { loadBank } from '../../../lib/bank';
 import { buildPlanData } from '../../../lib/planData';
-import { radarSvg, barsSvg, timelineSvg } from '../../../lib/planCharts';
+import { radarSvg, barsSvg, timelineSvg, distributionSvg } from '../../../lib/planCharts';
 import { fullName } from '../../../lib/names';
 import { safeStr } from '../../../lib/safe';
 import appConfig from '../../../app.config';
@@ -49,8 +49,9 @@ export default function PlanExport() {
       const radar = radarSvg({ labels: d.sections.map(s => `S${s.idx}`), series: d.series, size: 340 });
       const bars = barsSvg({ items: d.sections.map(s => ({ label: `${s.idx}. ${s.name}`, value: s.score })), width: 340 });
       const cal = timelineSvg({ rows: d.rows.map(r => ({ n: r.n, label: r.action || r.question, due: r.due })), today: new Date(`${d.today}T12:00:00`), width: 680, lang, labels: { today: t('planx.today') } });
+      const dist = distributionSvg({ items: d.dist, width: 680, labels: { c3: t('answer.short_3'), c2: t('answer.short_2'), c1: t('answer.short_1'), na: t('answer.short_NA') } });
       const png = async c => (c.svg ? { data: await svgToPng(c.svg, c.w, c.h), w: c.w, h: c.h } : null);
-      const images = { radar: await png(radar), bars: await png(bars), timeline: await png(cal) };
+      const images = { radar: await png(radar), bars: await png(bars), timeline: await png(cal), dist: await png(dist) };
       if (appConfig.logoUrl) { try { images.logo = await loadLogoPng(appConfig.logoUrl, 28); } catch { /* sans logo */ } }
       const blob = await planDocxBlob({ d, t, lang, images });
       const url = URL.createObjectURL(blob);

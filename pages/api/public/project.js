@@ -13,5 +13,12 @@ export default async function handler(req, res) {
       .eq('project_id', p.id).eq('role', 'coach').eq('offered_to_osc', true);
     coaches = (data || []).map(m => ({ id: m.user_id, name: m.profiles?.name || m.profiles?.email }));
   }
-  res.json({ name: p.name, welcome_fr: p.welcome_fr, welcome_en: p.welcome_en, coaches });
+  // Lien d'un coach (?coach=…) : l'OSC lui est rattachée d'office ; le coach doit appartenir à ce projet
+  let presetCoach = null;
+  const cid = String(req.query.coach || '');
+  if (/^[0-9a-f-]{36}$/i.test(cid)) {
+    const { data: m } = await db.from('memberships').select('user_id, profiles(name, first_name, last_name, email)').eq('project_id', p.id).eq('user_id', cid).eq('role', 'coach').maybeSingle();
+    if (m) presetCoach = { id: m.user_id, name: [m.profiles?.first_name, m.profiles?.last_name].filter(Boolean).join(' ') || m.profiles?.name || m.profiles?.email };
+  }
+  res.json({ name: p.name, welcome_fr: p.welcome_fr, welcome_en: p.welcome_en, coaches, presetCoach });
 }

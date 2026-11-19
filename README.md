@@ -124,3 +124,9 @@ Thème sobre inspiré des interfaces type Supabase : fond gris très clair, cart
 - Menu latéral collé au bord gauche, repliable (bouton en haut à gauche), avec la liste des projets.
 - OSC : rubrique « Plan d'accompagnement individuel » en lecture seule (visible quand le coach l'a partagé).
 - Cases à cocher instantanées, boutons avec indicateur d'envoi.
+
+## Mise à jour 3.1
+
+- Plan : export clarifié (menu « Langue du document » puis « Télécharger en PDF » / « Télécharger en Word ») ; le diagramme de répartition des réponses figure dans la vue d'ensemble du PDF et du Word.
+- Cohorte : bloc « Lien du formulaire à partager » visible par tous les rôles. Le coach dispose aussi de « Mon lien de coach » (`/p/<slug>?coach=<id>`) : les organisations qui entrent par ce lien lui sont rattachées d'office. Le coach doit être membre du projet, sinon le paramètre est ignoré.
+- Aucune migration.

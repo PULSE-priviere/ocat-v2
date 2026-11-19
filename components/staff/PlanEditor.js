@@ -5,11 +5,13 @@ import { sb } from '../../lib/supabase';
 import { safeStr } from '../../lib/safe';
 import { planRows } from '../../lib/plan';
 import { timelineSvg } from '../../lib/planCharts';
+import Icon from '../Icon';
 
 export default function PlanEditor({ assessment, bank, answers, goSession }) {
   const { t, lang } = useI18n();
   const [plan, setPlan] = useState(null);   // { status, items: [{ questionId, due, kept }] }
   const [state, setState] = useState('');
+  const [docLang, setDocLang] = useState(lang === 'en' ? 'en' : 'fr');   // langue du document exporté, indépendante de la langue de l'écran
   const timer = useRef(null);
 
   useEffect(() => {
@@ -47,12 +49,15 @@ export default function PlanEditor({ assessment, bank, answers, goSession }) {
           </select>
         </label>
         <span className="grow" />
-        {['pdf', 'word'].map(kind => (
-          <span key={kind} className={`exp ${kind}`}>
-            <b>{t(`plan.${kind}`)}</b>
-            {['fr', 'en'].map(l => <a key={l} href={`/staff/plan/${assessment.id}?lang=${l}&format=${kind === 'pdf' ? 'pdf' : 'docx'}`} target="_blank" rel="noreferrer">{l.toUpperCase()}</a>)}
-          </span>
-        ))}
+        <div className="exportbar" role="group" aria-label={t('plan.export_title')}>
+          <label className="exportlang">{t('plan.doc_lang')}
+            <select value={docLang} onChange={e => setDocLang(e.target.value)}>
+              <option value="fr">{t('plan.lang_fr')}</option><option value="en">{t('plan.lang_en')}</option>
+            </select>
+          </label>
+          <a className="btn" href={`/staff/plan/${assessment.id}?lang=${docLang}&format=pdf`} target="_blank" rel="noreferrer"><Icon name="download" size={15} />{t('plan.dl_pdf')}</a>
+          <a className="btn" href={`/staff/plan/${assessment.id}?lang=${docLang}&format=docx`} target="_blank" rel="noreferrer"><Icon name="download" size={15} />{t('plan.dl_word')}</a>
+        </div>
         {state ? <span className="muted small">{t(`save.${state}`)}</span> : null}
       </div>
       <section className="card pcal">

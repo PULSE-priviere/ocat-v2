@@ -12,6 +12,7 @@ import ProjectSections from '../../components/staff/ProjectSections';
 import Journal from '../../components/staff/Journal';
 import Duplicates from '../../components/staff/Duplicates';
 import Admin from '../../components/staff/Admin';
+import ShareLinks from '../../components/staff/ShareLinks';
 import { useI18n } from '../../lib/i18n';
 import { useStaff } from '../../lib/useStaff';
 import { sb } from '../../lib/supabase';
@@ -94,7 +95,7 @@ export default function Staff() {
         {error ? <p className="error">{t(`errors.${error}`)}</p> : null}
         {!data ? <p className="muted">{t('common.loading')}</p> : (
           <>
-            {cur === 'cohort' && <Cohort project={project} cohort={data.cohort} coaches={coaches} owner={owner} reload={reload} />}
+            {cur === 'cohort' && <><ShareLinks project={project} staff={staff} /><Cohort project={project} cohort={data.cohort} coaches={coaches} owner={owner} reload={reload} /></>}
             {cur === 'needs' && <Needs project={project} cohort={data.cohort} needs={data.needs} />}
             {cur === 'team' && <Team project={project} members={data.members} isAdmin={staff.profile.is_admin} reload={reload} />}
             {cur === 'project' && <ProjectSettings project={project} needs={data.needs.needs} reload={() => { staff.refresh(); reload(); }} />}

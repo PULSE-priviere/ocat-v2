@@ -1,5 +1,5 @@
 // Document du plan d'accompagnement : bandeau, vue d'ensemble, calendrier, actions (utilisé pour l'écran, le PDF et les tests)
-import { radarSvg, barsSvg, timelineSvg } from '../lib/planCharts';
+import { radarSvg, barsSvg, timelineSvg, distributionSvg } from '../lib/planCharts';
 import { fmtDate } from '../lib/planData';
 
 export default function PlanDocument({ d, t, lang }) {
@@ -7,6 +7,7 @@ export default function PlanDocument({ d, t, lang }) {
   const radar = radarSvg({ labels: d.sections.map(s => `S${s.idx}`), series: d.series, responsive: true });
   const bars = barsSvg({ items: d.sections.map(s => ({ label: `${s.idx}. ${s.name}`, value: s.score, provisional: s.provisional })), responsive: true });
   const cal = timelineSvg({ rows: d.rows.map(r => ({ n: r.n, label: r.action || r.question, due: r.due })), today: new Date(`${d.today}T12:00:00`), lang, labels: { today: t('planx.today') }, responsive: true });
+  const dist = distributionSvg({ items: d.dist || [], labels: { c3: t('answer.short_3'), c2: t('answer.short_2'), c1: t('answer.short_1'), na: t('answer.short_NA') }, responsive: true });
   const undated = d.rows.filter(r => !r.due).length;
   return (
     <article className="pdoc">
@@ -31,6 +32,7 @@ export default function PlanDocument({ d, t, lang }) {
             <p className="pdoc-global"><span>{t('planx.global')}</span> <b>{d.global != null ? `${d.global.toFixed(2)}${d.globalProvisional ? '*' : ''}` : '—'}</b><small> / 3</small></p>
             {d.hasProvisional ? <p className="pdoc-note">{t('planx.provisional')}</p> : null}</td>
         </tr></tbody></table>
+        {dist.svg ? <div className="pdoc-dist"><h3>{t('planx.dist_title')}</h3><div dangerouslySetInnerHTML={{ __html: dist.svg }} /></div> : null}
       </section>
 
       <section className="pdoc-sec">
