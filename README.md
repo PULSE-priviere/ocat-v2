@@ -139,3 +139,12 @@ Thème sobre inspiré des interfaces type Supabase : fond gris très clair, cart
 - Onglet Équipe : un owner invite (coach et/ou owner), attribue les rôles case par case et révoque ; un coach voit l'équipe en lecture seule. Jamais de rôle administrateur ici : seul un administrateur en crée un (page Administration).
 - Un projet garde toujours au moins un owner (garde en base ; l'administrateur n'est pas concerné).
 - Mon profil : carte « Mes droits » (administrateur, et rôle dans chaque projet).
+
+## Mise à jour 3.3 (espace coach)
+
+**Ordre : d'abord la base, ensuite le code.** Supabase > SQL Editor : exécuter `supabase/migrations/0008_session_status.sql`.
+
+- Accueil du coach (`/staff`) : prise en main en 4 étapes (partager son lien, suivre les questionnaires, mener la session, valider et partager le plan), « où trouver quoi », « À faire maintenant », chiffres clés, liste de ses organisations par étape, guide de session, lien de coach.
+- Étape d'accompagnement de chaque organisation : questionnaire en cours, session à planifier, session planifiée, session en cours, plan en attente de validation, plan validé, plan partagé. Elle est déduite du statut de la session (choisi par le coach, avec une date), du travail déjà saisi (une note ou une action fait passer la session « en cours » toute seule) et du statut du plan (brouillon, validé, partagé) ; voir `lib/stage.js`.
+- Fiche d'une organisation : bandeau de progression, statut et date de la session (onglet Session).
+- Cohorte : colonne Étape, filtres par étape ; le filtre par coach et la colonne Coach sont réservés aux owners et à l'administrateur. Un coach ne voit que ses organisations (règle en base, inchangée).

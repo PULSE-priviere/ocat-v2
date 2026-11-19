@@ -7,7 +7,7 @@ import { planRows } from '../../lib/plan';
 import { timelineSvg } from '../../lib/planCharts';
 import Icon from '../Icon';
 
-export default function PlanEditor({ assessment, bank, answers, goSession }) {
+export default function PlanEditor({ assessment, bank, answers, goSession, onStatus }) {
   const { t, lang } = useI18n();
   const [plan, setPlan] = useState(null);   // { status, items: [{ questionId, due, kept }] }
   const [state, setState] = useState('');
@@ -16,11 +16,11 @@ export default function PlanEditor({ assessment, bank, answers, goSession }) {
 
   useEffect(() => {
     sb().from('action_plans').select('items, status').eq('assessment_id', assessment.id).maybeSingle()
-      .then(({ data }) => setPlan({ status: data?.status || 'draft', items: Array.isArray(data?.items) ? data.items : [] }));
+      .then(({ data }) => { setPlan({ status: data?.status || 'draft', items: Array.isArray(data?.items) ? data.items : [] }); onStatus?.(data?.status || null); });
   }, [assessment.id]);
 
   const persist = next => {
-    setPlan(next); setState('saving');
+    setPlan(next); setState('saving'); onStatus?.(next.status);
     clearTimeout(timer.current);
     timer.current = setTimeout(async () => {
       const { error } = await sb().from('action_plans').upsert({ assessment_id: assessment.id, items: next.items, status: next.status }, { onConflict: 'assessment_id' });

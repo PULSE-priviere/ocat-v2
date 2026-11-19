@@ -11,10 +11,14 @@ export default function StaffNav({ staff, project, active, onSignOut }) {
   const { t } = useI18n();
   const projects = (staff.projects || []).filter(p => !p.archived || staff.profile?.is_admin);
   const owner = project ? staff.isOwner(project.id) : false;
+  const coachHome = !staff.profile?.is_admin && Object.values(staff.roles || {}).some(r => r.includes('coach'));   // un coach arrive sur son accueil
+  const anyOwner = Object.values(staff.roles || {}).some(r => r.includes('owner'));
+  const showProjects = !coachHome || projects.length > 1 || anyOwner;
   const items = ['cohort', 'needs', 'team', ...(owner ? ['project', 'sections', 'journal', 'duplicates'] : [])];
   return (
     <nav className="sidenav" aria-label={t('staff.menu')}>
-      <Link className={`sideitem ${active === 'home' ? 'on' : ''}`} href="/staff"><Icon name="grid" />{t('staff.all_projects')}</Link>
+      {coachHome ? <Link className={`sideitem ${active === 'home' ? 'on' : ''}`} href="/staff"><Icon name="home" />{t('staff.home')}</Link> : null}
+      {showProjects ? <Link className={`sideitem ${active === (coachHome ? 'projects' : 'home') ? 'on' : ''}`} href={coachHome ? '/staff?tab=projects' : '/staff'}><Icon name="grid" />{t('staff.all_projects')}</Link> : null}
       <div className="sideprojects">
         {projects.map(p => {
           const open = project && project.id === p.id;

@@ -5,10 +5,11 @@ import Icon from '../Icon';
 import { useI18n, pick } from '../../lib/i18n';
 import { sb } from '../../lib/supabase';
 import { safeStr } from '../../lib/safe';
+import { effectiveSession } from '../../lib/stage';
 
 const SCALE = ['NA', '1', '2', '3'];
 
-export default function SessionTab({ bank, answers, comments, needs, assessment, saveAnswer, toggleNeed, addNeed, onQuestionAdded }) {
+export default function SessionTab({ hasWork, onUpdate, bank, answers, comments, needs, assessment, saveAnswer, toggleNeed, addNeed, onQuestionAdded }) {
   const { t, lang } = useI18n();
   const [filter, setFilter] = useState('support');
   const [open, setOpen] = useState(null);   // null : la première section concernée est ouverte ; sinon { idSection: true/false }
@@ -28,8 +29,20 @@ export default function SessionTab({ bank, answers, comments, needs, assessment,
   const toggle = id => setOpen(o => { const base = o || (firstWith ? { [firstWith]: true } : {}); return { ...base, [id]: !base[id] }; });
   const setAll = v => setOpen(Object.fromEntries(bank.sections.map(s => [s.id, v])));
 
+  const sessionValue = effectiveSession(assessment, hasWork);
   return (
     <>
+      <section className="sessionbar">
+        <div className="sessionbar-text"><b>{t('sess.title')}</b><p>{t('sess.hint')}</p></div>
+        <label>{t('sess.status')}
+          <select value={sessionValue} onChange={e => onUpdate({ session_status: e.target.value }).catch(() => {})}>
+            {['to_plan', 'planned', 'in_progress', 'done'].map(k => <option key={k} value={k}>{t(`sess.${k}`)}</option>)}
+          </select>
+        </label>
+        <label>{t('sess.date')}
+          <input type="date" value={assessment.session_date || ''} onChange={e => onUpdate({ session_date: e.target.value || null }).catch(() => {})} />
+        </label>
+      </section>
       <details className="guide-card" open={!started}>
         <summary><Icon name="bulb" />{t('session.guide_title')}</summary>
         <ol>{[1, 2, 3, 4, 5].map(n => <li key={n}>{t(`session.guide_${n}`)}</li>)}</ol>

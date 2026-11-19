@@ -13,6 +13,7 @@ import Journal from '../../components/staff/Journal';
 import Duplicates from '../../components/staff/Duplicates';
 import Admin from '../../components/staff/Admin';
 import ShareLinks from '../../components/staff/ShareLinks';
+import CoachHome from '../../components/staff/CoachHome';
 import { useI18n } from '../../lib/i18n';
 import { useStaff } from '../../lib/useStaff';
 import { sb } from '../../lib/supabase';
@@ -36,13 +37,8 @@ export default function Staff() {
   const project = pid ? projects.find(p => p.id === pid) : null;
   const owner = project ? staff.isOwner(project.id) : false;
   const allowed = ['cohort', 'needs', 'team', ...(owner ? ['project', 'sections', 'journal', 'duplicates'] : [])];
-  const cur = project ? (allowed.includes(tab) ? tab : 'cohort') : (tab === 'admin' && staff.profile?.is_admin ? 'admin' : 'home');
-
-  // Un coach qui n'a qu'un projet arrive directement dessus
-  useEffect(() => {
-    if (staff.loading || pid || tab || staff.profile?.is_admin || projects.length !== 1) return;
-    router.replace(`/staff?p=${projects[0].id}&tab=cohort`);
-  }, [staff.loading, pid, tab, projects.length]); // eslint-disable-line react-hooks/exhaustive-deps
+  const coachHome = !staff.profile?.is_admin && Object.values(staff.roles || {}).some(r => r.includes('coach'));
+  const cur = project ? (allowed.includes(tab) ? tab : 'cohort') : (tab === 'admin' && staff.profile?.is_admin ? 'admin' : tab === 'projects' ? 'projects' : 'home');
 
   useEffect(() => {
     if (!project) { setData(null); return; }
@@ -75,7 +71,7 @@ export default function Staff() {
       </>
     );
   } else if (!project) {
-    body = <ProjectsHome staff={staff} projects={projects} />;
+    body = cur === 'home' && coachHome ? <CoachHome staff={staff} /> : <ProjectsHome staff={staff} projects={projects} />;
   } else {
     body = (
       <>

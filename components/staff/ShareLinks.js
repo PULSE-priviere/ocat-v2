@@ -15,7 +15,7 @@ function CopyRow({ label, url, hint }) {
   );
 }
 
-export default function ShareLinks({ project, staff }) {
+export default function ShareLinks({ project, staff, onlyMine = false, heading = '' }) {
   const { t } = useI18n();
   const [origin, setOrigin] = useState('');
   useEffect(() => setOrigin(window.location.origin), []);
@@ -24,10 +24,10 @@ export default function ShareLinks({ project, staff }) {
   const isCoach = (staff.roles?.[project.id] || []).includes('coach');
   return (
     <section className="sharebar">
-      <p className="linktitle">{t('share.title')}</p>
-      <p className="small linknote">{t('share.desc')}</p>
-      <CopyRow label={t('share.project_link')} url={base} />
-      {isCoach ? <CopyRow label={t('share.my_link')} url={`${base}?coach=${staff.profile.id}`} hint={t('share.my_hint')} /> : null}
+      <p className="linktitle">{heading ? `${t('share.my_link')} · ${heading}` : t(onlyMine ? 'share.my_link' : 'share.title')}</p>
+      <p className="small linknote">{t(onlyMine ? 'share.my_hint' : 'share.desc')}</p>
+      {onlyMine ? null : <CopyRow label={t('share.project_link')} url={base} />}
+      {isCoach ? <CopyRow label={onlyMine ? t('share.project_link') : t('share.my_link')} url={`${base}?coach=${staff.profile.id}`} hint={onlyMine ? '' : t('share.my_hint')} /> : null}
     </section>
   );
 }

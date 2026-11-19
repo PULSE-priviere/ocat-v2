@@ -4,6 +4,8 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import Layout from '../../../components/Layout';
 import StaffNav from '../../../components/staff/StaffNav';
+import { StageTracker } from '../../../components/staff/StageBadge';
+import { stageOf } from '../../../lib/stage';
 import OrgInfoForm from '../../../components/OrgInfoForm';
 import Recap from '../../../components/staff/Recap';
 import SessionTab from '../../../components/staff/SessionTab';
@@ -34,6 +36,8 @@ export default function SubjectPage() {
   const [allAnswers, setAllAnswers] = useState({});   // assessment_id → { question_id → réponse } (radar)
   const [needs, setNeeds] = useState([]);
   const [tab, setTab] = useState('recap');
+  const [planStatus, setPlanStatus] = useState(null);
+  useEffect(() => { if (typeof query.tab === 'string' && TABS.includes(query.tab)) setTab(query.tab); }, [query.tab]);   // ex. /staff/subject/…?tab=session
   const [link, setLink] = useState('');
   const [msg, setMsg] = useState('');
   const [tick, setTick] = useState(0);
@@ -57,6 +61,7 @@ export default function SubjectPage() {
       const ids = Object.values(curAns).map(a => a.id);
       const links = ids.length ? await fetchIn(chunk => sb().from('answer_needs').select('answer_id, need_id').in('answer_id', chunk), ids) : [];
       Object.values(curAns).forEach(a => { a.needIds = links.filter(l => l.answer_id === a.id).map(l => l.need_id); });
+      if (cur) { const { data: pl } = await sb().from('action_plans').select('status').eq('assessment_id', cur.id).maybeSingle(); setPlanStatus(pl?.status || null); }
       const { data: nd } = await sb().from('needs').select('id, label').eq('project_id', s.project.id).order('label');
       setSubject(s); setAssessments(sorted); setCurrent(cur); setBank(b); setAllAnswers(all); setAnswers({ ...curAns }); setNeeds(nd || []);
     })();
@@ -116,6 +121,8 @@ export default function SubjectPage() {
   // Profil : une série par type d'évaluation (clés normalisées), valeurs provisoires incluses
   const series = buildSeries({ assessments, allAnswers, bank, t });
 
+  const hasWork = Object.values(answers).some(a => String(a.coach_notes || '').trim() || String(a.coach_action || '').trim());
+  const stage = stageOf({ assessment: current, plan: planStatus ? { status: planStatus } : null, hasWork });
   const identity = { org: appConfig.orgName, person: fullName(staff.profile), href: '/staff/profile' };
   return (
     <Layout wide title={safeStr(subject.name)} home="/staff" identity={identity}
@@ -143,6 +150,7 @@ export default function SubjectPage() {
         }} />
       {msg && msg !== 'forbidden' ? <p className="error">{t(`errors.${msg}`)}</p> : null}
 
+      {current ? <StageTracker stage={stage} date={current.session_date} /> : null}
       <nav className="tabs" role="tablist">
         {TABS.map(k => <button key={k} role="tab" aria-selected={tab === k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{t(`subject.tab_${k}`)}</button>)}
       </nav>
@@ -152,10 +160,10 @@ export default function SubjectPage() {
       ) : tab === 'recap' ? (
         <Recap bank={bank} progress={progress} answers={answers} series={series} assessment={current} saveAnswer={saveAnswer} onStartSession={() => setTab('session')} />
       ) : tab === 'session' ? (
-        <SessionTab bank={bank} answers={answers} comments={current.section_comments || {}} needs={needs} assessment={current}
+        <SessionTab hasWork={hasWork} onUpdate={updateAssessment} bank={bank} answers={answers} comments={current.section_comments || {}} needs={needs} assessment={current}
           saveAnswer={saveAnswer} toggleNeed={toggleNeed} addNeed={addNeed} onQuestionAdded={reload} />
       ) : (
-        <PlanEditor assessment={current} bank={bank} answers={answers} goSession={() => setTab('session')} />
+        <PlanEditor assessment={current} bank={bank} answers={answers} onStatus={setPlanStatus} goSession={() => setTab('session')} />
       )}
     </Layout>
   );
