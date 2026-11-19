@@ -166,7 +166,14 @@
   "airtable_not_configured": "Airtable is not configured.",
   "airtable_error": "Airtable rejected the request.",
   "last_owner_project": "The project must keep at least one owner: give the owner role to someone else first.",
-  "invalid_entry_profile": "Choose the country, the type of structure and the size of your organisation."
+  "invalid_entry_profile": "Choose the country, the type of structure and the size of your organisation.",
+  "airtable_401": "Airtable rejects the token (error 401, \"Authentication required\"). It is invalid, expired or revoked, or was pasted with extra characters. Create a new personal access token at airtable.com/create/tokens, copy it in full (it starts with \"pat\") and paste it into the \"Airtable access token\" field.",
+  "airtable_403": "Airtable recognises the token, but it has no access to this base, or the table does not exist yet (error 403). At airtable.com/create/tokens, add the base under \"Access\" with the data.records:read and data.records:write scopes; then click \"Create the table\" if it does not exist.",
+  "airtable_404": "Base or table not found (error 404). Check the base ID (it starts with \"app\") and the exact table name, or click \"Create the table\".",
+  "airtable_422": "Airtable rejects this data (error 422): the table does not match the expected columns. Click \"Create the table\" on an empty table, or rename the columns as expected.",
+  "airtable_scopes": "The token is missing scopes. At airtable.com/create/tokens, add data.records:read and data.records:write.",
+  "airtable_token_format": "An Airtable access token starts with \"pat\". What you pasted is not one (old API key, base ID, or other text).",
+  "airtable_base_format": "The base ID starts with \"app\" (for example appXXXXXXXXXXXXXX). Paste it alone, or paste the base's address: the ID will be extracted."
  },
  "login": {
   "title": "Team sign-in",
@@ -335,7 +342,13 @@
   "at_table": "Table name",
   "at_token_hint": "The token (starts with pat) needs the data.records:write scope and, to create the table, schema.bases:write. It is stored server-side and never shown again; leave the field empty to keep the current token.",
   "at_auto": "Automatically send each submitted assessment",
-  "at_saved": "Connection saved."
+  "at_saved": "Connection saved.",
+  "at_status_fail": "The fields are filled in, but Airtable refuses the connection.",
+  "at_saved_ok": "Connection saved and verified: Airtable accepts it.",
+  "at_saved_but": "Connection saved, but Airtable does not accept it yet.",
+  "at_token_used": "Token in use: {hint} ({source}).",
+  "at_src_app": "saved in the application",
+  "at_src_env": "Vercel environment variable"
  },
  "subject": {
   "back": "Back to the cohort",
@@ -654,7 +667,7 @@
  "mex": {
   "title": "Monitoring & evaluation: export to Airtable",
   "intro": "Each assessment (baseline, midline, endline) becomes a row in an Airtable table: CSO context, overall score, section scores, completion. A section's score appears there only once the section is complete.",
-  "not_configured": "Airtable is not configured: set AIRTABLE_TOKEN and AIRTABLE_BASE_ID in Vercel, then redeploy.",
+  "not_configured": "Airtable is not configured: enter the token and the base ID in Administration > Airtable.",
   "setup": "Create the table in Airtable",
   "setup_hint": "Do this once. The Airtable token needs the schema.bases:write scope.",
   "sync": "Synchronise now",

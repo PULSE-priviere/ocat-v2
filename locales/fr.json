@@ -166,7 +166,14 @@
   "airtable_not_configured": "Airtable n'est pas configuré.",
   "airtable_error": "Airtable a refusé la requête.",
   "last_owner_project": "Le projet doit garder au moins un owner : donnez d'abord le rôle owner à quelqu'un d'autre.",
-  "invalid_entry_profile": "Choisissez le pays, le type de structure et la taille de votre organisation."
+  "invalid_entry_profile": "Choisissez le pays, le type de structure et la taille de votre organisation.",
+  "airtable_401": "Airtable refuse le jeton (erreur 401, « Authentication required »). Il est invalide, expiré ou révoqué, ou il a été collé avec des caractères en trop. Créez un nouveau jeton d'accès personnel sur airtable.com/create/tokens, copiez-le en entier (il commence par « pat ») et collez-le dans le champ « Jeton d'accès Airtable ».",
+  "airtable_403": "Airtable reconnaît le jeton, mais il n'a pas accès à cette base, ou la table n'existe pas encore (erreur 403). Sur airtable.com/create/tokens, ajoutez la base dans « Access » avec les droits data.records:read et data.records:write ; puis cliquez sur « Créer la table » si elle n'existe pas.",
+  "airtable_404": "Base ou table introuvable (erreur 404). Vérifiez l'identifiant de la base (il commence par « app ») et le nom exact de la table, ou cliquez sur « Créer la table ».",
+  "airtable_422": "Airtable refuse ces données (erreur 422) : la table ne correspond pas aux colonnes attendues. Cliquez sur « Créer la table » sur une table vide, ou renommez les colonnes comme prévu.",
+  "airtable_scopes": "Il manque des droits au jeton. Sur airtable.com/create/tokens, ajoutez data.records:read et data.records:write.",
+  "airtable_token_format": "Un jeton d'accès Airtable commence par « pat ». Ce que vous avez collé n'en est pas un (ancienne clé d'API, identifiant de base, ou autre texte).",
+  "airtable_base_format": "L'identifiant de base commence par « app » (par exemple appXXXXXXXXXXXXXX). Collez-le seul, ou collez l'adresse de la base : l'identifiant en sera extrait."
  },
  "login": {
   "title": "Connexion de l'équipe",
@@ -335,7 +342,13 @@
   "at_table": "Nom de la table",
   "at_token_hint": "Le jeton (commence par pat) doit avoir les droits data.records:write et, pour créer la table, schema.bases:write. Il est enregistré côté serveur et n'est jamais réaffiché ; laissez le champ vide pour garder le jeton actuel.",
   "at_auto": "Envoyer automatiquement chaque diagnostic soumis",
-  "at_saved": "Connexion enregistrée."
+  "at_saved": "Connexion enregistrée.",
+  "at_status_fail": "Les champs sont remplis, mais Airtable refuse la connexion.",
+  "at_saved_ok": "Connexion enregistrée et vérifiée : Airtable l'accepte.",
+  "at_saved_but": "Connexion enregistrée, mais Airtable ne l'accepte pas encore.",
+  "at_token_used": "Jeton utilisé : {hint} ({source}).",
+  "at_src_app": "enregistré dans l'application",
+  "at_src_env": "variable d'environnement Vercel"
  },
  "subject": {
   "back": "Retour à la cohorte",
@@ -654,7 +667,7 @@
  "mex": {
   "title": "Suivi-évaluation : export vers Airtable",
   "intro": "Chaque évaluation (baseline, midline, endline) devient une ligne dans une table Airtable : contexte de l'OSC, score global, scores par section, complétion. Le score d'une section n'y figure qu'une fois la section complète.",
-  "not_configured": "Airtable n'est pas configuré : renseignez AIRTABLE_TOKEN et AIRTABLE_BASE_ID dans Vercel, puis redéployez.",
+  "not_configured": "Airtable n'est pas configuré : saisissez le jeton et l'identifiant de la base dans Administration > Airtable.",
   "setup": "Créer la table dans Airtable",
   "setup_hint": "À faire une seule fois. Le jeton Airtable doit avoir le droit schema.bases:write.",
   "sync": "Synchroniser maintenant",

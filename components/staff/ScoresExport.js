@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useI18n } from '../../lib/i18n';
 import { staffApi } from '../../lib/supabase';
 import { downloadCsv } from '../../lib/csv';
+import { airtableMsg } from '../../lib/airtableMsg';
 
 export default function ScoresExport({ project }) {
   const { t } = useI18n();
@@ -13,7 +14,7 @@ export default function ScoresExport({ project }) {
   const run = async (name, fn) => {
     setBusy(name); setMsg(null); setProg(null);
     try { await fn(); } catch (e) {
-      setMsg({ kind: 'error', text: e.message === 'airtable_not_configured' ? t('mex.not_configured') : t('mex.error', { msg: e.detail || t(`errors.${e.message}`) }) });
+      setMsg({ kind: 'error', text: airtableMsg(t, e) });
     }
     setBusy('');
   };

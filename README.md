@@ -159,3 +159,10 @@ Thème sobre inspiré des interfaces type Supabase : fond gris très clair, cart
 - « Commencer le diagnostic » (page de confirmation) ouvre directement le diagnostic (`?start=1`), et non plus le tableau de bord.
 - Recherche d'une organisation : cohorte (tous rôles), accueil du coach, et recherche globale sur « Tous les projets » (administrateur, owners). Insensible aux accents.
 - L'export Airtable écrit désormais des libellés lisibles (Pays, Type de structure, Taille).
+
+## Mise à jour 3.5 (diagnostic Airtable)
+
+- « Connectée » n'est affiché qu'après une vraie vérification auprès d'Airtable (jeton, droits, puis base et table) ; sinon l'écran dit pourquoi, avec la marche à suivre (erreurs 401, 403, 404, 422, droits manquants).
+- Le jeton collé est nettoyé (sans « Bearer », espaces ni guillemets) et doit commencer par « pat » ; l'identifiant de base peut être collé sous forme d'adresse complète.
+- Après « Enregistrer », la connexion est testée immédiatement. L'écran indique quel jeton est utilisé (application ou variable Vercel).
+- Aucune migration.

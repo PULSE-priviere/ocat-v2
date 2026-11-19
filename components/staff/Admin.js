@@ -11,6 +11,7 @@ import { safeStr } from '../../lib/safe';
 import { fullName } from '../../lib/names';
 import { projectColor } from '../../lib/projectColor';
 import { downloadCsv } from '../../lib/csv';
+import { airtableMsg } from '../../lib/airtableMsg';
 
 export default function Admin({ projects, reload }) {
   const { t } = useI18n();
@@ -192,10 +193,18 @@ function AirtableSettings() {
   useEffect(() => { load(); }, [load]);
   const run = async (name, fn) => {
     setBusy(name); setMsg(null); setProg(null);
-    try { await fn(); } catch (e) { setMsg({ kind: 'error', text: e.message === 'airtable_not_configured' ? t('mex.not_configured') : t('mex.error', { msg: e.detail || t(`errors.${e.message}`) }) }); }
+    try { await fn(); } catch (e) { setMsg({ kind: 'error', text: airtableMsg(t, e) }); }
     setBusy('');
   };
-  const save = e => { e.preventDefault(); run('save', async () => { await staffApi('airtable_save', f); setMsg({ kind: 'ok', text: t('admin.at_saved') }); await load(); }); };
+  // Après l'enregistrement, on vérifie tout de suite auprès d'Airtable
+  const save = e => {
+    e.preventDefault();
+    run('save', async () => {
+      await staffApi('airtable_save', f); await load();
+      try { await staffApi('airtable_test'); setMsg({ kind: 'ok', text: t('admin.at_saved_ok') }); }
+      catch (x) { setMsg({ kind: 'error', text: `${t('admin.at_saved_but')} ${airtableMsg(t, x)}` }); }
+    });
+  };
   const test = () => run('test', async () => { await staffApi('airtable_test'); setMsg({ kind: 'ok', text: t('admin.at_test_ok') }); });
   const setup = () => run('setup', async () => { const r = await staffApi('scores_setup', { all: true }); setMsg({ kind: 'ok', text: t(r.exists ? 'mex.exists' : 'mex.done_setup') }); });
   const sync = () => run('sync', async () => {
@@ -210,17 +219,17 @@ function AirtableSettings() {
   });
   return (
     <>
-      <section className={`feature ${st?.configured ? 'grad-blue' : 'grad-off'}`}>
+      <section className={`feature ${st?.verified ? 'grad-blue' : st?.configured ? 'grad-warn' : 'grad-off'}`}>
         <div className="feature-head">
           <span className="feature-icon"><Icon name="db" size={19} /></span>
           <div>
             <h2>{t('admin.at_title')}</h2>
-            <p>{!st ? t('common.loading') : st.configured ? t('admin.at_status_ok', { base: st.baseId, table: st.table }) : t('admin.at_status_none')}{st?.source === 'env' ? ` ${t('admin.at_from_env')}` : ''}</p>
+            <p>{!st ? t('common.loading') : st.verified ? t('admin.at_status_ok', { base: st.baseId, table: st.table }) : st.configured ? `${t('admin.at_status_fail')} ${airtableMsg(t, { message: st.problem?.code, detail: st.problem?.detail })}` : t('admin.at_status_none')}{st?.source === 'env' ? ` ${t('admin.at_from_env')}` : ''}</p>
           </div>
         </div>
         {st?.configured ? (
           <div className="feature-actions" style={{ marginTop: '1rem' }}>
-            <button className="btn white" aria-busy={busy === 'sync'} disabled={!!busy} onClick={sync}>{t('admin.at_sync_all')}</button>
+            {st.verified ? <button className="btn white" aria-busy={busy === 'sync'} disabled={!!busy} onClick={sync}>{t('admin.at_sync_all')}</button> : null}
             <button className="btn glass" aria-busy={busy === 'test'} disabled={!!busy} onClick={test}>{t('admin.at_test')}</button>
             <button className="btn glass" aria-busy={busy === 'setup'} disabled={!!busy} onClick={setup}>{t('mex.setup')}</button>
             <button className="btn glass" aria-busy={busy === 'csv'} disabled={!!busy} onClick={csv}>{t('admin.at_csv_all')}</button>
@@ -234,11 +243,12 @@ function AirtableSettings() {
         <p className="muted small">{t('admin.at_lead')}</p>
         <form className="form" onSubmit={save}>
           <div className="form row">
-            <label>{t('admin.at_token')}<input type="password" autoComplete="off" placeholder={st?.tokenHint || 'pat…'} value={f.token} onChange={e => setF({ ...f, token: e.target.value })} /></label>
+            <label>{t('admin.at_token')}<input type="password" name="airtable-access-token" autoComplete="new-password" spellCheck={false} placeholder={st?.tokenHint || 'pat…'} value={f.token} onChange={e => setF({ ...f, token: e.target.value })} /></label>
             <label>{t('admin.at_base')}<input required placeholder="app…" value={f.baseId} onChange={e => setF({ ...f, baseId: e.target.value })} /></label>
             <label>{t('admin.at_table')}<input value={f.table} onChange={e => setF({ ...f, table: e.target.value })} /></label>
           </div>
           <p className="muted small">{t('admin.at_token_hint')}</p>
+          {st?.tokenHint ? <p className="muted small">{t('admin.at_token_used', { hint: st.tokenHint, source: t(`admin.at_src_${st.source || 'app'}`) })}</p> : null}
           <label className="check"><input type="checkbox" checked={f.auto} onChange={e => setF({ ...f, auto: e.target.checked })} /><span>{t('admin.at_auto')}</span></label>
           <button className="btn primary" aria-busy={busy === 'save'} disabled={!!busy}>{t('common.save')}</button>
         </form>

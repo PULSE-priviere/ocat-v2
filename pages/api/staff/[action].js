@@ -2,7 +2,7 @@
 import { admin, fail, isEmail, staffFromReq, newToken, hashToken, tokenExpiry, personalUrl, rotateToken } from '../../../lib/server';
 import { sendMail } from '../../../lib/mail';
 import { sendLoginLink } from '../../../lib/login';
-import { airtableConfig, airtableReady, buildRows, pushToAirtable, createScoresTable, testAirtable, FIELD_DEFS } from '../../../lib/scoresExport';
+import { airtableConfig, airtableReady, buildRows, pushToAirtable, createScoresTable, testAirtable, airtableCode, cleanToken, cleanBaseId, FIELD_DEFS } from '../../../lib/scoresExport';
 
 const rpc = async (db, fn, args) => (await db.rpc(fn, args)).data === true;
 
@@ -147,14 +147,14 @@ const actions = {
     if (!(await canScores(db, body))) return [403, 'forbidden'];
     const cfg = await airtableConfig(svc);
     if (!airtableReady(cfg)) return [400, 'airtable_not_configured'];
-    try { return await createScoresTable(cfg); } catch (e) { return [502, 'airtable_error', e.message]; }
+    try { return await createScoresTable(cfg); } catch (e) { return [502, airtableCode(e), e.message]; }
   },
   async scores_sync({ db, svc, body }) {
     if (!(await canScores(db, body))) return [403, 'forbidden'];
     const cfg = await airtableConfig(svc);
     if (!airtableReady(cfg)) return [400, 'airtable_not_configured'];
     const { ids, total, offset } = await assessmentPage(svc, body);
-    try { await pushToAirtable(await buildRows(svc, ids), cfg); } catch (e) { return [502, 'airtable_error', e.message]; }
+    try { await pushToAirtable(await buildRows(svc, ids), cfg); } catch (e) { return [502, airtableCode(e), e.message]; }
     const done = offset + ids.length;
     return { sent: ids.length, done, total, next: ids.length && done < total ? done : null };
   },
@@ -170,16 +170,23 @@ const actions = {
   async airtable_get({ db, svc }) {
     if (!(await rpc(db, 'is_admin'))) return [403, 'forbidden'];
     const cfg = await airtableConfig(svc);
-    return { configured: airtableReady(cfg), baseId: cfg.base, table: cfg.table, auto: cfg.auto,
+    // « configured » = champs remplis ; « verified » = Airtable accepte réellement la connexion
+    let verified = false, problem = null;
+    if (airtableReady(cfg)) {
+      try { await testAirtable(cfg); verified = true; } catch (e) { problem = { code: airtableCode(e), detail: e.message }; }
+    }
+    return { configured: airtableReady(cfg), verified, problem, baseId: cfg.base, table: cfg.table, auto: cfg.auto,
       tokenHint: cfg.token ? `••••${cfg.token.slice(-4)}` : '', source: cfg.fromApp ? 'app' : (cfg.token ? 'env' : '') };
   },
   async airtable_save({ db, svc, body }) {
     if (!(await rpc(db, 'is_admin'))) return [403, 'forbidden'];
     const { data: cur } = await svc.from('app_settings').select('value').eq('key', 'airtable').maybeSingle();
-    const next = { ...(cur?.value || {}), baseId: String(body.baseId || '').trim().slice(0, 40),
-      table: String(body.table || '').trim().slice(0, 100) || 'Scores', auto: body.auto !== false };
-    if (body.token) next.token = String(body.token).trim().slice(0, 300);
-    if (!next.baseId) return [400, 'invalid_form'];
+    const token = cleanToken(body.token);                      // sans « Bearer », espaces ni guillemets
+    if (token && !token.startsWith('pat')) return [400, 'airtable_token_format'];
+    const baseId = cleanBaseId(body.baseId);                   // l'adresse de la base collée en entier convient aussi
+    if (!baseId) return [400, 'airtable_base_format'];
+    const next = { ...(cur?.value || {}), baseId, table: String(body.table || '').trim().slice(0, 100) || 'Scores', auto: body.auto !== false };
+    if (token) next.token = token.slice(0, 300);
     const { error } = await svc.from('app_settings').upsert({ key: 'airtable', value: next, updated_at: new Date().toISOString() });
     if (error) return [500, 'server_error'];
     return { ok: true };
@@ -188,7 +195,7 @@ const actions = {
     if (!(await rpc(db, 'is_admin'))) return [403, 'forbidden'];
     const cfg = await airtableConfig(svc);
     if (!airtableReady(cfg)) return [400, 'airtable_not_configured'];
-    try { return await testAirtable(cfg); } catch (e) { return [502, 'airtable_error', e.message]; }
+    try { return await testAirtable(cfg); } catch (e) { return [502, airtableCode(e), e.message]; }
   },
 
   // Fusion de doublons (F31) : les évaluations passent sur le dossier conservé

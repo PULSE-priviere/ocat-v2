@@ -668,3 +668,5 @@ summary:focus-visible { outline: none; text-decoration: underline; text-underlin
 .sr-main { display: grid; min-width: 0; }
 .entry-org { border: 0; padding: 0; margin: 0; display: grid; gap: 0.9rem; min-width: 0; }
 .entry-org legend { padding: 0 0 0.4rem; font-size: 0.74rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--t3); }
+
+.feature.grad-warn { background: linear-gradient(135deg, #B45309 0%, #E2A33B 100%); }
