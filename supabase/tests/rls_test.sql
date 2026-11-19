@@ -108,6 +108,29 @@ insert into results select 'coach1 révoqué ne voit plus rien', (select count(*
 select set_config('request.jwt.claim.sub', '', true);
 insert into results select 'non connecté ne voit rien', (select count(*) from subjects) = 0;
 
+-- Équipe : lecture par les membres, rôles gérés par l'owner, dernier owner protégé
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000d', true);
+insert into results select 'coach voit l''équipe de son projet', (select count(*) from memberships where project_id = '40000000-0000-0000-0000-000000000001') = 2;
+do $$ begin
+  insert into memberships(user_id, project_id, role) values ('00000000-0000-0000-0000-00000000000d', '40000000-0000-0000-0000-000000000001', 'owner');
+  insert into results values ('coach ne peut pas se donner le rôle owner', false);
+exception when others then insert into results values ('coach ne peut pas se donner le rôle owner', true); end $$;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000b', true);
+do $$ begin
+  insert into memberships(user_id, project_id, role) values ('00000000-0000-0000-0000-00000000000d', '40000000-0000-0000-0000-000000000001', 'owner');
+  insert into results values ('owner donne le rôle owner à un coach (qui reste coach)', true);
+exception when others then insert into results values ('owner donne le rôle owner à un coach (qui reste coach)', false); end $$;
+insert into results select 'la personne cumule les rôles owner et coach', (select count(*) from memberships where user_id = '00000000-0000-0000-0000-00000000000d' and project_id = '40000000-0000-0000-0000-000000000001') = 2;
+do $$ begin
+  delete from memberships where user_id = '00000000-0000-0000-0000-00000000000b' and role = 'owner';
+  insert into results values ('un owner peut se retirer s''il reste un autre owner', true);
+exception when others then insert into results values ('un owner peut se retirer s''il reste un autre owner', false); end $$;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000d', true);
+do $$ begin
+  delete from memberships where user_id = '00000000-0000-0000-0000-00000000000d' and role = 'owner';
+  insert into results values ('le dernier owner ne peut pas être retiré', false);
+exception when others then insert into results values ('le dernier owner ne peut pas être retiré', sqlerrm = 'last_owner'); end $$;
+
 reset role;
 select test, case when ok then 'OK' else 'ÉCHEC' end as result from results;
 rollback;

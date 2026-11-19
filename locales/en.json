@@ -161,7 +161,8 @@
   "invalid_profile": "Check the details entered (first and last name are required).",
   "invalid_section": "Enter a name and at least one question.",
   "airtable_not_configured": "Airtable is not configured.",
-  "airtable_error": "Airtable rejected the request."
+  "airtable_error": "Airtable rejected the request.",
+  "last_owner_project": "The project must keep at least one owner: give the owner role to someone else first."
  },
  "login": {
   "title": "Team sign-in",
@@ -242,7 +243,13 @@
   "invited": "Invitation sent.",
   "offered": "Offered to CSOs",
   "revoke": "Revoke",
-  "revoke_confirm": "Revoke {name}'s access to this project? Access ends immediately. Remember to reassign their CSOs."
+  "revoke_confirm": "Revoke {name}'s access to this project? Access ends immediately. Remember to reassign their CSOs.",
+  "read_only": "Only the project's owners can invite people and change roles.",
+  "offered_col": "Offered to CSOs",
+  "invite_title": "Invite to the team",
+  "invite": "Invite",
+  "need_role": "Choose at least one role.",
+  "role_hint": "A person can be both owner and coach (for example a project lead who also supports organisations). They must keep at least one role; \"Revoke\" removes them from the project."
  },
  "project": {
   "public_link": "Project public link",
@@ -544,7 +551,12 @@
   "title": "My profile",
   "intro": "These details appear at the top right of every page.",
   "saved": "Profile saved",
-  "back": "Back to the team area"
+  "back": "Back to the team area",
+  "rights_title": "My access",
+  "rights_admin": "Full access to all projects: projects, accounts and roles, Airtable connection.",
+  "rights_owner": "Owner: manages the project (team and roles, public link, sections, needs) and sees all its CSOs.",
+  "rights_coach": "Coach: supports the CSOs assigned to them (support session, plan).",
+  "rights_none": "No access has been granted to your account yet. Ask a project owner to add you to their team."
  },
  "settings": {
   "link_title": "CSO personal link",

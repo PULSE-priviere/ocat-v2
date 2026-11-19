@@ -161,7 +161,8 @@
   "invalid_profile": "Vérifiez les informations saisies (prénom et nom obligatoires).",
   "invalid_section": "Indiquez un nom et au moins une question.",
   "airtable_not_configured": "Airtable n'est pas configuré.",
-  "airtable_error": "Airtable a refusé la requête."
+  "airtable_error": "Airtable a refusé la requête.",
+  "last_owner_project": "Le projet doit garder au moins un owner : donnez d'abord le rôle owner à quelqu'un d'autre."
  },
  "login": {
   "title": "Connexion de l'équipe",
@@ -242,7 +243,13 @@
   "invited": "Invitation envoyée.",
   "offered": "Proposé aux OSC",
   "revoke": "Révoquer",
-  "revoke_confirm": "Révoquer l'accès de {name} à ce projet ? Il perd l'accès immédiatement. Pensez à réaffecter ses OSC."
+  "revoke_confirm": "Révoquer l'accès de {name} à ce projet ? Il perd l'accès immédiatement. Pensez à réaffecter ses OSC.",
+  "read_only": "Seuls les owners du projet peuvent inviter des personnes et modifier les rôles.",
+  "offered_col": "Proposé aux OSC",
+  "invite_title": "Inviter dans l'équipe",
+  "invite": "Inviter",
+  "need_role": "Choisissez au moins un rôle.",
+  "role_hint": "Une personne peut être à la fois owner et coach (par exemple un chef de projet qui accompagne aussi des organisations). Elle doit garder au moins un rôle ; « Révoquer » la retire du projet."
  },
  "project": {
   "public_link": "Lien public du projet",
@@ -544,7 +551,12 @@
   "title": "Mon profil",
   "intro": "Ces informations s'affichent en haut à droite de chaque page.",
   "saved": "Profil enregistré",
-  "back": "Retour à l'espace équipe"
+  "back": "Retour à l'espace équipe",
+  "rights_title": "Mes droits",
+  "rights_admin": "Accès complet à tous les projets : projets, comptes et rôles, connexion Airtable.",
+  "rights_owner": "Owner : gère le projet (équipe et rôles, lien public, sections, besoins) et voit toutes ses OSC.",
+  "rights_coach": "Coach : accompagne les OSC qui lui sont affectées (session d'accompagnement, plan).",
+  "rights_none": "Aucun droit n'est encore attribué à votre compte. Demandez à un owner de projet de vous ajouter à son équipe."
  },
  "settings": {
   "link_title": "Lien personnel de l'OSC",

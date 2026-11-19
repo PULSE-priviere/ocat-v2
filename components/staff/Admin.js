@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import Icon from '../Icon';
 import Check from '../Check';
+import Team from './Team';
 import { useI18n } from '../../lib/i18n';
 import { sb, staffApi } from '../../lib/supabase';
 import { safeStr } from '../../lib/safe';
@@ -17,7 +18,7 @@ export default function Admin({ projects, reload }) {
   const [profiles, setProfiles] = useState([]);
   const load = useCallback(async () => {
     const [{ data: m }, { data: p }] = await Promise.all([
-      sb().from('memberships').select('user_id, project_id, role, profile:profiles(id, email, name, first_name, last_name)'),
+      sb().from('memberships').select('user_id, project_id, role, offered_to_osc, profile:profiles(id, email, name, first_name, last_name)'),
       sb().from('profiles').select('id, email, name, first_name, last_name, is_admin').order('email'),
     ]);
     setMems(m || []); setProfiles(p || []);
@@ -85,11 +86,10 @@ function ProjectList({ projects, mems, onOpen, onCreated }) {
   );
 }
 
-// Administration d'un projet : informations, membres (rôle, révocation), invitation
-function ProjectAdmin({ project, projects, mems, setMems, onBack, onChanged }) {
-  const { t, lang } = useI18n();
+// Administration d'un projet : informations, archivage, équipe (mêmes règles que l'onglet Équipe, sans la restriction du dernier owner)
+function ProjectAdmin({ project, projects, mems, onBack, onChanged }) {
+  const { t } = useI18n();
   const [info, setInfo] = useState({ name: project.name || '', cohort: project.cohort || '', zone: project.zone || '' });
-  const [inv, setInv] = useState({ email: '', firstName: '', lastName: '', role: 'coach' });
   const [busy, setBusy] = useState('');
   const [msg, setMsg] = useState('');
   useEffect(() => { setInfo({ name: project.name || '', cohort: project.cohort || '', zone: project.zone || '' }); }, [project.id]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -99,28 +99,6 @@ function ProjectAdmin({ project, projects, mems, setMems, onBack, onChanged }) {
     setBusy(''); setMsg(error ? 'errors.server_error' : 'admin.saved'); if (!error) onChanged();
   };
   const archive = async () => { setBusy('archive'); await sb().from('projects').update({ archived: !project.archived }).eq('id', project.id); setBusy(''); onChanged(); };
-  const setRole = async (m, role) => {
-    if (role === m.role) return;
-    setMems(list => list.map(x => (x === m ? { ...x, role } : x)));
-    const d = await sb().from('memberships').delete().match({ user_id: m.user_id, project_id: m.project_id, role: m.role });
-    const i = await sb().from('memberships').insert({ user_id: m.user_id, project_id: m.project_id, role });
-    if (d.error || (i.error && i.error.code !== '23505')) setMsg('errors.server_error');
-    onChanged();
-  };
-  const revoke = async m => {
-    if (!window.confirm(t('team.revoke_confirm', { name: fullName(m.profile) }))) return;
-    setMems(list => list.filter(x => x !== m));
-    const { error } = await sb().from('memberships').delete().match({ user_id: m.user_id, project_id: m.project_id, role: m.role });
-    if (error) setMsg('errors.server_error');
-    onChanged();
-  };
-  const invite = async e => {
-    e.preventDefault(); setBusy('invite'); setMsg('');
-    try { await staffApi('invite', { ...inv, projectId: project.id, lang }); setInv({ email: '', firstName: '', lastName: '', role: inv.role }); setMsg('team.invited'); onChanged(); }
-    catch (x) { setMsg(`errors.${x.message}`); }
-    setBusy('');
-  };
-  const sorted = [...mems].sort((a, b) => (a.role === b.role ? fullName(a.profile).localeCompare(fullName(b.profile)) : a.role === 'owner' ? -1 : 1));
   return (
     <>
       <button className="link" onClick={onBack}>← {t('admin.back')}</button>
@@ -130,33 +108,10 @@ function ProjectAdmin({ project, projects, mems, setMems, onBack, onChanged }) {
         <span className="grow" />
         <button className={`btn ${project.archived ? '' : 'warn'}`} aria-busy={busy === 'archive'} onClick={archive}>{t(project.archived ? 'admin.unarchive' : 'admin.archive')}</button>
       </div>
-
       <section className="card">
         <h2>{t('admin.members')}</h2>
-        {sorted.length === 0 ? <p className="empty-inline">{t('admin.no_members')}</p> : (
-          <table className="table">
-            <thead><tr><th>{t('admin.person')}</th><th>{t('admin.role')}</th><th /></tr></thead>
-            <tbody>{sorted.map(m => (
-              <tr key={`${m.user_id}-${m.role}`}>
-                <td>{fullName(m.profile)}<br /><small className="muted">{safeStr(m.profile?.email)}</small></td>
-                <td><select aria-label={t('admin.role')} value={m.role} onChange={e => setRole(m, e.target.value)} style={{ width: 'auto' }}>
-                  <option value="owner">{t('role.owner')}</option><option value="coach">{t('role.coach')}</option>
-                </select></td>
-                <td className="right"><button className="btn danger small" onClick={() => revoke(m)}>{t('team.revoke')}</button></td>
-              </tr>
-            ))}</tbody>
-          </table>
-        )}
-        <h3 className="subh">{t('admin.invite_member')}</h3>
-        <form className="form row" onSubmit={invite}>
-          <label>{t('entry.email')}<input type="email" required value={inv.email} onChange={e => setInv({ ...inv, email: e.target.value })} /></label>
-          <label>{t('profile.label.first_name')}<input required value={inv.firstName} onChange={e => setInv({ ...inv, firstName: e.target.value })} /></label>
-          <label>{t('profile.label.last_name')}<input required value={inv.lastName} onChange={e => setInv({ ...inv, lastName: e.target.value })} /></label>
-          <label>{t('admin.role')}<select value={inv.role} onChange={e => setInv({ ...inv, role: e.target.value })}><option value="coach">{t('role.coach')}</option><option value="owner">{t('role.owner')}</option></select></label>
-          <button className="btn primary" aria-busy={busy === 'invite'} disabled={busy === 'invite'}>{t('admin.invite')}</button>
-        </form>
+        <Team project={project} members={mems} owner isAdmin embedded reload={onChanged} />
       </section>
-
       <section className="card">
         <h2>{t('admin.edit_project')}</h2>
         <form className="form row" onSubmit={saveInfo}>

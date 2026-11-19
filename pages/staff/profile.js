@@ -6,6 +6,7 @@ import { useStaff } from '../../lib/useStaff';
 import { sb } from '../../lib/supabase';
 import { fullName } from '../../lib/names';
 import { safeStr } from '../../lib/safe';
+import RightsCard from '../../components/staff/RightsCard';
 import appConfig from '../../app.config';
 
 export default function MyProfile() {
@@ -24,10 +25,11 @@ export default function MyProfile() {
   };
   return (
     <Layout home="/staff" title={t('myprofile.title')} identity={{ org: appConfig.orgName, person: fullName(staff.profile), href: '/staff/profile' }}>
-      <div className="narrow">
+      <div className="narrow mid">
         <a className="link" href="/staff">← {t('myprofile.back')}</a>
         <h1>{t('myprofile.title')}</h1>
         <p className="lead">{t('myprofile.intro')}</p>
+        <RightsCard staff={staff} />
         <form className="card form" onSubmit={submit}>
           <label>{t('profile.label.email')}<input value={safeStr(staff.profile.email)} disabled /></label>
           <label>{t('profile.label.first_name')}<input required value={f.first_name} onChange={e => setF({ ...f, first_name: e.target.value })} /></label>

@@ -11,7 +11,7 @@ export default function StaffNav({ staff, project, active, onSignOut }) {
   const { t } = useI18n();
   const projects = (staff.projects || []).filter(p => !p.archived || staff.profile?.is_admin);
   const owner = project ? staff.isOwner(project.id) : false;
-  const items = ['cohort', 'needs', ...(owner ? ['team', 'project', 'sections', 'journal', 'duplicates'] : [])];
+  const items = ['cohort', 'needs', 'team', ...(owner ? ['project', 'sections', 'journal', 'duplicates'] : [])];
   return (
     <nav className="sidenav" aria-label={t('staff.menu')}>
       <Link className={`sideitem ${active === 'home' ? 'on' : ''}`} href="/staff"><Icon name="grid" />{t('staff.all_projects')}</Link>

@@ -130,3 +130,12 @@ Thème sobre inspiré des interfaces type Supabase : fond gris très clair, cart
 - Plan : export clarifié (menu « Langue du document » puis « Télécharger en PDF » / « Télécharger en Word ») ; le diagramme de répartition des réponses figure dans la vue d'ensemble du PDF et du Word.
 - Cohorte : bloc « Lien du formulaire à partager » visible par tous les rôles. Le coach dispose aussi de « Mon lien de coach » (`/p/<slug>?coach=<id>`) : les organisations qui entrent par ce lien lui sont rattachées d'office. Le coach doit être membre du projet, sinon le paramètre est ignoré.
 - Aucune migration.
+
+## Mise à jour 3.2 (équipe et rôles)
+
+**Ordre : d'abord la base, ensuite le code.** Supabase > SQL Editor : exécuter `supabase/migrations/0007_team_roles.sql`.
+
+- Une personne peut cumuler les rôles owner et coach dans un projet ; un projet peut avoir plusieurs owners.
+- Onglet Équipe : un owner invite (coach et/ou owner), attribue les rôles case par case et révoque ; un coach voit l'équipe en lecture seule. Jamais de rôle administrateur ici : seul un administrateur en crée un (page Administration).
+- Un projet garde toujours au moins un owner (garde en base ; l'administrateur n'est pas concerné).
+- Mon profil : carte « Mes droits » (administrateur, et rôle dans chaque projet).

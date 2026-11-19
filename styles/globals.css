@@ -581,3 +581,13 @@ summary:focus-visible { outline: none; text-decoration: underline; text-underlin
 .copyrow .hint { margin: 0.3rem 0 0; font-size: 0.78rem; color: var(--t3); }
 
 .presetcoach { margin: 0; padding: 0.65rem 0.85rem; border: 1px solid #CBE6D4; background: #F1F8F4; color: #1E6B41; border-radius: 10px; font-size: 0.88rem; font-weight: 500; }
+
+/* Équipe et droits */
+.rolechecks { display: flex; gap: 1.1rem; flex-wrap: wrap; }
+.callout.slim { padding: 0.7rem 1rem; margin-bottom: 0.8rem; }
+.narrow.mid { max-width: 660px; }
+.rights .rightrow { display: flex; gap: 0.8rem; align-items: flex-start; padding: 0.7rem 0; border-top: 1px solid #F2F2F2; }
+.rights h2 + .rightrow { border-top: 0; padding-top: 0; }
+.rights .rightrow p { margin: 0.25rem 0 0; font-size: 0.88rem; }
+.rights .rightrow .sq { margin-top: 0.35rem; }
+.rights .chips { margin: 0.35rem 0 0.15rem; }

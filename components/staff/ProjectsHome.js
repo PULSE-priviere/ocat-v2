@@ -32,7 +32,7 @@ export default function ProjectsHome({ staff, projects }) {
   }, [key]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const sum = k => Object.values(stats || {}).reduce((a, s) => a + (s[k] || 0), 0);
-  const role = p => (staff.profile.is_admin ? t('role.admin') : (staff.roles[p.id] || []).includes('owner') ? t('role.owner') : t('role.coach'));
+  const role = p => (staff.profile.is_admin ? t('role.admin') : (staff.roles[p.id] || []).slice().sort().reverse().map(r => t(`role.${r}`)).join(' · '));
   const names = list => (list && list.length ? list.join(', ') : '—');
   return (
     <>

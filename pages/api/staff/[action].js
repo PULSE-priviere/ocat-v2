@@ -31,15 +31,19 @@ async function createAssessment(svc, subjectId, type, email, lang) {
 }
 
 const actions = {
-  // Inviter un compte ; owner : coachs de son projet ; admin : tout
+  // Inviter un compte : un owner invite des coachs et des owners dans son projet ; seul l'administrateur crée un administrateur
   async invite({ db, svc, body }) {
-    const email = String(body.email || '').trim().toLowerCase();
-    const { projectId, role, makeAdmin } = body;
+    const { projectId, makeAdmin } = body;
     const first = String(body.firstName || '').trim(), last = String(body.lastName || '').trim();
+    const email = String(body.email || '').trim().toLowerCase();
     if (!isEmail(email)) return [400, 'invalid_form'];
-    const isAdm = await rpc(db, 'is_admin');
-    if ((makeAdmin || role === 'owner') && !isAdm) return [403, 'forbidden'];
-    if (role === 'coach' && !(await rpc(db, 'is_owner', { p: projectId }))) return [403, 'forbidden'];
+    // Rôles demandés dans le projet : owner et/ou coach (jamais administrateur ici)
+    const roles = [...new Set((Array.isArray(body.roles) ? body.roles : [body.role]).filter(r => ['owner', 'coach'].includes(r)))];
+    if (makeAdmin && !(await rpc(db, 'is_admin'))) return [403, 'forbidden'];
+    if (projectId) {
+      if (!roles.length) return [400, 'invalid_form'];
+      if (!(await rpc(db, 'is_owner', { p: projectId }))) return [403, 'forbidden'];
+    } else if (!makeAdmin) return [400, 'invalid_form'];
     let { data: prof } = await svc.from('profiles').select('id').eq('email', email).maybeSingle();
     if (!prof) {
       const { data: u, error } = await svc.auth.admin.createUser({ email, email_confirm: true });
@@ -48,8 +52,8 @@ const actions = {
       prof = p2;
     }
     if (makeAdmin) await svc.from('profiles').update({ is_admin: true }).eq('id', prof.id);
-    if (projectId && ['owner', 'coach'].includes(role)) {
-      await svc.from('memberships').upsert({ user_id: prof.id, project_id: projectId, role }, { onConflict: 'user_id,project_id,role' });
+    if (projectId) {
+      for (const role of roles) await svc.from('memberships').upsert({ user_id: prof.id, project_id: projectId, role }, { onConflict: 'user_id,project_id,role' });
     }
     await sendLoginLink(svc, email, body.lang).catch(() => {});
     return { ok: true };
