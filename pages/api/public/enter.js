@@ -2,6 +2,8 @@
 import { admin, fail, isEmail, clientIp, verifyTurnstile, rateLimited, newToken, hashToken, tokenExpiry, personalUrl, rotateToken } from '../../../lib/server';
 import { sendMail } from '../../../lib/mail';
 import { isCountry } from '../../../lib/countries';
+import { syncAssessmentsSafe } from '../../../lib/airtableSync';
+import { inBackground } from '../../../lib/background';
 import appConfig from '../../../app.config';
 
 export default async function handler(req, res) {
@@ -33,7 +35,7 @@ export default async function handler(req, res) {
       .order('created_at', { ascending: false }).limit(1).maybeSingle();
     if (a) {
       const url = await rotateToken(db, a.id);
-      await sendMail({ to: cleanEmail, kind: 'resume_link', lang, vars: { url } }).catch(() => {});
+      await inBackground(sendMail({ to: cleanEmail, kind: 'resume_link', lang, vars: { url } }));
     }
     return res.json({ status: 'exists' });
   }
@@ -49,10 +51,14 @@ export default async function handler(req, res) {
     .insert({ project_id: p.id, name: cleanName, contact_first_name: first, contact_last_name: last, email: cleanEmail, coach_id: coach, origin: 'public', country: cc, org_type: orgType, org_size: orgSize }).select('id').single();
   if (e1) return fail(res, 500, 'server_error');
   const token = newToken();
-  const { error: e2 } = await db.from('assessments')
-    .insert({ subject_id: subj.id, type: 'baseline', token_hash: hashToken(token), token_expires_at: tokenExpiry() });
+  const { data: asm, error: e2 } = await db.from('assessments')
+    .insert({ subject_id: subj.id, type: 'baseline', token_hash: hashToken(token), token_expires_at: tokenExpiry() }).select('id').single();
   if (e2) return fail(res, 500, 'server_error');
   const url = personalUrl(token);
-  await sendMail({ to: cleanEmail, kind: 'personal_link', lang, vars: { url, name: cleanName, contact: first } }).catch(() => {});
+  // L'e-mail et l'envoi vers Airtable se font en même temps, en tâche de fond : le lien s'affiche sans attendre
+  await inBackground(Promise.all([
+    sendMail({ to: cleanEmail, kind: 'personal_link', lang, vars: { url, name: cleanName, contact: first } }).catch(() => {}),
+    syncAssessmentsSafe(db, [asm.id], { timeoutMs: 8000 }),
+  ]));
   res.json({ status: 'created', url });
 }

@@ -166,3 +166,32 @@ Thème sobre inspiré des interfaces type Supabase : fond gris très clair, cart
 - Le jeton collé est nettoyé (sans « Bearer », espaces ni guillemets) et doit commencer par « pat » ; l'identifiant de base peut être collé sous forme d'adresse complète.
 - Après « Enregistrer », la connexion est testée immédiatement. L'écran indique quel jeton est utilisé (application ou variable Vercel).
 - Aucune migration.
+
+## Mise à jour 3.6 (Airtable : trois tables reliées)
+
+Aucune migration. Voir `docs/AIRTABLE.md`.
+
+- L'export vers Airtable passe de une table (« Scores ») à trois tables reliées : **Organisations**, **Diagnostics** (scores par section, besoins d'accompagnement) et **Accompagnement** (notes du coach, action, responsable, échéance, par besoin). Les liens se font par identifiant d'enregistrement : deux organisations de même nom ne se confondent pas.
+- « Créer / mettre à jour les tables » crée les tables absentes et ajoute les colonnes manquantes. Le jeton doit avoir en plus `schema.bases:read` et `schema.bases:write`.
+- Envoi automatique : création d'une organisation, modification de sa fiche, diagnostic soumis, plan validé ou partagé, session terminée. Rythme limité à 5 requêtes par seconde (limite d'Airtable).
+- Trois CSV (un par table) en plus de l'envoi.
+- Vocabulaire : « organisation » remplace « OSC » / « CSO » dans toute l'interface.
+
+## Mise à jour 3.7 (e-mails d'invitation et activation)
+
+**Ordre : d'abord la base, ensuite le code.** Supabase > SQL Editor : exécuter `supabase/migrations/0010_staff_invites.sql`.
+
+- Invitation d'un coach, d'un owner ou d'un administrateur : un vrai message (qui invite, quel projet, quel rôle), en texte et en HTML, avec un lien d'activation **sur le domaine de l'application** et **sans date d'expiration** (valable jusqu'à son utilisation). Il ne se consomme qu'au clic sur le bouton : un antivirus d'e-mail qui ouvre le lien ne le « use » pas. Seule l'empreinte du jeton est stockée.
+- « Renvoyer l'invitation » (onglet Équipe, Administration > Comptes). L'invitant ne voit jamais le lien ; il est prévenu si l'e-mail n'est pas parti.
+- Liens de connexion : également sur le domaine de l'application (`/auth/confirm`, page à bouton).
+- Administration > E-mails : fournisseur, expéditeur, SPF/DKIM/DMARC, e-mail de test. Procédure de passage à Resend : `docs/EMAIL.md`.
+- Resend : version HTML, nom d'expéditeur, adresse de réponse (`MAIL_REPLY_TO`).
+
+## Mise à jour 3.8 (envoi direct par SMTP, boutons réactifs)
+
+Aucune migration. **Nouvelles dépendances** : `nodemailer` et `@vercel/functions` (déjà dans `package.json` et `package-lock.json` ; Vercel les installe au déploiement).
+
+- `MAIL_PROVIDER=smtp` : envoi direct depuis l'application par un serveur SMTP, par exemple Gmail avec un mot de passe d'application (variables `SMTP_USER`, `SMTP_PASS`, `SMTP_HOST`, `SMTP_PORT`). Plus besoin d'Airtable pour les e-mails. Voir `docs/EMAIL.md`.
+- Administration > E-mails reconnaît SMTP, signale l'adresse d'expédition remplacée par Gmail, et donne un message précis en cas d'échec (mot de passe refusé, serveur injoignable…).
+- Boutons : chargement immédiat au clic, puis « E-mail envoyé : vérifiez aussi vos indésirables » (connexion, nouveau lien, invitation, renvoi).
+- Rapidité : l'e-mail et l'envoi vers Airtable partent en tâche de fond (`lib/background.js`, `waitUntil` de Vercel) à la connexion, à l'entrée d'une organisation, au nouveau lien, à la soumission et à la modification de la fiche. Hors Vercel, l'application attend (comportement sûr).

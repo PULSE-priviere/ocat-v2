@@ -1,7 +1,7 @@
 // Plan d'accompagnement : repris de la session (notes, action, responsable). Ici, seulement l'échéance.
 import { useEffect, useRef, useState } from 'react';
 import { useI18n, pick } from '../../lib/i18n';
-import { sb } from '../../lib/supabase';
+import { sb, staffApi } from '../../lib/supabase';
 import { safeStr } from '../../lib/safe';
 import { planRows } from '../../lib/plan';
 import { timelineSvg } from '../../lib/planCharts';
@@ -25,6 +25,7 @@ export default function PlanEditor({ assessment, bank, answers, goSession, onSta
     timer.current = setTimeout(async () => {
       const { error } = await sb().from('action_plans').upsert({ assessment_id: assessment.id, items: next.items, status: next.status }, { onConflict: 'assessment_id' });
       setState(error ? 'error' : 'saved');
+      if (!error && (next.status === 'validated' || next.status === 'shared')) staffApi('sync_assessment', { assessmentId: assessment.id }).catch(() => {});   // plan validé ou partagé : envoyé à Airtable
     }, 600);
   };
   if (!plan) return <p className="muted">{t('common.loading')}</p>;

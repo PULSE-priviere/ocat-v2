@@ -1,8 +1,14 @@
 // Actions staff qui exigent la clé service. Les droits sont toujours vérifiés avec le client RLS de l'appelant.
-import { admin, fail, isEmail, staffFromReq, newToken, hashToken, tokenExpiry, personalUrl, rotateToken } from '../../../lib/server';
-import { sendMail } from '../../../lib/mail';
-import { sendLoginLink } from '../../../lib/login';
-import { airtableConfig, airtableReady, buildRows, pushToAirtable, createScoresTable, testAirtable, airtableCode, cleanToken, cleanBaseId, FIELD_DEFS } from '../../../lib/scoresExport';
+import { admin, fail, isEmail, staffFromReq, newToken, hashToken, tokenExpiry, personalUrl, rotateToken, appUrl } from '../../../lib/server';
+import { sendInvitation } from '../../../lib/invite';
+import { inBackground } from '../../../lib/background';
+import { mailConfig, smtpConfig, sendMail } from '../../../lib/mail';
+import { checkDns, FREE_MAIL } from '../../../lib/mailcheck';
+import { airtableConfig, airtableReady, testAirtable, airtableCode, cleanToken, cleanBaseId, DEFAULT_TABLES } from '../../../lib/scoresExport';
+import { buildData, syncAssessments, syncAssessmentsSafe, ensureTables, fieldNames, TABLE_KEYS } from '../../../lib/airtableSync';
+
+// L'envoi vers Airtable peut durer (5 requêtes par seconde au plus)
+export const config = { maxDuration: 60 };
 
 const rpc = async (db, fn, args) => (await db.rpc(fn, args)).data === true;
 
@@ -11,7 +17,7 @@ const canScores = (db, body) => (body.all ? rpc(db, 'is_admin') : rpc(db, 'is_ow
 
 // Une page de 40 évaluations d'un projet, dans un ordre stable
 async function assessmentPage(svc, body) {
-  const offset = Math.max(0, Number(body.offset) || 0), limit = 40;
+  const offset = Math.max(0, Number(body.offset) || 0), limit = 5;   // 5 diagnostics par appel : chacun peut produire des dizaines de lignes d'accompagnement
   // body.all : toutes les évaluations de tous les projets (administrateur)
   let q = svc.from('assessments').select('id, subjects!inner(project_id)', { count: 'exact' });
   if (!body.all) q = q.eq('subjects.project_id', body.projectId);
@@ -30,9 +36,17 @@ async function createAssessment(svc, subjectId, type, email, lang) {
   return { id: data.id, url };
 }
 
+// Prépare et envoie l'invitation : nom de l'invitant, projet, rôles. Renvoie true si l'e-mail est parti.
+async function invitationMail(svc, { user, prof, email, projectId, roles, lang }) {
+  const { data: me } = await svc.from('profiles').select('first_name, last_name, name').eq('id', user.id).maybeSingle();
+  const inviter = [me?.first_name, me?.last_name].filter(Boolean).join(' ') || me?.name || user.email;
+  const project = projectId ? (await svc.from('projects').select('name').eq('id', projectId).maybeSingle()).data?.name || '' : '';
+  return sendInvitation(svc, { userId: prof.id, email, contact: prof.first_name || '', inviter, inviterId: user.id, project, roles, lang });
+}
+
 const actions = {
   // Inviter un compte : un owner invite des coachs et des owners dans son projet ; seul l'administrateur crée un administrateur
-  async invite({ db, svc, body }) {
+  async invite({ db, svc, body, user }) {
     const { projectId, makeAdmin } = body;
     const first = String(body.firstName || '').trim(), last = String(body.lastName || '').trim();
     const email = String(body.email || '').trim().toLowerCase();
@@ -44,19 +58,58 @@ const actions = {
       if (!roles.length) return [400, 'invalid_form'];
       if (!(await rpc(db, 'is_owner', { p: projectId }))) return [403, 'forbidden'];
     } else if (!makeAdmin) return [400, 'invalid_form'];
-    let { data: prof } = await svc.from('profiles').select('id').eq('email', email).maybeSingle();
+    let { data: prof } = await svc.from('profiles').select('id, first_name').eq('email', email).maybeSingle();
     if (!prof) {
       const { data: u, error } = await svc.auth.admin.createUser({ email, email_confirm: true });
       if (error) return [500, 'server_error'];
-      const { data: p2 } = await svc.from('profiles').insert({ id: u.user.id, email, first_name: first || null, last_name: last || null, name: [first, last].filter(Boolean).join(' ') || null }).select('id').single();
+      const { data: p2 } = await svc.from('profiles').insert({ id: u.user.id, email, first_name: first || null, last_name: last || null, name: [first, last].filter(Boolean).join(' ') || null }).select('id, first_name').single();
       prof = p2;
     }
     if (makeAdmin) await svc.from('profiles').update({ is_admin: true }).eq('id', prof.id);
     if (projectId) {
       for (const role of roles) await svc.from('memberships').upsert({ user_id: prof.id, project_id: projectId, role }, { onConflict: 'user_id,project_id,role' });
     }
-    await sendLoginLink(svc, email, body.lang).catch(() => {});
-    return { ok: true };
+    const mailSent = await invitationMail(svc, { user, prof, email, projectId, roles, lang: body.lang });
+    return { ok: true, mailSent };
+  },
+  // Renvoyer l'invitation à une personne de l'équipe (l'e-mail part toujours à SON adresse : jamais de lien montré à l'invitant)
+  async resend_invite({ db, svc, body, user }) {
+    const uid = String(body.userId || ''), projectId = body.projectId || null;
+    if (projectId) { if (!(await rpc(db, 'is_owner', { p: projectId }))) return [403, 'forbidden']; }
+    else if (!(await rpc(db, 'is_admin'))) return [403, 'forbidden'];
+    const { data: prof } = await svc.from('profiles').select('id, email, first_name, is_admin').eq('id', uid).maybeSingle();
+    if (!prof) return [404, 'not_found'];
+    let roles = [];
+    if (projectId) {
+      const { data: ms } = await svc.from('memberships').select('role').eq('user_id', uid).eq('project_id', projectId);
+      roles = (ms || []).map(m => m.role);
+      if (!roles.length) return [404, 'not_found'];
+    } else if (!prof.is_admin) return [404, 'not_found'];
+    const mailSent = await invitationMail(svc, { user, prof, email: prof.email, projectId, roles, lang: body.lang });
+    return { ok: true, mailSent };
+  },
+
+  // Envoi des e-mails (administrateur) : fournisseur, expéditeur, enregistrements DNS, et e-mail de test
+  async mail_status({ db }) {
+    if (!(await rpc(db, 'is_admin'))) return [403, 'forbidden'];
+    const c = mailConfig(), sc = smtpConfig();
+    const fromAddr = (/<([^>]+)>/.exec(c.from) || [])[1] || c.from;
+    const domain = (/@([^>\s]+)/.exec(fromAddr) || [])[1] || '';
+    let appHost = '';
+    try { appHost = new URL(appUrl()).hostname; } catch { /* APP_URL absent */ }
+    const smtp = c.provider === 'smtp' ? {
+      host: sc.host, port: sc.port, user: sc.user, configured: !!(sc.user && sc.pass),
+      gmail: /(^|\.)(gmail|googlemail)\.com$/i.test(sc.host),
+      fromMismatch: !!fromAddr && !!sc.user && fromAddr.toLowerCase() !== sc.user.toLowerCase(),
+    } : null;
+    return { provider: c.provider, from: c.from || (smtp ? sc.user : ''), replyTo: c.replyTo, domain, appHost, smtp,
+      freeMail: c.provider === 'resend' && !!domain && FREE_MAIL.test(domain),     // avec SMTP, c'est le serveur du compte qui signe : une adresse Gmail est légitime
+      dns: c.provider === 'resend' && domain ? await checkDns(domain) : null };
+  },
+  async mail_test({ db, user, body }) {
+    if (!(await rpc(db, 'is_admin'))) return [403, 'forbidden'];
+    try { await sendMail({ to: user.email, kind: 'test', lang: body.lang }); return { ok: true, to: user.email }; }
+    catch (e) { return [502, String(e.message).startsWith('mail_smtp_') ? e.message : 'mail_failed', e.detail || e.message]; }
   },
 
   // Nouveau lien personnel (l'ancien est révoqué) ; renvoyé par e-mail si demandé
@@ -86,6 +139,7 @@ const actions = {
       .insert({ project_id: body.projectId, name, email, contact_first_name: String(body.firstName).trim(), contact_last_name: String(body.lastName).trim(), coach_id: body.coachId || null, origin: 'manual' }).select('id').single();
     if (error) return [409, 'email_exists'];
     const r = await createAssessment(svc, s.id, 'baseline', email, body.lang);
+    await inBackground(syncAssessmentsSafe(svc, [r.id], { timeoutMs: 8000 }));
     return { subjectId: s.id, url: r.url };
   },
 
@@ -143,27 +197,39 @@ const actions = {
   },
 
   // Suivi-évaluation : crée la table Airtable, envoie les scores, ou renvoie les lignes pour un CSV (par lots de 40 évaluations)
+  // Crée les trois tables (ou ajoute les colonnes manquantes)
   async scores_setup({ db, svc, body }) {
     if (!(await canScores(db, body))) return [403, 'forbidden'];
     const cfg = await airtableConfig(svc);
     if (!airtableReady(cfg)) return [400, 'airtable_not_configured'];
-    try { return await createScoresTable(cfg); } catch (e) { return [502, airtableCode(e), e.message]; }
+    try { return await ensureTables(svc, cfg); } catch (e) { return [502, airtableCode(e), e.message]; }
   },
+  // Envoie une page de diagnostics (avec leurs organisations et leurs lignes d'accompagnement)
   async scores_sync({ db, svc, body }) {
     if (!(await canScores(db, body))) return [403, 'forbidden'];
     const cfg = await airtableConfig(svc);
     if (!airtableReady(cfg)) return [400, 'airtable_not_configured'];
     const { ids, total, offset } = await assessmentPage(svc, body);
-    try { await pushToAirtable(await buildRows(svc, ids), cfg); } catch (e) { return [502, airtableCode(e), e.message]; }
+    let sent;
+    try { sent = await syncAssessments(svc, cfg, ids); } catch (e) { return [502, airtableCode(e), e.message]; }
     const done = offset + ids.length;
-    return { sent: ids.length, done, total, next: ids.length && done < total ? done : null };
+    return { ...sent, done, total, next: ids.length && done < total ? done : null };
   },
+  // CSV d'une des trois tables, mêmes colonnes que dans Airtable
   async scores_csv({ db, svc, body }) {
     if (!(await canScores(db, body))) return [403, 'forbidden'];
+    const table = TABLE_KEYS.includes(body.table) ? body.table : 'diagnostics';
     const { ids, total, offset } = await assessmentPage(svc, body);
-    const rows = await buildRows(svc, ids);
+    const data = await buildData(svc, ids);
     const done = offset + ids.length;
-    return { fields: FIELD_DEFS.map(f => f.name), rows, done, total, next: ids.length && done < total ? done : null };
+    return { fields: fieldNames(table), rows: data[table], done, total, next: ids.length && done < total ? done : null };
+  },
+  // Envoi d'un diagnostic précis, déclenché quand un plan est validé ou partagé, ou qu'une session est terminée
+  async sync_assessment({ db, svc, body }) {
+    const { data: a } = await db.from('assessments').select('id').eq('id', String(body.assessmentId || '')).maybeSingle();   // la RLS limite aux organisations visibles
+    if (!a) return [403, 'forbidden'];
+    await inBackground(syncAssessmentsSafe(svc, [a.id], { timeoutMs: 20000 }));
+    return { ok: true };
   },
 
   // Connexion Airtable (administrateur) : le jeton est enregistré côté serveur et n'est jamais renvoyé en clair
@@ -175,7 +241,7 @@ const actions = {
     if (airtableReady(cfg)) {
       try { await testAirtable(cfg); verified = true; } catch (e) { problem = { code: airtableCode(e), detail: e.message }; }
     }
-    return { configured: airtableReady(cfg), verified, problem, baseId: cfg.base, table: cfg.table, auto: cfg.auto,
+    return { configured: airtableReady(cfg), verified, problem, baseId: cfg.base, tables: cfg.tables, auto: cfg.auto,
       tokenHint: cfg.token ? `••••${cfg.token.slice(-4)}` : '', source: cfg.fromApp ? 'app' : (cfg.token ? 'env' : '') };
   },
   async airtable_save({ db, svc, body }) {
@@ -185,7 +251,9 @@ const actions = {
     if (token && !token.startsWith('pat')) return [400, 'airtable_token_format'];
     const baseId = cleanBaseId(body.baseId);                   // l'adresse de la base collée en entier convient aussi
     if (!baseId) return [400, 'airtable_base_format'];
-    const next = { ...(cur?.value || {}), baseId, table: String(body.table || '').trim().slice(0, 100) || 'Scores', auto: body.auto !== false };
+    const tables = Object.fromEntries(TABLE_KEYS.map(k => [k, String(body.tables?.[k] || '').trim().slice(0, 100) || DEFAULT_TABLES[k]]));
+    if (new Set(Object.values(tables).map(x => x.toLowerCase())).size < 3) return [400, 'airtable_tables_distinct'];
+    const next = { ...(cur?.value || {}), baseId, tables, auto: body.auto !== false };
     if (token) next.token = token.slice(0, 300);
     const { error } = await svc.from('app_settings').upsert({ key: 'airtable', value: next, updated_at: new Date().toISOString() });
     if (error) return [500, 'server_error'];

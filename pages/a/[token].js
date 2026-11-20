@@ -6,6 +6,7 @@ import LinkBox from '../../components/LinkBox';
 import Intro from '../../components/Intro';
 import OscDashboard from '../../components/OscDashboard';
 import Icon from '../../components/Icon';
+import MailSent from '../../components/MailSent';
 import { timelineSvg } from '../../lib/planCharts';
 import { fmtDate } from '../../lib/planData';
 import { useI18n, pick } from '../../lib/i18n';
@@ -35,6 +36,7 @@ export default function OscPage() {
   const [save, setSave] = useState('saved');       // saved | saving | offline | error
   const [saveError, setSaveError] = useState('');
   const [resent, setResent] = useState(false);
+  const [resending, setResending] = useState(false);
   const flushing = useRef(false);
 
   const load = useCallback(async () => {
@@ -153,8 +155,9 @@ export default function OscPage() {
   };
 
   const resend = async () => {
+    setResending(true);
     await fetch('/api/osc/resend', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token, lang }) }).catch(() => {});
-    setResent(true);
+    setResent(true); setResending(false);
   };
 
   if (fatal) return (
@@ -162,7 +165,7 @@ export default function OscPage() {
       <div className="narrow hero empty">
         <h1>{t(`errors.title_${['invalid_link', 'expired_link', 'offline'].includes(fatal) ? fatal : 'generic'}`)}</h1>
         <p className="lead">{t(`errors.${fatal}`)}</p>
-        {fatal === 'expired_link' ? (resent ? <p className="ok">{t('osc.resent')}</p> : <button className="btn primary" onClick={resend}>{t('osc.resend')}</button>) : null}
+        {fatal === 'expired_link' ? (resent ? <MailSent title={t('osc.resent_title')}>{t('osc.resent')}</MailSent> : <button className="btn primary" aria-busy={resending} disabled={resending} onClick={resend}>{t('osc.resend')}</button>) : null}
         {fatal === 'offline' ? <button className="btn" onClick={() => location.reload()}>{t('common.retry')}</button> : null}
       </div>
     </Layout>

@@ -107,6 +107,7 @@ export default function SubjectPage() {
     setCurrent(apply); setAssessments(list => list.map(a => (a.id === before.id ? apply(a) : a)));
     const { error } = await sb().from('assessments').update(patch).eq('id', before.id);
     if (error) { setCurrent(before); setAssessments(list => list.map(a => (a.id === before.id ? before : a))); setMsg('server_error'); throw error; }
+    if (patch.session_status === 'done') staffApi('sync_assessment', { assessmentId: before.id }).catch(() => {});   // session terminée : envoyée à Airtable
   };
 
   const action = async (name, body) => {

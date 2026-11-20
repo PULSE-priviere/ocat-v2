@@ -136,7 +136,7 @@ export default function PublicEntry() {
           </label>
           <div ref={widget} />
           {error ? <p className="error" role="alert">{t(`errors.${error}`)}</p> : null}
-          <button className="btn primary big" disabled={busy}>{busy ? t('common.sending') : t('entry.submit')}</button>
+          <button className="btn primary big" aria-busy={busy} disabled={busy}>{t('entry.submit')}</button>
         </form>
       </div>
     </Layout>

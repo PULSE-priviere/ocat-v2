@@ -1,6 +1,8 @@
 // POST {token, op, ...} : enregistre une réponse ou un commentaire de section (F3)
 import { admin, fail, assessmentFromToken, tokenExpiry } from '../../../lib/server';
 import { isCountry } from '../../../lib/countries';
+import { syncAssessmentsSafe } from '../../../lib/airtableSync';
+import { inBackground } from '../../../lib/background';
 import appConfig from '../../../app.config';
 
 
@@ -69,6 +71,7 @@ export default async function handler(req, res) {
     if (!Object.keys(out).length) return fail(res, 400, 'invalid_form');
     const { error: e } = await db.from('subjects').update(out).eq('id', a.subjects.id);
     if (e) return fail(res, 500, 'server_error');
+    await inBackground(syncAssessmentsSafe(db, [a.id], { timeoutMs: 8000 }));   // la fiche modifiée est renvoyée à Airtable, sans faire attendre
   } else return fail(res, 400, 'invalid_form');
 
   // Le lien se prolonge à chaque réponse enregistrée

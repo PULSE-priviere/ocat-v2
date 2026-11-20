@@ -2,7 +2,8 @@
 import { admin, fail, assessmentFromToken, appUrl } from '../../../lib/server';
 import { loadBank } from '../../../lib/bank';
 import { sendMail } from '../../../lib/mail';
-import { airtableConfig, airtableReady, buildRows, pushToAirtable } from '../../../lib/scoresExport';
+import { syncAssessmentsSafe } from '../../../lib/airtableSync';
+import { inBackground } from '../../../lib/background';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return fail(res, 405, 'method');
@@ -20,12 +21,6 @@ export default async function handler(req, res) {
 
   await db.from('assessments').update({ status: 'submitted', submitted_at: new Date().toISOString() }).eq('id', a.id);
 
-  // Suivi-évaluation : les scores partent vers Airtable dès l'envoi ; un échec n'empêche pas la soumission
-  try {
-    const cfg = await airtableConfig(db);
-    if (airtableReady(cfg) && cfg.auto) await pushToAirtable(await buildRows(db, [a.id]), cfg);
-  } catch (e) { console.error('[airtable] envoi des scores impossible :', e.message); }
-
   const { data: owners } = await db.from('memberships').select('profiles(email)')
     .eq('project_id', a.subjects.project_id).eq('role', 'owner');
   const to = new Set((owners || []).map(o => o.profiles?.email).filter(Boolean));
@@ -34,6 +29,10 @@ export default async function handler(req, res) {
     if (c) to.add(c.email);
   }
   const url = `${appUrl()}/staff/subject/${a.subjects.id}`;
-  for (const email of to) await sendMail({ to: email, kind: 'submitted', vars: { name: a.subjects.name, url } }).catch(() => {});
+  // Airtable et notifications en tâche de fond : la soumission s'affiche tout de suite ; un échec ne l'empêche jamais
+  await inBackground(Promise.all([
+    syncAssessmentsSafe(db, [a.id], { timeoutMs: 8000 }),   // organisation, diagnostic et lignes d'accompagnement
+    ...[...to].map(email => sendMail({ to: email, kind: 'submitted', vars: { name: a.subjects.name, url } }).catch(() => {})),
+  ]));
   res.json({ ok: true });
 }

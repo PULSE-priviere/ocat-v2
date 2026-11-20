@@ -24,6 +24,7 @@ export default function Team({ project, members, owner, isAdmin, reload, embedde
   const [inv, setInv] = useState({ email: '', firstName: '', lastName: '', owner: false, coach: true });
   const [msg, setMsg] = useState('');
   const [busy, setBusy] = useState(false);
+  const [resending, setResending] = useState('');
   const fail = e => setMsg(String(e?.message || '').includes('last_owner') ? 'errors.last_owner_project' : 'errors.server_error');
 
   // Les cases se cochent tout de suite ; en cas de refus de la base, elles reviennent en arrière (voir Check)
@@ -46,12 +47,18 @@ export default function Team({ project, members, owner, isAdmin, reload, embedde
     if (error) return fail(error);
     reload();
   };
+  const resend = async p => {
+    setMsg(''); setResending(p.id);
+    try { const r = await staffApi('resend_invite', { userId: p.id, projectId: project.id, lang }); setMsg(r.mailSent ? 'team.resent' : 'team.mail_failed'); }
+    catch (err) { setMsg(`errors.${err.message}`); }
+    setResending('');
+  };
   const invite = async e => {
     e.preventDefault(); setMsg('');
     const roles = [inv.owner && 'owner', inv.coach && 'coach'].filter(Boolean);
     if (!roles.length) return setMsg('team.need_role');
     setBusy(true);
-    try { await staffApi('invite', { email: inv.email, firstName: inv.firstName, lastName: inv.lastName, roles, projectId: project.id, lang }); setMsg('team.invited'); setInv({ email: '', firstName: '', lastName: '', owner: false, coach: true }); reload(); }
+    try { const r = await staffApi('invite', { email: inv.email, firstName: inv.firstName, lastName: inv.lastName, roles, projectId: project.id, lang }); setMsg(r.mailSent === false ? 'team.mail_failed' : 'team.invited'); setInv({ email: '', firstName: '', lastName: '', owner: false, coach: true }); reload(); }
     catch (err) { setMsg(`errors.${err.message}`); }
     setBusy(false);
   };
@@ -78,7 +85,7 @@ export default function Team({ project, members, owner, isAdmin, reload, embedde
                     ) : <div className="chips">{[...p.roles].sort().reverse().map(r => <span key={r} className="pill">{t(`role.${r}`)}</span>)}</div>}
                   </td>
                   {owner ? <td>{p.roles.has('coach') ? <Check checked={p.offered} onChange={v => setOffered(p, v)} label={t('team.offered')} /> : <span className="muted small">—</span>}</td> : null}
-                  {owner ? <td className="right"><button className="btn danger small" onClick={() => revoke(p)}>{t('team.revoke')}</button></td> : null}
+                  {owner ? <td className="right"><button className="btn small" aria-busy={resending === p.id} disabled={!!resending} onClick={() => resend(p)}>{t('team.resend')}</button> <button className="btn danger small" onClick={() => revoke(p)}>{t('team.revoke')}</button></td> : null}
                 </tr>
               );
             })}</tbody>
@@ -106,7 +113,7 @@ export default function Team({ project, members, owner, isAdmin, reload, embedde
           </form>
         </>
       ) : null}
-      {msg ? <p className={msg.startsWith('errors') || msg === 'team.need_role' ? 'error' : 'ok'}>{t(msg)}</p> : null}
+      {msg ? <p className={msg.startsWith('errors') || msg === 'team.need_role' || msg === 'team.mail_failed' ? 'error' : 'ok'}>{t(msg)}</p> : null}
     </>
   );
 }

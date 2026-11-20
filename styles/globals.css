@@ -670,3 +670,17 @@ summary:focus-visible { outline: none; text-decoration: underline; text-underlin
 .entry-org legend { padding: 0 0 0.4rem; font-size: 0.74rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--t3); }
 
 .feature.grad-warn { background: linear-gradient(135deg, #B45309 0%, #E2A33B 100%); }
+
+/* E-mails : état de l'envoi */
+.mailrow { display: grid; grid-template-columns: 7.5rem 1fr; gap: 0.9rem; align-items: start; padding: 0.75rem 0; border-top: 1px solid #F2F2F2; }
+.mailrow:first-of-type { border-top: 0; }
+.mailrow p { margin: 0.15rem 0 0; }
+.mailrow .pill { justify-self: start; }
+
+/* Retour immédiat au clic, et confirmation d'envoi d'e-mail */
+.btn:not(:disabled):active { transform: translateY(1px); }
+.btn:disabled:not([aria-busy="true"]) { cursor: not-allowed; }
+.mailsent { display: flex; gap: 0.85rem; align-items: flex-start; background: #F1F8F4; border: 1px solid #CBE6D4; color: #1E4D33; border-radius: 14px; padding: 1.05rem 1.2rem; text-align: left; margin: 1rem 0; }
+.mailsent-icon { flex: 0 0 auto; width: 32px; height: 32px; border-radius: 50%; background: #3F9A63; color: #fff; display: grid; place-items: center; }
+.mailsent b { font-size: 1rem; }
+.mailsent p { margin: 0.25rem 0 0; font-size: 0.92rem; line-height: 1.5; }
