@@ -558,7 +558,9 @@
     "social_enterprise": "Entreprise sociale",
     "foundation": "Fondation",
     "network": "Réseau / Network",
-    "chamber_of_commerce": "Chambre de commerce"
+    "chamber_of_commerce": "Chambre de commerce",
+    "public_institution": "Institution publique",
+    "company": "Entreprise (société)"
    },
    "org_size": {
     "1-5": "1 à 5",

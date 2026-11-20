@@ -558,7 +558,9 @@
     "social_enterprise": "Social enterprise",
     "foundation": "Foundation",
     "network": "Network",
-    "chamber_of_commerce": "Chamber of commerce"
+    "chamber_of_commerce": "Chamber of commerce",
+    "public_institution": "Public institution",
+    "company": "Company"
    },
    "org_size": {
     "1-5": "1 to 5",
