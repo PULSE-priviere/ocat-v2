@@ -12,7 +12,7 @@ import { fmtDate } from '../../lib/planData';
 import { useI18n, pick } from '../../lib/i18n';
 import { safeStr } from '../../lib/safe';
 import { contactName } from '../../lib/names';
-import { sectionProgress, isBankScale, byAnswer } from '../../lib/scoring';
+import { sectionProgress, isScored, isProjectExtra, byAnswer } from '../../lib/scoring';
 
 const SCALE = ['NA', '1', '2', '3'];
 
@@ -131,7 +131,7 @@ export default function OscPage() {
 
   // Reprise : première question sans réponse (F4) ; sans aucune réponse, page d'introduction
   const startOrResume = () => {
-    const first = data.sections.map(s => ({ s, q: data.questions.find(x => x.section_id === s.id && isBankScale(x) && !answers[x.id]?.code) })).find(x => x.q);
+    const first = data.sections.map(s => ({ s, q: data.questions.find(x => x.section_id === s.id && isScored(x, s) && !answers[x.id]?.code) })).find(x => x.q);
     if (!first || !Object.keys(answers).length) { setView('home'); toTop(); return; }
     setView(first.s.id);
     setTimeout(() => document.getElementById(`q-${first.q.id}`)?.scrollIntoView({ block: 'center' }), 150);
@@ -263,7 +263,7 @@ function SectionView({ data, section, answers, comment, deepen, setDeepen, locke
       <h1>{pick(section, 'name', lang)}</h1>
       <p className="muted">{progress.done}/{progress.total} · {t(`status.${progress.status}`)}</p>
       <ol className="questions">
-        {qs.map(q => <Question key={q.id} q={q} a={answers[q.id]} locked={locked} onChange={p => setAnswer(q, p)} />)}
+        {qs.map(q => <Question key={q.id} q={q} a={answers[q.id]} locked={locked} extra={isProjectExtra(q, section)} onChange={p => setAnswer(q, p)} />)}
       </ol>
       {isData ? <p className="muted small">{t('osc.data_hint')}</p> : (
         <div className="card deepen" role="group" aria-labelledby={`dp-${section.id}`}>
@@ -293,14 +293,14 @@ function SectionView({ data, section, answers, comment, deepen, setDeepen, locke
   );
 }
 
-function Question({ q, a, locked, onChange }) {
+function Question({ q, a, locked, extra, onChange }) {
   const { t, lang } = useI18n();
   const [guide, setGuide] = useState(false);
   const name = `q-${q.id}`;
   const code = a?.code || null;
   return (
     <li id={name} className={`q ${code ? 'answered' : ''}`}>
-      <p className="q-text">{q.code ? <span className="q-code">{q.code}</span> : null}{pick(q, 'text', lang)}</p>
+      <p className="q-text">{q.code ? <span className="q-code">{q.code}</span> : null}{pick(q, 'text', lang)}{extra ? <span className="tag">{t('osc.extra')}</span> : null}</p>
       {a?.edited_by_coach ? <p className="tag">{t('osc.edited_by_coach')}</p> : null}
       {['text', 'short', 'number', 'choice'].includes(q.format) ? (
         <DataInput q={q} a={a} locked={locked} onChange={onChange} lang={lang} />

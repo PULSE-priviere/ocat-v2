@@ -8,7 +8,7 @@ import Cohort from '../../components/staff/Cohort';
 import Needs from '../../components/staff/Needs';
 import Team from '../../components/staff/Team';
 import ProjectSettings from '../../components/staff/ProjectSettings';
-import ProjectSections from '../../components/staff/ProjectSections';
+import Questionnaire from '../../components/staff/Questionnaire';
 import Journal from '../../components/staff/Journal';
 import Duplicates from '../../components/staff/Duplicates';
 import Admin from '../../components/staff/Admin';
@@ -36,7 +36,7 @@ export default function Staff() {
   const projects = (staff.projects || []).filter(p => !p.archived || staff.profile?.is_admin);
   const project = pid ? projects.find(p => p.id === pid) : null;
   const owner = project ? staff.isOwner(project.id) : false;
-  const allowed = ['cohort', 'needs', 'team', ...(owner ? ['project', 'sections', 'journal', 'duplicates'] : [])];
+  const allowed = ['cohort', 'needs', 'sections', 'team', ...(owner ? ['project', 'journal', 'duplicates'] : [])];
   const coachHome = !staff.profile?.is_admin && Object.values(staff.roles || {}).some(r => r.includes('coach'));
   const cur = project ? (allowed.includes(tab) ? tab : 'cohort') : (tab === 'admin' && staff.profile?.is_admin ? 'admin' : tab === 'projects' ? 'projects' : 'home');
 
@@ -95,7 +95,7 @@ export default function Staff() {
             {cur === 'needs' && <Needs project={project} cohort={data.cohort} needs={data.needs} />}
             {cur === 'team' && <Team project={project} members={data.members} owner={owner} isAdmin={staff.profile.is_admin} reload={reload} />}
             {cur === 'project' && <ProjectSettings project={project} needs={data.needs.needs} reload={() => { staff.refresh(); reload(); }} />}
-            {cur === 'sections' && <ProjectSections project={project} reload={reload} />}
+            {cur === 'sections' && <Questionnaire project={project} owner={owner} reload={reload} />}
             {cur === 'journal' && <Journal project={project} cohort={data.cohort} />}
             {cur === 'duplicates' && <Duplicates cohort={data.cohort} reload={reload} />}
           </>

@@ -89,8 +89,54 @@ exception when others then insert into results values ('coach ne peut pas ajoute
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000a', true);
 insert into sections(framework_id, num, name_fr, name_en, project_id)
   values ('10000000-0000-0000-0000-000000000001', 13, 'P2', 'P2', '40000000-0000-0000-0000-000000000002');
+create temp table p2sec as select id from sections where project_id = '40000000-0000-0000-0000-000000000002';
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000b', true);
 insert into results select 'owner P1 ne voit pas les sections de P2', (select count(*) from sections where project_id = '40000000-0000-0000-0000-000000000002') = 0;
+
+-- Questions du projet : ajout à la fin d'une section COMMUNE par l'owner ; questions de base en lecture seule ; garde sur les sections d'autres projets
+do $$ begin
+  insert into questions(framework_id, section_id, project_id, concept_id, ord, text_fr)
+    values ('10000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000001', '40000000-0000-0000-0000-000000000001', 'proj-test-1', 2, 'Q ajoutée');
+  insert into results values ('owner ajoute une question à la fin d''une section commune', true);
+exception when others then insert into results values ('owner ajoute une question à la fin d''une section commune', false); end $$;
+do $$ declare n int; begin
+  update questions set text_fr = 'modifiée' where id = '30000000-0000-0000-0000-000000000001'; get diagnostics n = row_count;
+  insert into results values ('owner ne peut pas modifier une question de base', n = 0);
+end $$;
+do $$ declare n int; begin
+  delete from questions where id = '30000000-0000-0000-0000-000000000001'; get diagnostics n = row_count;
+  insert into results values ('owner ne peut pas supprimer une question de base', n = 0);
+end $$;
+do $$ declare n int; begin
+  update questions set text_fr = 'Q ajoutée (modifiée)' where concept_id = 'proj-test-1'; get diagnostics n = row_count;
+  insert into results values ('owner modifie une question qu''il a ajoutée', n = 1);
+end $$;
+do $$ begin
+  insert into questions(framework_id, section_id, project_id, concept_id, ord, text_fr)
+    values ('10000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000001', '40000000-0000-0000-0000-000000000002', 'proj-test-2', 3, 'pour P2');
+  insert into results values ('owner ne peut pas ajouter une question à un AUTRE projet', false);
+exception when others then insert into results values ('owner ne peut pas ajouter une question à un AUTRE projet', true); end $$;
+do $$ begin
+  insert into questions(framework_id, section_id, project_id, concept_id, ord, text_fr)
+    values ('10000000-0000-0000-0000-000000000001', (select id from p2sec), '40000000-0000-0000-0000-000000000001', 'proj-test-3', 1, 'dans la section de P2');
+  insert into results values ('une question de P1 ne peut pas être placée dans la section d''un autre projet (même invisible pour l''owner)', false);
+exception when others then insert into results values ('une question de P1 ne peut pas être placée dans la section d''un autre projet (même invisible pour l''owner)', sqlerrm = 'section_of_other_project'); end $$;
+do $$ begin
+  update questions set section_id = (select id from p2sec) where concept_id = 'proj-test-1';
+  insert into results values ('on ne peut pas non plus déplacer une question du projet vers la section d''un autre projet', false);
+exception when others then insert into results values ('on ne peut pas non plus déplacer une question du projet vers la section d''un autre projet', sqlerrm = 'section_of_other_project'); end $$;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000c', true);
+insert into results select 'coach voit les questions ajoutées à son projet (et les questions de base)', (select count(*) from questions where project_id = '40000000-0000-0000-0000-000000000001') = 1 and (select count(*) from questions where project_id is null) = 1;
+do $$ begin
+  insert into questions(framework_id, section_id, project_id, concept_id, ord, text_fr)
+    values ('10000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000001', '40000000-0000-0000-0000-000000000001', 'proj-test-4', 4, 'par un coach');
+  insert into results values ('coach ne peut pas ajouter de question', false);
+exception when others then insert into results values ('coach ne peut pas ajouter de question', true); end $$;
+do $$ declare n int; begin
+  update questions set text_fr = 'x' where concept_id = 'proj-test-1'; get diagnostics n = row_count;
+  insert into results values ('coach ne peut pas modifier une question ajoutée', n = 0);
+end $$;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000b', true);
 
 -- Admin : tout
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000a', true);

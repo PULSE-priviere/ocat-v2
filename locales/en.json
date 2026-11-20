@@ -126,7 +126,8 @@
   "plan_intro": "This plan is set by your coach from the support session. You can view it here; only your coach can change it.",
   "plan_empty": "Your individual support plan has not been defined yet. It will be set with your coach during the support session: feel free to get in touch with them.",
   "start_first": "Start with the first section",
-  "resent_title": "Email sent"
+  "resent_title": "Email sent",
+  "extra": "Additional question"
  },
  "report": {
   "title": "{name} report",
@@ -209,7 +210,7 @@
   "tab_admin": "Administration",
   "profile": "My profile",
   "complete_name": "Complete your first and last name: they appear at the top right.",
-  "tab_sections": "Project sections",
+  "tab_sections": "Questionnaire",
   "all_projects": "All projects",
   "menu": "Menu",
   "hero_eyebrow": "Team area",
@@ -660,7 +661,7 @@
   "help_scored": "Paste your questions, one per line: they are answered with the usual labels (N/A, 1, 2, 3).",
   "help_data": "Add your questions one by one and choose the expected type of answer for each.",
   "q_type": "Answer type",
-  "t_scale": "Scored (N/A, 1, 2, 3)",
+  "t_scale": "Scale 1 to 3",
   "t_text": "Long text",
   "t_short": "Short text",
   "t_number": "Number",
@@ -885,5 +886,32 @@
   "invites": "Invitations (database)",
   "invites_ok": "The invitations table is in place.",
   "invites_missing": "The invitations table is missing: run the 0010_staff_invites.sql file in Supabase (SQL Editor). Without it the test email works but no invitation can be sent."
+ },
+ "qn": {
+  "lead_owner": "All the sections and questions that this project's organisations see. Base questions cannot be edited. You can add questions at the end of each section (they do not count towards the score) and project-specific sections.",
+  "lead_coach": "All the sections and questions that this project's organisations see. Only the project owners can add some.",
+  "search_ph": "Search a question or a topic (e.g. \"export\", \"audit\")…",
+  "results": "{n} question(s) found in {m} section(s)",
+  "no_results_title": "No results",
+  "no_results": "No question mentions \"{q}\": this topic is not covered in any section.",
+  "none_in": "Topic absent from: {list}.",
+  "matches": "{n} match(es)",
+  "no_match": "None",
+  "no_match_section": "No question in this section matches the search.",
+  "questions_count": "{n} questions",
+  "extra_count": "{n} added to the project",
+  "specific": "{project} specific section",
+  "data_badge": "Data, no score",
+  "back": "All sections",
+  "base_readonly": "Base question: cannot be edited",
+  "extra_badge": "Project question",
+  "extra_hint": "Does not count towards the score",
+  "choices": "Choices",
+  "add_here": "Add a question at the end of this section",
+  "add_note_base": "It will be visible to the project's organisations, after the base questions, but counts neither towards the section score nor the overall score.",
+  "add_section": "Add a section",
+  "edit_section": "Edit this section",
+  "x_of_y": "{x} of {y} questions",
+  "text_en_optional": "English text (optional)"
  }
 }

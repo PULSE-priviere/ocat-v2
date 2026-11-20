@@ -14,7 +14,7 @@ export default function StaffNav({ staff, project, active, onSignOut }) {
   const coachHome = !staff.profile?.is_admin && Object.values(staff.roles || {}).some(r => r.includes('coach'));   // un coach arrive sur son accueil
   const anyOwner = Object.values(staff.roles || {}).some(r => r.includes('owner'));
   const showProjects = !coachHome || projects.length > 1 || anyOwner;
-  const items = ['cohort', 'needs', 'team', ...(owner ? ['project', 'sections', 'journal', 'duplicates'] : [])];
+  const items = ['cohort', 'needs', 'sections', 'team', ...(owner ? ['project', 'journal', 'duplicates'] : [])];
   return (
     <nav className="sidenav" aria-label={t('staff.menu')}>
       {coachHome ? <Link className={`sideitem ${active === 'home' ? 'on' : ''}`} href="/staff"><Icon name="home" />{t('staff.home')}</Link> : null}

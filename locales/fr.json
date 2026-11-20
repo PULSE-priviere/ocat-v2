@@ -126,7 +126,8 @@
   "plan_intro": "Ce plan est établi par votre coach à partir de la session d'accompagnement. Vous pouvez le consulter ici ; seul votre coach peut le modifier.",
   "plan_empty": "Votre plan d'accompagnement individuel n'a pas encore été défini. Il sera établi avec votre coach lors de la session d'accompagnement : n'hésitez pas à vous rapprocher de lui.",
   "start_first": "Commencer par la première section",
-  "resent_title": "E-mail envoyé"
+  "resent_title": "E-mail envoyé",
+  "extra": "Question complémentaire"
  },
  "report": {
   "title": "Rapport de {name}",
@@ -209,7 +210,7 @@
   "tab_admin": "Administration",
   "profile": "Mon profil",
   "complete_name": "Complétez votre prénom et votre nom : ils s'affichent en haut à droite.",
-  "tab_sections": "Sections du projet",
+  "tab_sections": "Questionnaire",
   "all_projects": "Tous les projets",
   "menu": "Menu",
   "hero_eyebrow": "Espace équipe",
@@ -660,7 +661,7 @@
   "help_scored": "Collez vos questions, une par ligne : elles seront répondues avec les libellés habituels (N/A, 1, 2, 3).",
   "help_data": "Ajoutez vos questions une par une et choisissez, pour chacune, le type de réponse attendu.",
   "q_type": "Type de réponse",
-  "t_scale": "Notée (N/A, 1, 2, 3)",
+  "t_scale": "Échelle 1 à 3",
   "t_text": "Texte long",
   "t_short": "Texte court",
   "t_number": "Nombre",
@@ -885,5 +886,32 @@
   "invites": "Invitations (base de données)",
   "invites_ok": "La table des invitations est en place.",
   "invites_missing": "La table des invitations est absente : exécutez le fichier 0010_staff_invites.sql dans Supabase (SQL Editor). Sans elle, l'e-mail de test fonctionne mais aucune invitation ne peut partir."
+ },
+ "qn": {
+  "lead_owner": "Toutes les sections et questions que voient les organisations de ce projet. Les questions de base ne peuvent pas être modifiées. Vous pouvez ajouter des questions à la fin de chaque section (elles ne comptent pas dans le score) et des sections propres au projet.",
+  "lead_coach": "Toutes les sections et questions que voient les organisations de ce projet. Seuls les owners du projet peuvent en ajouter.",
+  "search_ph": "Rechercher une question ou un sujet (ex. « export », « audit »)…",
+  "results": "{n} question(s) trouvée(s) dans {m} section(s)",
+  "no_results_title": "Aucun résultat",
+  "no_results": "Aucune question ne parle de « {q} » : ce sujet n'est abordé dans aucune section.",
+  "none_in": "Sujet absent de : {list}.",
+  "matches": "{n} correspondance(s)",
+  "no_match": "Aucune",
+  "no_match_section": "Aucune question de cette section ne correspond à la recherche.",
+  "questions_count": "{n} questions",
+  "extra_count": "{n} ajoutée(s) au projet",
+  "specific": "Section spécifique {project}",
+  "data_badge": "Données, sans score",
+  "back": "Toutes les sections",
+  "base_readonly": "Question de base : non modifiable",
+  "extra_badge": "Question du projet",
+  "extra_hint": "Ne compte pas dans le score",
+  "choices": "Choix",
+  "add_here": "Ajouter une question à la fin de cette section",
+  "add_note_base": "Elle sera visible par les organisations du projet, après les questions de base, mais ne comptera ni dans le score de la section ni dans le score global.",
+  "add_section": "Ajouter une section",
+  "edit_section": "Modifier cette section",
+  "x_of_y": "{x} sur {y} questions",
+  "text_en_optional": "Texte en anglais (facultatif)"
  }
 }

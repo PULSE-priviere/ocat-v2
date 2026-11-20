@@ -202,3 +202,14 @@ Aucune migration. **Nouvelles dépendances** : `nodemailer` et `@vercel/function
 
 - Airtable : **mode simple par défaut** (une table « Scores », mêmes colonnes que l'ancienne version, une table existante continue de fonctionner). Le mode complet (trois tables) est une option dans Administration > Airtable. Voir `docs/AIRTABLE.md`.
 - Invitations : le message d'échec distingue « lien d'invitation non créé » (base de données pas à jour) de « e-mail refusé » ; Administration > E-mails vérifie la présence de la table des invitations.
+
+## Mise à jour 3.10 (questionnaire visible par les coachs et les owners)
+
+**Ordre : d'abord la base, ensuite le code.** Supabase > SQL Editor : exécuter `supabase/migrations/0011_question_guard.sql`.
+
+- L'onglet « Sections du projet » (réservé aux owners) devient **« Questionnaire »**, visible par tous les membres du projet : une carte par section (sections de base et sections propres au projet), au clic les questions.
+- **Coachs** : lecture seule. **Owners** : ajoutent des sections propres au projet et des questions à la fin de n'importe quelle section ; les questions de base ne se modifient pas (aucun droit en base, vérifié).
+- Une question **ajoutée à une section commune** (échelle 1 à 3, texte, nombre, oui/non, choix) est facultative et **ne compte ni dans le score de la section, ni dans le score global, ni dans la complétion** (`isScored` dans `lib/scoring.js`) ; elle est marquée « Question complémentaire » pour l'organisation.
+- Les sections propres au projet portent le badge « Section spécifique <projet> ».
+- Barre de recherche (insensible aux accents) : cartes grisées ou comptées par section, résultats groupés avec surlignage, liste des sections où le sujet est absent.
+- La migration 0011 interdit de rattacher une question d'un projet à la section d'un autre projet.

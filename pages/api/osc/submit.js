@@ -1,6 +1,7 @@
 // POST {token} : soumission (F6) quand les 9 sections sont complètes ; notifie owners et coach
 import { admin, fail, assessmentFromToken, appUrl } from '../../../lib/server';
 import { loadBank } from '../../../lib/bank';
+import { isScored } from '../../../lib/scoring';
 import { sendMail } from '../../../lib/mail';
 import { syncAssessmentsSafe } from '../../../lib/airtableSync';
 import { inBackground } from '../../../lib/background';
@@ -13,8 +14,10 @@ export default async function handler(req, res) {
   if (a.status === 'locked') return fail(res, 423, 'locked');
   if (a.status === 'submitted') return res.json({ ok: true });
 
-  const { questions } = await loadBank(db, a.subjects.projects.framework_id, null, a.subjects.project_id);
-  const scale = questions.filter(q => q.format === 'scale');
+  const { sections, questions } = await loadBank(db, a.subjects.projects.framework_id, null, a.subjects.project_id);
+  // Obligatoires : les questions à échelle qui comptent pour le score (pas celles que l'owner a ajoutées aux sections communes)
+  const secOf = Object.fromEntries(sections.map(s => [s.id, s]));
+  const scale = questions.filter(q => q.format === 'scale' && isScored(q, secOf[q.section_id]));
   const { data: answers } = await db.from('answers').select('question_id, code').eq('assessment_id', a.id);
   const done = new Set((answers || []).filter(x => x.code).map(x => x.question_id));
   if (scale.some(q => !done.has(q.id))) return fail(res, 400, 'incomplete');
