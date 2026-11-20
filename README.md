@@ -195,3 +195,10 @@ Aucune migration. **Nouvelles dépendances** : `nodemailer` et `@vercel/function
 - Administration > E-mails reconnaît SMTP, signale l'adresse d'expédition remplacée par Gmail, et donne un message précis en cas d'échec (mot de passe refusé, serveur injoignable…).
 - Boutons : chargement immédiat au clic, puis « E-mail envoyé : vérifiez aussi vos indésirables » (connexion, nouveau lien, invitation, renvoi).
 - Rapidité : l'e-mail et l'envoi vers Airtable partent en tâche de fond (`lib/background.js`, `waitUntil` de Vercel) à la connexion, à l'entrée d'une organisation, au nouveau lien, à la soumission et à la modification de la fiche. Hors Vercel, l'application attend (comportement sûr).
+
+## Mise à jour 3.9 (Airtable simple par défaut, diagnostic des invitations)
+
+**Si ce n'est pas déjà fait** : Supabase > SQL Editor : exécuter `supabase/migrations/0010_staff_invites.sql` (nécessaire aux invitations).
+
+- Airtable : **mode simple par défaut** (une table « Scores », mêmes colonnes que l'ancienne version, une table existante continue de fonctionner). Le mode complet (trois tables) est une option dans Administration > Airtable. Voir `docs/AIRTABLE.md`.
+- Invitations : le message d'échec distingue « lien d'invitation non créé » (base de données pas à jour) de « e-mail refusé » ; Administration > E-mails vérifie la présence de la table des invitations.

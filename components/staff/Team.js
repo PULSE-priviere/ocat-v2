@@ -49,7 +49,7 @@ export default function Team({ project, members, owner, isAdmin, reload, embedde
   };
   const resend = async p => {
     setMsg(''); setResending(p.id);
-    try { const r = await staffApi('resend_invite', { userId: p.id, projectId: project.id, lang }); setMsg(r.mailSent ? 'team.resent' : 'team.mail_failed'); }
+    try { const r = await staffApi('resend_invite', { userId: p.id, projectId: project.id, lang }); setMsg(r.mailSent ? 'team.resent' : r.reason === 'invite' ? 'team.invite_failed' : 'team.mail_failed'); }
     catch (err) { setMsg(`errors.${err.message}`); }
     setResending('');
   };
@@ -58,7 +58,7 @@ export default function Team({ project, members, owner, isAdmin, reload, embedde
     const roles = [inv.owner && 'owner', inv.coach && 'coach'].filter(Boolean);
     if (!roles.length) return setMsg('team.need_role');
     setBusy(true);
-    try { const r = await staffApi('invite', { email: inv.email, firstName: inv.firstName, lastName: inv.lastName, roles, projectId: project.id, lang }); setMsg(r.mailSent === false ? 'team.mail_failed' : 'team.invited'); setInv({ email: '', firstName: '', lastName: '', owner: false, coach: true }); reload(); }
+    try { const r = await staffApi('invite', { email: inv.email, firstName: inv.firstName, lastName: inv.lastName, roles, projectId: project.id, lang }); setMsg(r.mailSent === false ? (r.reason === 'invite' ? 'team.invite_failed' : 'team.mail_failed') : 'team.invited'); setInv({ email: '', firstName: '', lastName: '', owner: false, coach: true }); reload(); }
     catch (err) { setMsg(`errors.${err.message}`); }
     setBusy(false);
   };
@@ -113,7 +113,7 @@ export default function Team({ project, members, owner, isAdmin, reload, embedde
           </form>
         </>
       ) : null}
-      {msg ? <p className={msg.startsWith('errors') || msg === 'team.need_role' || msg === 'team.mail_failed' ? 'error' : 'ok'}>{t(msg)}</p> : null}
+      {msg ? <p className={msg.startsWith('errors') || msg === 'team.need_role' || msg === 'team.mail_failed' || msg === 'team.invite_failed' ? 'error' : 'ok'}>{t(msg)}</p> : null}
     </>
   );
 }

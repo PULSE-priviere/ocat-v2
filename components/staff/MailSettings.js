@@ -52,6 +52,7 @@ export default function MailSettings() {
             <Row level={dns.dmarc ? 'ok' : 'warn'} title="DMARC">{t(dns.dmarc ? 'mailv.dns_ok' : 'mailv.dmarc_missing', { domain: st.domain })}</Row>
           </>
         ) : null}
+        <Row level={st.invites?.ok ? 'ok' : 'bad'} title={t('mailv.invites')}>{st.invites?.ok ? t('mailv.invites_ok') : `${t('mailv.invites_missing')}${st.invites?.detail ? ` (${st.invites.detail})` : ''}`}</Row>
         <Row level="info" title={t('mailv.links')}>{t('mailv.links_text', { host: st.appHost || '—' })}</Row>
         <Row level={st.replyTo ? 'ok' : 'info'} title={t('mailv.reply_to')}>{st.replyTo || t('mailv.reply_to_none')}</Row>
       </section>

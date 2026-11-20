@@ -283,7 +283,8 @@
   "role_hint": "Une personne peut être à la fois owner et coach (par exemple un chef de projet qui accompagne aussi des organisations). Elle doit garder au moins un rôle ; « Révoquer » la retire du projet.",
   "resend": "Renvoyer l'invitation",
   "resent": "Invitation renvoyée par e-mail. Si la personne ne la voit pas, elle doit regarder dans ses indésirables (spam).",
-  "mail_failed": "Le compte est prêt, mais l'e-mail n'a pas pu être envoyé. Réessayez avec « Renvoyer l'invitation », ou vérifiez l'envoi dans Administration > E-mails."
+  "mail_failed": "Le compte est prêt, mais l'e-mail n'a pas pu être envoyé. Réessayez avec « Renvoyer l'invitation », ou vérifiez l'envoi dans Administration > E-mails.",
+  "invite_failed": "Le compte est prêt, mais le lien d'invitation n'a pas pu être créé : la base de données n'est pas à jour (migration 0010_staff_invites.sql). Prévenez l'administrateur ; voir Administration > E-mails."
  },
  "project": {
   "public_link": "Lien public du projet",
@@ -351,10 +352,10 @@
   "at_from_env": "(réglage repris des variables d'environnement)",
   "at_sync_all": "Synchroniser tous les projets",
   "at_test": "Tester la connexion",
-  "at_test_ok": "Connexion réussie : les trois tables répondent.",
+  "at_test_ok": "Connexion réussie : Airtable répond.",
   "at_csv_all": "Tout télécharger en CSV",
   "at_settings": "Connexion à Airtable",
-  "at_lead": "Une seule base pour tous les projets, avec trois tables reliées : Organisations, Diagnostics et Accompagnement. Chaque ligne indique son projet (RISE, EU REACH…).",
+  "at_lead": "Une seule base Airtable pour tous les projets : chaque ligne indique son projet (RISE, EU REACH…).",
   "at_token": "Jeton d'accès Airtable",
   "at_base": "Identifiant de la base",
   "at_token_hint": "Le jeton (commence par pat) doit avoir les droits data.records:write et, pour créer la table, schema.bases:write. Il est enregistré côté serveur et n'est jamais réaffiché ; laissez le champ vide pour garder le jeton actuel.",
@@ -370,7 +371,14 @@
   "at_table_organisations": "Table des organisations",
   "at_table_diagnostics": "Table des diagnostics",
   "at_table_accompagnement": "Table de l'accompagnement",
-  "v_email": "E-mails"
+  "v_email": "E-mails",
+  "at_mode": "Mode d'export",
+  "at_mode_simple": "Simple : une seule table « Scores » (recommandé)",
+  "at_mode_complet": "Complet : trois tables liées (Organisations, Diagnostics, Accompagnement)",
+  "at_mode_simple_hint": "Une ligne par diagnostic : informations de l'organisation, scores par section, besoins d'accompagnement. Suffit pour le suivi-évaluation (baseline, midline, endline). Droits Airtable nécessaires : data.records:read et data.records:write ; pour créer la table depuis l'application : schema.bases:write.",
+  "at_mode_complet_hint": "Ajoute une table des organisations et une table de l'accompagnement (notes du coach, actions, échéances). Plus complet, mais plus lourd : il faut aussi les droits schema.bases:read et schema.bases:write.",
+  "at_table_scores": "Nom de la table",
+  "at_status_ok_simple": "Connectée et vérifiée : base {base}, table « {table} ». Tous les projets y envoient leurs diagnostics."
  },
  "subject": {
   "back": "Retour à la cohorte",
@@ -729,7 +737,12 @@
   "done_ok": "Les trois tables sont à jour.",
   "detail_airtable": "Airtable",
   "detail_tables": "Tables concernées",
-  "detail_scopes": "Droits manquants"
+  "detail_scopes": "Droits manquants",
+  "intro_simple": "Chaque diagnostic (baseline, midline, endline) devient une ligne de la table « Scores » : informations de l'organisation, score global, scores par section, complétion, besoins d'accompagnement. Le score d'une section n'y figure qu'une fois la section complète.",
+  "setup_simple": "Créer / mettre à jour la table",
+  "setup_hint_simple": "À faire une seule fois (rien à faire si la table existe déjà). Pour créer la table depuis l'application, le jeton doit avoir le droit schema.bases:write.",
+  "csv_scores": "CSV · Scores",
+  "done_sync_simple": "Synchronisation terminée : {d} diagnostics envoyés."
  },
  "share": {
   "title": "Lien du formulaire à partager",
@@ -868,6 +881,9 @@
   "test_failed": "L'envoi a échoué.",
   "provider_smtp": "Envoi direct par SMTP ({host}:{port}) depuis {user}, sans Airtable. Avec Gmail, les messages sont signés par Google (SPF, DKIM et DMARC valides). Limite d'environ 500 destinataires par jour avec un compte Gmail gratuit, 2 000 avec Google Workspace.",
   "provider_smtp_incomplete": "SMTP choisi, mais SMTP_USER ou SMTP_PASS manque dans les variables Vercel.",
-  "from_mismatch": "Gmail remplace cette adresse par celle du compte ({user}). Utilisez la même adresse, ou un alias « Envoyer en tant que » déclaré dans Gmail."
+  "from_mismatch": "Gmail remplace cette adresse par celle du compte ({user}). Utilisez la même adresse, ou un alias « Envoyer en tant que » déclaré dans Gmail.",
+  "invites": "Invitations (base de données)",
+  "invites_ok": "La table des invitations est en place.",
+  "invites_missing": "La table des invitations est absente : exécutez le fichier 0010_staff_invites.sql dans Supabase (SQL Editor). Sans elle, l'e-mail de test fonctionne mais aucune invitation ne peut partir."
  }
 }

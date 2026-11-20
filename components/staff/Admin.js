@@ -144,7 +144,7 @@ function Accounts({ profiles, setProfiles, mems, projects, onChanged }) {
   const resend = async p => {
     setMsg(''); setResending(p.id);
     const first = mems.find(m => m.user_id === p.id);
-    try { const r = await staffApi('resend_invite', { userId: p.id, projectId: p.is_admin ? null : first?.project_id, lang }); setMsg(r.mailSent ? 'team.resent' : 'team.mail_failed'); }
+    try { const r = await staffApi('resend_invite', { userId: p.id, projectId: p.is_admin ? null : first?.project_id, lang }); setMsg(r.mailSent ? 'team.resent' : r.reason === 'invite' ? 'team.invite_failed' : 'team.mail_failed'); }
     catch (x) { setMsg(`errors.${x.message}`); }
     setResending('');
   };
@@ -184,7 +184,7 @@ function Accounts({ profiles, setProfiles, mems, projects, onChanged }) {
         <label>{t('profile.label.last_name')}<input required value={inv.lastName} onChange={e => setInv({ ...inv, lastName: e.target.value })} /></label>
         <button className="btn primary" aria-busy={busy} disabled={busy}>{t('admin.invite')}</button>
       </form>
-      {msg ? <p className={msg.startsWith('errors') || msg === 'team.mail_failed' ? 'error' : 'ok'}>{t(msg)}</p> : null}
+      {msg ? <p className={msg.startsWith('errors') || msg === 'team.mail_failed' || msg === 'team.invite_failed' ? 'error' : 'ok'}>{t(msg)}</p> : null}
     </>
   );
 }
@@ -193,10 +193,10 @@ function Accounts({ profiles, setProfiles, mems, projects, onChanged }) {
 function AirtableSettings() {
   const { t } = useI18n();
   const [st, setSt] = useState(null);
-  const [f, setF] = useState({ token: '', baseId: '', tables: { organisations: 'Organisations', diagnostics: 'Diagnostics', accompagnement: 'Accompagnement' }, auto: true });
+  const [f, setF] = useState({ token: '', baseId: '', mode: 'simple', table: 'Scores', tables: { organisations: 'Organisations', diagnostics: 'Diagnostics', accompagnement: 'Accompagnement' }, auto: true });
   const { busy, msg, prog, setMsg, run, setup, sync, csv } = useAirtableActions({ all: true }, 'suivi-evaluation-tous-projets');
   const load = useCallback(async () => {
-    try { const r = await staffApi('airtable_get'); setSt(r); setF(x => ({ ...x, token: '', baseId: r.baseId || '', tables: r.tables || x.tables, auto: r.auto !== false })); }
+    try { const r = await staffApi('airtable_get'); setSt(r); setF(x => ({ ...x, token: '', baseId: r.baseId || '', mode: r.mode || 'simple', table: r.table || 'Scores', tables: r.tables || x.tables, auto: r.auto !== false })); }
     catch { setSt({ configured: false }); }
   }, []);
   useEffect(() => { load(); }, [load]);
@@ -218,20 +218,20 @@ function AirtableSettings() {
           <span className="feature-icon"><Icon name="db" size={19} /></span>
           <div>
             <h2>{t('admin.at_title')}</h2>
-            <p>{!st ? t('common.loading') : st.verified ? t('admin.at_status_ok', { base: st.baseId }) : st.configured ? `${t('admin.at_status_fail')} ${airtableMsg(t, { message: st.problem?.code, detail: st.problem?.detail })}` : t('admin.at_status_none')}{st?.source === 'env' ? ` ${t('admin.at_from_env')}` : ''}</p>
+            <p>{!st ? t('common.loading') : st.verified ? t(st.mode === 'complet' ? 'admin.at_status_ok' : 'admin.at_status_ok_simple', { base: st.baseId, table: st.table }) : st.configured ? `${t('admin.at_status_fail')} ${airtableMsg(t, { message: st.problem?.code, detail: st.problem?.detail })}` : t('admin.at_status_none')}{st?.source === 'env' ? ` ${t('admin.at_from_env')}` : ''}</p>
           </div>
         </div>
         {st?.configured ? (
           <div className="feature-actions" style={{ marginTop: '1rem' }}>
             {st.verified ? <button className="btn white" aria-busy={busy === 'sync'} disabled={!!busy} onClick={sync}>{t('admin.at_sync_all')}</button> : null}
             <button className="btn glass" aria-busy={busy === 'test'} disabled={!!busy} onClick={test}>{t('admin.at_test')}</button>
-            <button className="btn glass" aria-busy={busy === 'setup'} disabled={!!busy} onClick={setup}>{t('mex.setup')}</button>
+            <button className="btn glass" aria-busy={busy === 'setup'} disabled={!!busy} onClick={setup}>{t(st.mode === 'complet' ? 'mex.setup' : 'mex.setup_simple')}</button>
             {prog ? <span className="small">{t('mex.progress', prog)}</span> : null}
           </div>
         ) : null}
         {st?.configured ? (
           <div className="feature-actions" style={{ marginTop: '0.6rem' }}>
-            {['organisations', 'diagnostics', 'accompagnement'].map(k => (
+            {(st.mode === 'complet' ? ['organisations', 'diagnostics', 'accompagnement'] : ['scores']).map(k => (
               <button key={k} className="btn glass small" aria-busy={busy === `csv_${k}`} disabled={!!busy} onClick={() => csv(k)}>{t(`mex.csv_${k}`)}</button>
             ))}
           </div>
@@ -248,12 +248,25 @@ function AirtableSettings() {
           </div>
           <p className="muted small">{t('admin.at_token_hint')}</p>
           {st?.tokenHint ? <p className="muted small">{t('admin.at_token_used', { hint: st.tokenHint, source: t(`admin.at_src_${st.source || 'app'}`) })}</p> : null}
-          <span className="fieldlabel">{t('admin.at_tables_title')}</span>
-          <div className="form row">
-            {['organisations', 'diagnostics', 'accompagnement'].map(k => (
-              <label key={k}>{t(`admin.at_table_${k}`)}<input value={f.tables[k]} onChange={e => setTable(k, e.target.value)} /></label>
-            ))}
-          </div>
+          <label>{t('admin.at_mode')}
+            <select value={f.mode} onChange={e => setF({ ...f, mode: e.target.value })}>
+              <option value="simple">{t('admin.at_mode_simple')}</option>
+              <option value="complet">{t('admin.at_mode_complet')}</option>
+            </select>
+          </label>
+          <p className="muted small">{t(`admin.at_mode_${f.mode}_hint`)}</p>
+          {f.mode === 'complet' ? (
+            <>
+              <span className="fieldlabel">{t('admin.at_tables_title')}</span>
+              <div className="form row">
+                {['organisations', 'diagnostics', 'accompagnement'].map(k => (
+                  <label key={k}>{t(`admin.at_table_${k}`)}<input value={f.tables[k]} onChange={e => setTable(k, e.target.value)} /></label>
+                ))}
+              </div>
+            </>
+          ) : (
+            <label>{t('admin.at_table_scores')}<input value={f.table} onChange={e => setF({ ...f, table: e.target.value })} /></label>
+          )}
           <label className="check"><input type="checkbox" checked={f.auto} onChange={e => setF({ ...f, auto: e.target.checked })} /><span>{t('admin.at_auto')}</span></label>
           <button className="btn primary" aria-busy={busy === 'save'} disabled={!!busy}>{t('common.save')}</button>
         </form>

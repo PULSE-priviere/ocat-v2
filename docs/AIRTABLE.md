@@ -1,30 +1,38 @@
-# Airtable : trois tables reliées
+# Airtable : suivi-évaluation
 
-Une seule base Airtable pour tous les projets. Chaque ligne indique son **projet**.
+Une seule base Airtable pour tous les projets. Chaque ligne indique son **projet**. Deux modes, au choix dans *Administration > Airtable > Mode d'export*.
 
-| Table | Une ligne par… | Contenu |
-|---|---|---|
-| **Organisations** | organisation | Organisation, Projet, Pays, Type de structure, Taille, Contact, E-mail, Coach, Origine (lien public / créée par l'équipe), Date de création |
-| **Diagnostics** | diagnostic (baseline, midline, endline) | lien vers l'organisation ; Évaluation, Statut, Étape d'accompagnement, Statut de la session et du plan ; Complétion, Score global, Score S1 à S9 (seulement quand la section est complète) ; répartition des réponses ; **Besoins d'accompagnement**, Appuis demandés, Questions avec appui demandé, Sections à approfondir |
-| **Accompagnement** | besoin travaillé en session | liens vers l'organisation et le diagnostic ; Section, Question, Réponse de l'organisation, Appui demandé ; **Notes du coach, Action à mener, Responsable, Échéance** ; Dans le plan, Statut du plan, Statut et date de la session |
+## Mode simple (par défaut, recommandé) : une table « Scores »
 
-Une question a sa ligne d'accompagnement dès qu'un appui est demandé, ou qu'une note, une action ou un responsable existe.
+Une ligne par diagnostic (baseline, midline, endline) : organisation, contact, e-mail, projet, coach, pays, type de structure, taille ; évaluation, statut, dates ; complétion, score global, **score de chaque section** (S1 à S9, seulement quand la section est complète) ; répartition des réponses ; appuis demandés, actions définies, besoins d'accompagnement.
+
+C'est tout ce qu'il faut pour le suivi-évaluation. Les colonnes sont celles de l'ancienne table « Scores » : une table existante continue de fonctionner sans rien modifier.
+
+Droits du jeton Airtable : `data.records:read`, `data.records:write` (et `schema.bases:write` si l'application doit créer la table).
+
+## Mode complet (option) : trois tables reliées
+
+À ajouter si vous voulez **suivre l'accompagnement dans Airtable** :
+- **Organisations** : une ligne par organisation ;
+- **Diagnostics** : comme « Scores », plus l'étape d'accompagnement, les statuts de la session et du plan, les questions avec appui demandé ;
+- **Accompagnement** : une ligne par besoin travaillé en session (notes du coach, action à mener, responsable, échéance, présence dans le plan).
+
+Droits supplémentaires : `schema.bases:read` et `schema.bases:write`. Plus de requêtes vers Airtable, donc des envois un peu plus longs.
+
+Les scores sont **identiques** dans les deux modes : choisir le mode complet ne change rien au calcul du suivi-évaluation.
 
 ## Mise en place
 
-1. Sur airtable.com/create/tokens, créer un jeton avec les droits `data.records:read`, `data.records:write`, `schema.bases:read` et `schema.bases:write`, et y ajouter la base.
-2. Administration > Airtable : coller le jeton et l'identifiant de la base, puis **Enregistrer** (la connexion est vérifiée tout de suite).
-3. **Créer / mettre à jour les tables** : l'application crée les trois tables et leurs liens. À refaire après une mise à jour qui ajoute des colonnes ; rien n'est jamais supprimé.
-4. **Synchroniser maintenant** : envoie tout (environ 2 à 3 minutes pour 350 organisations).
+1. airtable.com/create/tokens : jeton avec les droits ci-dessus, et la base ajoutée.
+2. Administration > Airtable : jeton, identifiant de la base, mode, nom de la table ; **Enregistrer** (la connexion est vérifiée tout de suite).
+3. *Créer / mettre à jour la table* (rien à faire si la table existe déjà), puis *Synchroniser maintenant*.
 
-Ne pas créer les tables à la main ni renommer les colonnes « Identifiant » (clé de mise à jour) : l'application s'en sert pour retrouver chaque ligne.
+Ne pas renommer la colonne clé (`Cle` en mode simple, `Identifiant` en mode complet) : l'application s'en sert pour retrouver chaque ligne.
 
 ## Quand les données partent-elles ?
 
-Automatiquement : création d'une organisation (lien public ou par l'équipe), modification de sa fiche, envoi d'un diagnostic, plan validé ou partagé, session marquée « Terminée ». Les notes prises entre-temps partent à l'un de ces moments, ou avec **Synchroniser maintenant**.
-
-Une ligne est mise à jour, jamais dupliquée. Si une note est supprimée dans l'application, sa ligne Airtable n'est pas supprimée : à retirer à la main.
+Automatiquement : création d'une organisation, modification de sa fiche, envoi d'un diagnostic, plan validé ou partagé, session terminée. Une ligne est mise à jour, jamais dupliquée. Une ligne n'est pas supprimée d'Airtable si elle disparaît de l'application.
 
 ## CSV
 
-Les mêmes trois tables se téléchargent en CSV (Administration pour tous les projets, onglet Projet pour un projet).
+Les mêmes données se téléchargent en CSV (Administration pour tous les projets, onglet Projet pour un projet).

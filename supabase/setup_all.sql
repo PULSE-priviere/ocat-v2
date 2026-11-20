@@ -489,3 +489,6 @@ create table if not exists staff_invites (
 );
 create index if not exists staff_invites_user on staff_invites(user_id);
 alter table staff_invites enable row level security;
+
+-- Recharge le schéma côté API (au cas où la table vient d'être créée)
+notify pgrst, 'reload schema';

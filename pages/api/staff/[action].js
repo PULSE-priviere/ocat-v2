@@ -4,8 +4,8 @@ import { sendInvitation } from '../../../lib/invite';
 import { inBackground } from '../../../lib/background';
 import { mailConfig, smtpConfig, sendMail } from '../../../lib/mail';
 import { checkDns, FREE_MAIL } from '../../../lib/mailcheck';
-import { airtableConfig, airtableReady, testAirtable, airtableCode, cleanToken, cleanBaseId, DEFAULT_TABLES } from '../../../lib/scoresExport';
-import { buildData, syncAssessments, syncAssessmentsSafe, ensureTables, fieldNames, TABLE_KEYS } from '../../../lib/airtableSync';
+import { airtableConfig, airtableReady, testAirtable, airtableCode, cleanToken, cleanBaseId, DEFAULT_TABLES, DEFAULT_SCORES_TABLE } from '../../../lib/scoresExport';
+import { buildData, syncAssessments, syncAssessmentsSafe, ensureTables, fieldNames, legacyRows, TABLE_KEYS, CSV_KEYS } from '../../../lib/airtableSync';
 
 // L'envoi vers Airtable peut durer (5 requêtes par seconde au plus)
 export const config = { maxDuration: 60 };
@@ -36,7 +36,7 @@ async function createAssessment(svc, subjectId, type, email, lang) {
   return { id: data.id, url };
 }
 
-// Prépare et envoie l'invitation : nom de l'invitant, projet, rôles. Renvoie true si l'e-mail est parti.
+// Prépare et envoie l'invitation : nom de l'invitant, projet, rôles. Renvoie { ok, reason?, detail? }.
 async function invitationMail(svc, { user, prof, email, projectId, roles, lang }) {
   const { data: me } = await svc.from('profiles').select('first_name, last_name, name').eq('id', user.id).maybeSingle();
   const inviter = [me?.first_name, me?.last_name].filter(Boolean).join(' ') || me?.name || user.email;
@@ -69,8 +69,8 @@ const actions = {
     if (projectId) {
       for (const role of roles) await svc.from('memberships').upsert({ user_id: prof.id, project_id: projectId, role }, { onConflict: 'user_id,project_id,role' });
     }
-    const mailSent = await invitationMail(svc, { user, prof, email, projectId, roles, lang: body.lang });
-    return { ok: true, mailSent };
+    const r = await invitationMail(svc, { user, prof, email, projectId, roles, lang: body.lang });
+    return { ok: true, mailSent: r.ok, reason: r.reason, detail: r.detail };
   },
   // Renvoyer l'invitation à une personne de l'équipe (l'e-mail part toujours à SON adresse : jamais de lien montré à l'invitant)
   async resend_invite({ db, svc, body, user }) {
@@ -85,12 +85,12 @@ const actions = {
       roles = (ms || []).map(m => m.role);
       if (!roles.length) return [404, 'not_found'];
     } else if (!prof.is_admin) return [404, 'not_found'];
-    const mailSent = await invitationMail(svc, { user, prof, email: prof.email, projectId, roles, lang: body.lang });
-    return { ok: true, mailSent };
+    const r = await invitationMail(svc, { user, prof, email: prof.email, projectId, roles, lang: body.lang });
+    return { ok: true, mailSent: r.ok, reason: r.reason, detail: r.detail };
   },
 
   // Envoi des e-mails (administrateur) : fournisseur, expéditeur, enregistrements DNS, et e-mail de test
-  async mail_status({ db }) {
+  async mail_status({ db, svc }) {
     if (!(await rpc(db, 'is_admin'))) return [403, 'forbidden'];
     const c = mailConfig(), sc = smtpConfig();
     const fromAddr = (/<([^>]+)>/.exec(c.from) || [])[1] || c.from;
@@ -102,7 +102,9 @@ const actions = {
       gmail: /(^|\.)(gmail|googlemail)\.com$/i.test(sc.host),
       fromMismatch: !!fromAddr && !!sc.user && fromAddr.toLowerCase() !== sc.user.toLowerCase(),
     } : null;
-    return { provider: c.provider, from: c.from || (smtp ? sc.user : ''), replyTo: c.replyTo, domain, appHost, smtp,
+    // Pas de requête HEAD ici : une table absente y est prise pour un succès. Les invitations s'enregistrent en base (migration 0010) : sans la table, l'e-mail de test passe mais aucune invitation ne part
+    const { error: invErr } = await svc.from('staff_invites').select('id').limit(1);
+    return { provider: c.provider, from: c.from || (smtp ? sc.user : ''), replyTo: c.replyTo, domain, appHost, smtp, invites: { ok: !invErr, detail: invErr ? invErr.message : '' },
       freeMail: c.provider === 'resend' && !!domain && FREE_MAIL.test(domain),     // avec SMTP, c'est le serveur du compte qui signe : une adresse Gmail est légitime
       dns: c.provider === 'resend' && domain ? await checkDns(domain) : null };
   },
@@ -213,16 +215,23 @@ const actions = {
     let sent;
     try { sent = await syncAssessments(svc, cfg, ids); } catch (e) { return [502, airtableCode(e), e.message]; }
     const done = offset + ids.length;
-    return { ...sent, done, total, next: ids.length && done < total ? done : null };
+    return { ...sent, mode: cfg.mode, done, total, next: ids.length && done < total ? done : null };
   },
-  // CSV d'une des trois tables, mêmes colonnes que dans Airtable
+  // CSV : la table « Scores » (mode simple) ou l'une des trois tables (mode complet), mêmes colonnes que dans Airtable
   async scores_csv({ db, svc, body }) {
     if (!(await canScores(db, body))) return [403, 'forbidden'];
-    const table = TABLE_KEYS.includes(body.table) ? body.table : 'diagnostics';
+    const cfg = await airtableConfig(svc);
+    const table = CSV_KEYS.includes(body.table) ? body.table : (cfg.mode === 'complet' ? 'diagnostics' : 'scores');
     const { ids, total, offset } = await assessmentPage(svc, body);
     const data = await buildData(svc, ids);
     const done = offset + ids.length;
-    return { fields: fieldNames(table), rows: data[table], done, total, next: ids.length && done < total ? done : null };
+    return { fields: fieldNames(table), rows: table === 'scores' ? legacyRows(data) : data[table], done, total, next: ids.length && done < total ? done : null };
+  },
+  // Mode d'export en vigueur (pour afficher les bons boutons à un owner)
+  async scores_mode({ db, svc, body }) {
+    if (!(await canScores(db, body))) return [403, 'forbidden'];
+    const cfg = await airtableConfig(svc);
+    return { mode: cfg.mode, table: cfg.table };
   },
   // Envoi d'un diagnostic précis, déclenché quand un plan est validé ou partagé, ou qu'une session est terminée
   async sync_assessment({ db, svc, body }) {
@@ -241,7 +250,7 @@ const actions = {
     if (airtableReady(cfg)) {
       try { await testAirtable(cfg); verified = true; } catch (e) { problem = { code: airtableCode(e), detail: e.message }; }
     }
-    return { configured: airtableReady(cfg), verified, problem, baseId: cfg.base, tables: cfg.tables, auto: cfg.auto,
+    return { configured: airtableReady(cfg), verified, problem, baseId: cfg.base, mode: cfg.mode, table: cfg.table, tables: cfg.tables, auto: cfg.auto,
       tokenHint: cfg.token ? `••••${cfg.token.slice(-4)}` : '', source: cfg.fromApp ? 'app' : (cfg.token ? 'env' : '') };
   },
   async airtable_save({ db, svc, body }) {
@@ -251,9 +260,11 @@ const actions = {
     if (token && !token.startsWith('pat')) return [400, 'airtable_token_format'];
     const baseId = cleanBaseId(body.baseId);                   // l'adresse de la base collée en entier convient aussi
     if (!baseId) return [400, 'airtable_base_format'];
+    const mode = body.mode === 'complet' ? 'complet' : 'simple';
+    const table = String(body.table || '').trim().slice(0, 100) || DEFAULT_SCORES_TABLE;
     const tables = Object.fromEntries(TABLE_KEYS.map(k => [k, String(body.tables?.[k] || '').trim().slice(0, 100) || DEFAULT_TABLES[k]]));
-    if (new Set(Object.values(tables).map(x => x.toLowerCase())).size < 3) return [400, 'airtable_tables_distinct'];
-    const next = { ...(cur?.value || {}), baseId, tables, auto: body.auto !== false };
+    if (mode === 'complet' && new Set(Object.values(tables).map(x => x.toLowerCase())).size < 3) return [400, 'airtable_tables_distinct'];
+    const next = { ...(cur?.value || {}), baseId, mode, table, tables, auto: body.auto !== false };
     if (token) next.token = token.slice(0, 300);
     const { error } = await svc.from('app_settings').upsert({ key: 'airtable', value: next, updated_at: new Date().toISOString() });
     if (error) return [500, 'server_error'];

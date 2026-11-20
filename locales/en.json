@@ -283,7 +283,8 @@
   "role_hint": "A person can be both owner and coach (for example a project lead who also supports organisations). They must keep at least one role; \"Revoke\" removes them from the project.",
   "resend": "Resend the invitation",
   "resent": "Invitation sent again by email. If the person does not see it, they should look in their junk folder (spam).",
-  "mail_failed": "The account is ready, but the email could not be sent. Try \"Resend the invitation\", or check sending in Administration > Emails."
+  "mail_failed": "The account is ready, but the email could not be sent. Try \"Resend the invitation\", or check sending in Administration > Emails.",
+  "invite_failed": "The account is ready, but the invitation link could not be created: the database is not up to date (migration 0010_staff_invites.sql). Tell the administrator; see Administration > Emails."
  },
  "project": {
   "public_link": "Project public link",
@@ -351,10 +352,10 @@
   "at_from_env": "(setting taken from environment variables)",
   "at_sync_all": "Synchronise all projects",
   "at_test": "Test the connection",
-  "at_test_ok": "Connection successful: all three tables respond.",
+  "at_test_ok": "Connection successful: Airtable responds.",
   "at_csv_all": "Download everything as CSV",
   "at_settings": "Airtable connection",
-  "at_lead": "One base for all projects, with three linked tables: Organisations, Diagnostics and Accompagnement. Each row shows its project (RISE, EU REACH…).",
+  "at_lead": "One Airtable base for all projects: each row shows its project (RISE, EU REACH…).",
   "at_token": "Airtable access token",
   "at_base": "Base ID",
   "at_token_hint": "The token (starts with pat) needs the data.records:write scope and, to create the table, schema.bases:write. It is stored server-side and never shown again; leave the field empty to keep the current token.",
@@ -370,7 +371,14 @@
   "at_table_organisations": "Organisations table",
   "at_table_diagnostics": "Diagnostics table",
   "at_table_accompagnement": "Support table",
-  "v_email": "Emails"
+  "v_email": "Emails",
+  "at_mode": "Export mode",
+  "at_mode_simple": "Simple: a single \"Scores\" table (recommended)",
+  "at_mode_complet": "Full: three linked tables (Organisations, Diagnostics, Accompagnement)",
+  "at_mode_simple_hint": "One row per diagnostic: organisation details, scores by section, support needs. Enough for monitoring & evaluation (baseline, midline, endline). Airtable scopes needed: data.records:read and data.records:write; to create the table from the application: schema.bases:write.",
+  "at_mode_complet_hint": "Adds an organisations table and a support table (coach's notes, actions, due dates). More complete but heavier: it also needs the schema.bases:read and schema.bases:write scopes.",
+  "at_table_scores": "Table name",
+  "at_status_ok_simple": "Connected and verified: base {base}, table \"{table}\". All projects send their diagnostics there."
  },
  "subject": {
   "back": "Back to the cohort",
@@ -729,7 +737,12 @@
   "done_ok": "All three tables are up to date.",
   "detail_airtable": "Airtable",
   "detail_tables": "Tables concerned",
-  "detail_scopes": "Missing scopes"
+  "detail_scopes": "Missing scopes",
+  "intro_simple": "Each diagnostic (baseline, midline, endline) becomes a row of the \"Scores\" table: organisation details, overall score, scores by section, completion, support needs. A section's score only appears once the section is complete.",
+  "setup_simple": "Create / update the table",
+  "setup_hint_simple": "Do this once (nothing to do if the table already exists). To create the table from the application, the token needs the schema.bases:write scope.",
+  "csv_scores": "CSV · Scores",
+  "done_sync_simple": "Synchronisation complete: {d} diagnostics sent."
  },
  "share": {
   "title": "Form link to share",
@@ -868,6 +881,9 @@
   "test_failed": "Sending failed.",
   "provider_smtp": "Direct sending over SMTP ({host}:{port}) from {user}, without Airtable. With Gmail, messages are signed by Google (valid SPF, DKIM and DMARC). Limit of about 500 recipients per day with a free Gmail account, 2,000 with Google Workspace.",
   "provider_smtp_incomplete": "SMTP selected, but SMTP_USER or SMTP_PASS is missing from the Vercel variables.",
-  "from_mismatch": "Gmail replaces this address with the account's ({user}). Use the same address, or a \"Send mail as\" alias declared in Gmail."
+  "from_mismatch": "Gmail replaces this address with the account's ({user}). Use the same address, or a \"Send mail as\" alias declared in Gmail.",
+  "invites": "Invitations (database)",
+  "invites_ok": "The invitations table is in place.",
+  "invites_missing": "The invitations table is missing: run the 0010_staff_invites.sql file in Supabase (SQL Editor). Without it the test email works but no invitation can be sent."
  }
 }
