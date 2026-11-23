@@ -35,6 +35,12 @@ export default async function handler(req, res) {
       const keys = (Array.isArray(q.options) ? q.options : []).map(o => o.key);
       if (v && !keys.includes(v)) return fail(res, 400, 'invalid_form');
       row.value_text = v || null;
+    } else if (q.format === 'multi') {
+      const keys = (Array.isArray(q.options) ? q.options : []).map(o => o.key);
+      let arr = [];
+      if (v) { try { arr = JSON.parse(v); } catch { return fail(res, 400, 'invalid_form'); } }
+      if (!Array.isArray(arr) || new Set(arr).size !== arr.length || arr.some(k => typeof k !== 'string' || !keys.includes(k))) return fail(res, 400, 'invalid_form');
+      row.value_text = arr.length ? JSON.stringify(arr) : null;
     } else if (q.format === 'short') row.value_text = v.slice(0, 300) || null;
     else row.value_text = v.slice(0, 5000) || null;
     const { error: e } = await db.from('answers').upsert(row, { onConflict: 'assessment_id,question_id' });

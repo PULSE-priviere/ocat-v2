@@ -10,7 +10,8 @@ import { matches, highlightParts } from '../../lib/search';
 import { safeStr } from '../../lib/safe';
 import SearchBox from '../SearchBox';
 
-const DATA_TYPES = ['text', 'short', 'number', 'yesno', 'choice'];
+const DATA_TYPES = ['text', 'short', 'number', 'yesno', 'choice', 'multi'];
+const HAS_OPTS = ['choice', 'multi'];
 const lines = s => String(s || '').split('\n').map(x => x.trim()).filter(Boolean);
 const split = s => String(s || '').split(',').map(x => x.trim()).filter(Boolean);
 const blankRow = () => ({ type: 'text', fr: '', en: '', opts: '', optsEn: '' });
@@ -196,7 +197,7 @@ function AddQuestion({ types, onAdd }) {
   const submit = async e => {
     e.preventDefault(); setError('');
     if (!r.text.trim()) return;
-    const options = r.type === 'choice' ? split(r.opts) : null;
+    const options = HAS_OPTS.includes(r.type) ? split(r.opts) : null;
     if (options && options.length < 2) return setError('psec.need_choices');
     setBusy(true);
     try { await onAdd({ text: r.text, textEn: r.en, type: r.type, options }); setR({ type: r.type, text: '', en: '', opts: '' }); }
@@ -210,7 +211,7 @@ function AddQuestion({ types, onAdd }) {
         <label>{t('psec.q_text_fr')}<input required value={r.text} onChange={e => setR({ ...r, text: e.target.value })} /></label>
         <label>{t('qn.text_en_optional')}<input value={r.en} onChange={e => setR({ ...r, en: e.target.value })} /></label>
       </div>
-      {r.type === 'choice' ? <label>{t('psec.q_options')}<input value={r.opts} onChange={e => setR({ ...r, opts: e.target.value })} /></label> : null}
+      {HAS_OPTS.includes(r.type) ? <label>{t('psec.q_options')}<input value={r.opts} onChange={e => setR({ ...r, opts: e.target.value })} /></label> : null}
       {error ? <p className="error">{t(error)}</p> : null}
       <div><button className="btn primary" aria-busy={busy} disabled={busy}>{t('psec.add_question')}</button></div>
     </form>
@@ -231,9 +232,9 @@ function AddSection({ onCreate }) {
     const payload = { kind, nameFr: form.nameFr, nameEn: form.nameEn };
     if (kind === 'scored') { payload.questionsFr = lines(form.qFr); payload.questionsEn = lines(form.qEn); }
     else {
-      const qs = rows.filter(r => r.fr.trim()).map(r => ({ type: r.type, fr: r.fr.trim(), en: r.en.trim(), options: r.type === 'choice' ? split(r.opts) : undefined, optionsEn: r.type === 'choice' ? split(r.optsEn) : undefined }));
+      const qs = rows.filter(r => r.fr.trim()).map(r => ({ type: r.type, fr: r.fr.trim(), en: r.en.trim(), options: HAS_OPTS.includes(r.type) ? split(r.opts) : undefined, optionsEn: HAS_OPTS.includes(r.type) ? split(r.optsEn) : undefined }));
       if (!qs.length) return setMsg('psec.need_question');
-      if (qs.some(q => q.type === 'choice' && q.options.length < 2)) return setMsg('psec.need_choices');
+      if (qs.some(q => HAS_OPTS.includes(q.type) && q.options.length < 2)) return setMsg('psec.need_choices');
       payload.questions = qs;
     }
     setBusy(true);
@@ -276,7 +277,7 @@ function AddSection({ onCreate }) {
                   <input placeholder={t('psec.q_text_fr')} aria-label={t('psec.q_text_fr')} value={r.fr} onChange={e => setRow(i, { fr: e.target.value })} />
                   <input placeholder={t('psec.q_text_en')} aria-label={t('psec.q_text_en')} value={r.en} onChange={e => setRow(i, { en: e.target.value })} />
                   <button type="button" className="btn danger small" aria-label={t('psec.remove')} disabled={rows.length === 1} onClick={() => setRows(rows.filter((_, k) => k !== i))}>×</button>
-                  {r.type === 'choice' ? (
+                  {HAS_OPTS.includes(r.type) ? (
                     <div className="qrow-opts">
                       <input placeholder={t('psec.q_options')} aria-label={t('psec.q_options')} value={r.opts} onChange={e => setRow(i, { opts: e.target.value })} />
                       <input placeholder={t('psec.q_options_en')} aria-label={t('psec.q_options_en')} value={r.optsEn} onChange={e => setRow(i, { optsEn: e.target.value })} />

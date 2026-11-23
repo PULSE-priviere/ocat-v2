@@ -302,7 +302,7 @@ function Question({ q, a, locked, extra, onChange }) {
     <li id={name} className={`q ${code ? 'answered' : ''}`}>
       <p className="q-text">{q.code ? <span className="q-code">{q.code}</span> : null}{pick(q, 'text', lang)}{extra ? <span className="tag">{t('osc.extra')}</span> : null}</p>
       {a?.edited_by_coach ? <p className="tag">{t('osc.edited_by_coach')}</p> : null}
-      {['text', 'short', 'number', 'choice'].includes(q.format) ? (
+      {['text', 'short', 'number', 'choice', 'multi'].includes(q.format) ? (
         <DataInput q={q} a={a} locked={locked} onChange={onChange} lang={lang} />
       ) : (
         <fieldset className="opts" disabled={locked}>
@@ -399,12 +399,35 @@ function PlanView({ items, questions }) {
   );
 }
 
-// Réponses des questions de section libre : texte long, texte court, nombre, choix dans une liste
+// Réponses des questions de section libre : texte long, texte court, nombre, choix dans une liste, choix multiple
 function DataInput({ q, a, locked, onChange, lang }) {
+  const { t } = useI18n();
   const label = pick(q, 'text', lang);
   if (q.format === 'text') return <textarea aria-label={label} rows={3} disabled={locked} value={a?.value_text || ''} onChange={e => onChange({ value_text: e.target.value })} />;
   if (q.format === 'short') return <input aria-label={label} maxLength={300} disabled={locked} value={a?.value_text || ''} onChange={e => onChange({ value_text: e.target.value })} />;
   if (q.format === 'number') return <input aria-label={label} type="number" inputMode="decimal" step="any" disabled={locked} value={a?.value_text ?? ''} onChange={e => onChange({ value_text: e.target.value })} />;
+  if (q.format === 'multi') {
+    // Réponse stockée sous forme de tableau JSON de clés : ["o1","o3"] ; null si rien n'est coché
+    let sel = [];
+    try { const p = JSON.parse(a?.value_text || '[]'); if (Array.isArray(p)) sel = p; } catch {}
+    const list = Array.isArray(q.options) ? q.options : [];
+    const toggle = key => {
+      const next = sel.includes(key) ? sel.filter(k => k !== key) : [...sel, key];
+      onChange({ value_text: next.length ? JSON.stringify(next) : null });
+    };
+    return (
+      <fieldset className="opts" disabled={locked}>
+        <legend className="sr">{label}</legend>
+        <p className="muted small">{t('osc.multi_hint')}</p>
+        {list.map(o => (
+          <label key={o.key} className={`opt ${sel.includes(o.key) ? 'on' : ''}`}>
+            <input type="checkbox" checked={sel.includes(o.key)} onChange={() => toggle(o.key)} />
+            <span>{(lang === 'en' && o.en) || o.fr}</span>
+          </label>
+        ))}
+      </fieldset>
+    );
+  }
   const opts = Array.isArray(q.options) ? q.options : [];
   return (
     <fieldset className="opts" disabled={locked}>

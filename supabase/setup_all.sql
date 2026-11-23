@@ -508,3 +508,9 @@ end $$;
 drop trigger if exists questions_section_guard on questions;
 create trigger questions_section_guard before insert or update of section_id, project_id on questions
   for each row execute function questions_section_guard();
+-- 0012 : question à choix multiple (plusieurs réponses possibles)
+alter table questions drop constraint if exists questions_format_check;
+alter table questions add constraint questions_format_check
+  check (format in ('scale','yesno','text','short','number','choice','multi'));
+
+notify pgrst, 'reload schema';

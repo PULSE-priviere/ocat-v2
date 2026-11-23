@@ -127,7 +127,8 @@
   "plan_empty": "Your individual support plan has not been defined yet. It will be set with your coach during the support session: feel free to get in touch with them.",
   "start_first": "Start with the first section",
   "resent_title": "Email sent",
-  "extra": "Additional question"
+  "extra": "Additional question",
+  "multi_hint": "You can select several answers."
  },
  "report": {
   "title": "{name} report",
@@ -669,6 +670,7 @@
   "t_number": "Number",
   "t_yesno": "Yes / no",
   "t_choice": "Choice from a list",
+  "t_multi": "Multiple choice (several answers)",
   "q_text_fr": "Question (French)",
   "q_text_en": "Question (English, optional)",
   "q_options": "Possible choices, separated by commas",

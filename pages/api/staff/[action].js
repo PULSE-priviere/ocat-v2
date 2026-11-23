@@ -167,13 +167,13 @@ const actions = {
       const qEn = (Array.isArray(body.questionsEn) ? body.questionsEn : []).map(s => String(s).trim().slice(0, 1000));
       items = qFr.map((text, i) => ({ format: 'scale', fr: text, en: qEn[i] || text, options: null }));
     } else {
-      const FORMATS = ['text', 'short', 'number', 'yesno', 'choice'];
+      const FORMATS = ['text', 'short', 'number', 'yesno', 'choice', 'multi'];
       items = [];
       for (const q of (Array.isArray(body.questions) ? body.questions : []).slice(0, 100)) {
         const fr = String(q?.fr || '').trim().slice(0, 1000);
         if (!FORMATS.includes(q?.type) || !fr) continue;
         let options = null;
-        if (q.type === 'choice') {
+        if (q.type === 'choice' || q.type === 'multi') {
           const o = (Array.isArray(q.options) ? q.options : []).map(x => String(x).trim().slice(0, 200)).filter(Boolean).slice(0, 30);
           const oe = (Array.isArray(q.optionsEn) ? q.optionsEn : []).map(x => String(x).trim().slice(0, 200));
           if (o.length < 2) return [400, 'invalid_section'];

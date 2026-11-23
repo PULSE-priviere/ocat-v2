@@ -1,0 +1,30 @@
+{
+  "_aide": "Clés de gauche = libellés exacts de l'ancien Airtable ; valeurs = clés de app.config.js (profileOptions). Mettre null pour laisser le champ vide. Les clés public_institution et company doivent être ajoutées à app.config.js et aux textes (voir consignes).",
+  "org_type": {
+    "ONG": "ngo",
+    "Association": "association",
+    "Entreprise sociale": "social_enterprise",
+    "GIE": "cooperative",
+    "Reseau / Network": "network",
+    "Institut rattaché - Université publique": "public_institution",
+    "Institution publique": "public_institution",
+    "EPP": "public_institution",
+    "SARLU": "company"
+  },
+  "org_size": {
+    "1-5": "1-5",
+    "6-20": "6-20",
+    "21-50": "21-50"
+  },
+  "coaches": {
+    "Fara": "faraniaina.rabeson@ppi-groupesos.org",
+    "Hery": "TODO@exemple.org",
+    "Nax": "TODO@exemple.org",
+    "Anja": "TODO@exemple.org",
+    "Maya": "TODO@exemple.org"
+  },
+  "assessment_type": {
+    "Endline (fin d'accompagnement)": "endline",
+    "Baseline (début d'accompagnement)": "baseline"
+  }
+}

@@ -127,7 +127,8 @@
   "plan_empty": "Votre plan d'accompagnement individuel n'a pas encore été défini. Il sera établi avec votre coach lors de la session d'accompagnement : n'hésitez pas à vous rapprocher de lui.",
   "start_first": "Commencer par la première section",
   "resent_title": "E-mail envoyé",
-  "extra": "Question complémentaire"
+  "extra": "Question complémentaire",
+  "multi_hint": "Plusieurs réponses possibles."
  },
  "report": {
   "title": "Rapport de {name}",
@@ -669,6 +670,7 @@
   "t_number": "Nombre",
   "t_yesno": "Oui / non",
   "t_choice": "Choix dans une liste",
+  "t_multi": "Choix multiple (plusieurs réponses)",
   "q_text_fr": "Question (français)",
   "q_text_en": "Question (anglais, facultatif)",
   "q_options": "Choix possibles, séparés par des virgules",
