@@ -18,7 +18,7 @@ export default function OrgTypesEditor({ value, onSave }) {
   useEffect(() => { setRows(value || []); }, [value]);
 
   const set = (i, patch) => setRows(rows.map((r, j) => (j === i ? { ...r, ...patch } : r)));
-  const add = () => setRows([...rows, { key: slugKey('type', rows.map((r) => r.key)), fr: '', en: '' }]);
+  const add = () => setRows([...rows, { key: '', fr: '', en: '' }]);
   const remove = (i) => setRows(rows.filter((_, j) => j !== i));
 
   async function save() {
