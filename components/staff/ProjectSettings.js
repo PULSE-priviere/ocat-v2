@@ -7,6 +7,7 @@ import Icon from '../Icon';
 import Check from '../Check';
 import CountryPicker from '../CountryPicker';
 import ScoresExport from './ScoresExport';
+import OrgTypesEditor from './OrgTypesEditor';
 
 const randomSlug = () => Array.from(crypto.getRandomValues(new Uint8Array(9))).map(b => b.toString(16).padStart(2, '0')).join('');
 
@@ -55,6 +56,8 @@ export default function ProjectSettings({ project, needs, reload }) {
         <p className="muted small" style={{ marginTop: 0 }}>{t('countries.hint')}</p>
         <CountryPicker value={p.countries || []} onChange={v => update({ countries: v }).catch(() => {})} />
       </section>
+      <h2>{t('orgtypes.title')}</h2>
+      <OrgTypesEditor value={p.org_types || []} onSave={list => update({ org_types: list })} />
       <h2>{t('project.welcome_title')}</h2>
       <div className="card form">
         <label>{t('project.welcome_fr')}<textarea rows={3} value={p.welcome_fr || ''} onChange={e => setP({ ...p, welcome_fr: e.target.value })} /></label>

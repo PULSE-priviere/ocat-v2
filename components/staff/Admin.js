@@ -13,6 +13,7 @@ import { fullName } from '../../lib/names';
 import { projectColor } from '../../lib/projectColor';
 import { useAirtableActions } from '../../lib/airtableActions';
 import { airtableMsg } from '../../lib/airtableMsg';
+import OrgTypesEditor from './OrgTypesEditor';
 
 export default function Admin({ projects, reload }) {
   const { t } = useI18n();
@@ -106,6 +107,11 @@ function ProjectAdmin({ project, projects, mems, onBack, onChanged }) {
     setBusy(''); setMsg(error ? 'errors.server_error' : 'admin.saved'); if (!error) onChanged();
   };
   const archive = async () => { setBusy('archive'); await sb().from('projects').update({ archived: !project.archived }).eq('id', project.id); setBusy(''); onChanged(); };
+  const saveOrgTypes = async list => {
+    const { error } = await sb().from('projects').update({ org_types: list }).eq('id', project.id);
+    if (error) throw error;
+    onChanged();
+  };
   return (
     <>
       <button className="link" onClick={onBack}>← {t('admin.back')}</button>
@@ -129,6 +135,8 @@ function ProjectAdmin({ project, projects, mems, onBack, onChanged }) {
           <button className="btn" aria-busy={busy === 'info'} disabled={busy === 'info'}>{t('common.save')}</button>
         </form>
       </section>
+      <h2>{t('orgtypes.title')}</h2>
+      <OrgTypesEditor value={project.org_types || []} onSave={saveOrgTypes} />
       {msg ? <p className={msg.startsWith('errors') ? 'error' : 'ok'}>{t(msg)}</p> : null}
     </>
   );

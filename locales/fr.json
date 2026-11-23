@@ -826,6 +826,17 @@
   "empty": "Aucune organisation ne vous est affectée pour l'instant. Partagez votre lien de coach : les organisations qui entrent par ce lien vous sont rattachées automatiquement. Un owner du projet peut aussi vous en affecter.",
   "session_title": "Comment mener une session d'accompagnement"
  },
+  "orgtypes": {
+  "title": "Types de structure proposés",
+  "hint": "Ces choix apparaissent dans le formulaire d'entrée du projet (« Type de structure »). Laissez la liste vide pour utiliser la liste par défaut. Corriger un libellé ne touche pas aux réponses déjà données.",
+  "empty": "Aucun choix propre au projet : la liste par défaut est utilisée.",
+  "fr_ph": "Libellé (français)",
+  "en_ph": "Libellé (anglais)",
+  "add": "Ajouter un type",
+  "remove": "Retirer",
+  "from_default": "Partir de la liste par défaut",
+  "saved": "Enregistré"
+ },
  "countries": {
   "title": "Pays du projet",
   "add": "Ajouter un pays…",

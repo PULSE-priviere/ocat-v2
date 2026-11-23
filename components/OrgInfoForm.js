@@ -6,6 +6,7 @@ import { safeStr } from '../lib/safe';
 import { contactName } from '../lib/names';
 import { countryName, countryOptions } from '../lib/countries';
 import appConfig from '../app.config';
+import { orgTypesOf, orgTypeLabel } from '../lib/orgTypes';
 
 const SELECTS = ['country', 'org_type', 'org_size'];
 const pickFields = v => ({
@@ -13,7 +14,7 @@ const pickFields = v => ({
   country: safeStr(v?.country), org_type: safeStr(v?.org_type), org_size: safeStr(v?.org_size),
 });
 
-export default function OrgInfoForm({ value, onSave, rows = [], editable = true, compact = false, countries = [] }) {
+export default function OrgInfoForm({ value, onSave, rows = [], editable = true, compact = false, countries = [], orgTypes = [] }) {
   const { t, lang } = useI18n();
   const [edit, setEdit] = useState(false);
   const [f, setF] = useState(pickFields(value));
@@ -22,10 +23,16 @@ export default function OrgInfoForm({ value, onSave, rows = [], editable = true,
   const [busy, setBusy] = useState(false);
   useEffect(() => { if (!edit) setF(pickFields(value)); }, [value, edit]);
 
-  const label = (field, code) => (!code ? '' : field === 'country' ? countryName(code, lang) : t(`profile.opt.${field}.${code}`));
+  // Types de structure : liste du projet si elle existe, sinon liste par défaut
+  const project = { org_types: orgTypes };
+  const label = (field, code) => (!code ? '' : field === 'country' ? countryName(code, lang)
+    : field === 'org_type' ? orgTypeLabel(project, code, lang, t)
+    : t(`profile.opt.${field}.${code}`));
   // Pays : ceux du projet (ou tous si le projet n'en a pas) ; la valeur actuelle reste choisissable
   const optionsFor = k => {
-    const list = k === 'country' ? countryOptions(lang, countries).map(o => o.code) : appConfig.profileOptions[k];
+    const list = k === 'country' ? countryOptions(lang, countries).map(o => o.code)
+      : k === 'org_type' ? orgTypesOf(project).map(x => x.key)
+      : appConfig.profileOptions[k];
     const cur = safeStr(f[k]);
     return cur && !list.includes(cur) ? [cur, ...list] : list;
   };

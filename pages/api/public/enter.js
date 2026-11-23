@@ -5,6 +5,7 @@ import { isCountry } from '../../../lib/countries';
 import { syncAssessmentsSafe } from '../../../lib/airtableSync';
 import { inBackground } from '../../../lib/background';
 import appConfig from '../../../app.config';
+import { orgTypesOf } from '../../../lib/orgTypes';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return fail(res, 405, 'method');
@@ -18,14 +19,14 @@ export default async function handler(req, res) {
   if (!(await verifyTurnstile(captcha, ip))) return fail(res, 400, 'captcha_failed');
 
   const db = admin();
-  const { data: p } = await db.from('projects').select('id, public_active, archived, countries')
+  const { data: p } = await db.from('projects').select('id, public_active, archived, countries, org_types')
     .eq('public_slug', String(slug || '')).maybeSingle();
   if (!p || !p.public_active || p.archived) return fail(res, 404, 'link_inactive');
-  // Profil de l'organisation, demandé au début du questionnaire : pays (parmi ceux du projet), type de structure, taille
+  // Profil de l'organisation, demandé au début du questionnaire : pays (parmi ceux du projet), type de structure (liste du projet, sinon liste par défaut), taille
   const list = p.countries || [];
   const cc = String(country || (list.length === 1 ? list[0] : '')).toUpperCase();
   if (!isCountry(cc) || (list.length && !list.includes(cc))
-    || !appConfig.profileOptions.org_type.includes(orgType) || !appConfig.profileOptions.org_size.includes(orgSize)) return fail(res, 400, 'invalid_entry_profile');
+    || !orgTypesOf(p).some(x => x.key === orgType) || !appConfig.profileOptions.org_size.includes(orgSize)) return fail(res, 400, 'invalid_entry_profile');
   if (await rateLimited(db, 'public_entry', ip)) return fail(res, 429, 'too_many_attempts');
 
   // E-mail déjà connu : nouveau lien envoyé à cette adresse uniquement, rien n'est affiché

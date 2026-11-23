@@ -8,6 +8,7 @@ import { safeStr } from '../../lib/safe';
 import { countryName, countryOptions } from '../../lib/countries';
 import appConfig from '../../app.config';
 import LinkBox from '../../components/LinkBox';
+import { orgTypesOf, orgTypeText } from '../../lib/orgTypes';
 
 const SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
@@ -111,7 +112,7 @@ export default function PublicEntry() {
               <label>{t('profile.label.org_type')}
                 <select required value={form.orgType} onChange={e => setForm({ ...form, orgType: e.target.value })}>
                   <option value="">{t('profile.choose')}</option>
-                  {appConfig.profileOptions.org_type.map(c => <option key={c} value={c}>{t(`profile.opt.org_type.${c}`)}</option>)}
+                  {orgTypesOf(project).map(x => <option key={x.key} value={x.key}>{orgTypeText(x, lang, t)}</option>)}
                 </select>
               </label>
               <label>{t('profile.label.org_size')}

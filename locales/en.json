@@ -826,6 +826,17 @@
   "empty": "No organisation is assigned to you yet. Share your coach link: organisations that come in through it are automatically attached to you. A project owner can also assign some to you.",
   "session_title": "How to run a support session"
  },
+"orgtypes": {
+  "title": "Organization types offered",
+  "hint": "These choices appear in the project's entry form (\"Organization type\"). Leave the list empty to use the default list. Fixing a label does not affect answers already given.",
+  "empty": "No project-specific choices: the default list is used.",
+  "fr_ph": "Label (French)",
+  "en_ph": "Label (English)",
+  "add": "Add a type",
+  "remove": "Remove",
+  "from_default": "Start from the default list",
+  "saved": "Saved"
+ },
  "countries": {
   "title": "Project countries",
   "add": "Add a country…",
