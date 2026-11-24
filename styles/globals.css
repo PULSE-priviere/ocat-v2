@@ -711,3 +711,53 @@ summary:focus-visible { outline: none; text-decoration: underline; text-underlin
 .qn-grouphead:hover b { text-decoration: underline; text-underline-offset: 3px; }
 .qn-group ul { list-style: none; margin: 0.3rem 0 0; padding: 0 0 0 0.3rem; display: grid; gap: 0.35rem; }
 .qn-group li { display: grid; grid-template-columns: 3.2rem 1fr; gap: 0.6rem; font-size: 0.9rem; line-height: 1.45; }
+
+/* Écran de séance d'accompagnement (v1) */
+.sess-bar { display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap; background: #fff; border: 1px solid var(--b1); border-radius: 14px; padding: 0.8rem 1rem; margin: 0.4rem 0 0.9rem; }
+.sess-bar h1 { margin: 0; }
+.sess-bar label { display: flex; align-items: center; gap: 0.4rem; font-size: 0.82rem; color: var(--t2); }
+.sess-bar input[type=date] { padding: 0.35rem 0.5rem; border: 1px solid var(--b1); border-radius: 8px; }
+.sess-bar .pill { background: var(--b1); color: var(--t1); padding: 0.25rem 0.6rem; border-radius: 999px; font-size: 0.82rem; }
+.sess-bar .grow { flex: 1; }
+
+.sess-grid { display: grid; grid-template-columns: 1fr 1.5fr 1fr; gap: 1rem; align-items: start; }
+@media (max-width: 1100px) { .sess-grid { grid-template-columns: 1fr; } }
+
+.sess-agenda, .sess-notes, .sess-recap { background: #fff; border: 1px solid var(--b1); border-radius: 14px; padding: 0.9rem 1rem; }
+.sess-agenda h3, .sess-recap h3 { margin: 0.2rem 0 0.6rem; font-size: 0.95rem; }
+.sess-agenda section + section { margin-top: 1rem; }
+
+.sess-last-card { background: #faf7f3; border: 1px solid var(--b1); border-radius: 10px; padding: 0.5rem 0.7rem; margin: 0.3rem 0; font-size: 0.85rem; }
+.sess-last-card p { margin: 0.2rem 0; }
+
+.sess-need-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; }
+.sess-need { display: grid; grid-template-columns: 1fr auto; column-gap: 0.4rem; align-items: center; padding: 0.4rem 0.5rem; border: 1px solid var(--b1); border-radius: 10px; background: #fff; }
+.sess-need.deepen { grid-template-columns: auto 1fr; background: #faf7f3; }
+.sess-need .muted.small { grid-column: 1 / -1; font-size: 0.78rem; }
+.sess-need-label { background: none; border: 0; padding: 0; text-align: left; color: var(--t1); cursor: pointer; font: inherit; }
+.sess-need-label:hover { text-decoration: underline; }
+
+.sess-status { font-size: 0.78rem; padding: 0.2rem 0.4rem; border-radius: 999px; border: 1px solid var(--b1); background: #fff; }
+.sess-status.s-todo { background: #fff5f0; }
+.sess-status.s-discussed { background: #fffaea; }
+.sess-status.s-covered { background: #eaf6ee; }
+.sess-status.s-autonomy { background: #eaf0f6; }
+.sess-status.s-out_of_scope { background: #eeeeee; color: var(--t3); }
+
+.sess-others { margin-top: 0.8rem; }
+.sess-others summary { cursor: pointer; font-size: 0.85rem; color: var(--t2); }
+.sess-others ul { margin-top: 0.5rem; }
+
+.sess-notes { position: relative; display: grid; gap: 0.4rem; }
+.sess-notes textarea { width: 100%; min-height: 60vh; border: 1px solid var(--b1); border-radius: 10px; padding: 0.8rem; font: inherit; font-size: 0.95rem; line-height: 1.55; resize: vertical; }
+.sess-notes textarea:focus { outline: 2px solid var(--accent, #E0533D); outline-offset: 1px; }
+.sess-save { text-align: right; }
+
+.sess-mention-menu { position: absolute; z-index: 5; top: 2.5rem; left: 1rem; background: #fff; border: 1px solid var(--b1); border-radius: 10px; box-shadow: 0 6px 22px rgba(0,0,0,0.08); list-style: none; margin: 0; padding: 0.3rem; min-width: 220px; max-height: 240px; overflow-y: auto; }
+.sess-mention-menu li button { width: 100%; background: none; border: 0; text-align: left; padding: 0.4rem 0.6rem; border-radius: 6px; cursor: pointer; font: inherit; }
+.sess-mention-menu li button:hover { background: var(--b1); }
+
+.sess-recap-card { border: 1px solid var(--b1); border-radius: 10px; padding: 0.6rem 0.75rem; margin: 0.4rem 0; display: grid; gap: 0.35rem; }
+.sess-recap-card header { display: flex; align-items: center; justify-content: space-between; gap: 0.4rem; }
+.sess-recap-card label { display: grid; gap: 0.2rem; font-size: 0.78rem; color: var(--t2); }
+.sess-recap-card input { padding: 0.35rem 0.5rem; border: 1px solid var(--b1); border-radius: 6px; font: inherit; font-size: 0.85rem; }
