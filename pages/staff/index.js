@@ -22,6 +22,9 @@ import { safeStr } from '../../lib/safe';
 import { fullName } from '../../lib/names';
 import appConfig from '../../app.config';
 
+// Dernières données de chaque projet ouvert, gardées en mémoire le temps de la visite (jamais sur le disque)
+const cache = new Map();
+
 export default function Staff() {
   const { t } = useI18n();
   const router = useRouter();
@@ -43,14 +46,19 @@ export default function Staff() {
   useEffect(() => {
     if (!project) { setData(null); return; }
     let alive = true;
-    // Changement de projet : on vide l'écran pour ne jamais afficher les OSC du projet précédent
-    setData(d => (d && d.pid === project.id ? d : null)); setError('');
+    // Clé par personne ET projet : après une déconnexion, un autre compte ne voit jamais les données du précédent
+    const cacheKey = `${staff.profile?.id}:${project.id}`;
+    // Changement de projet : on vide l'écran pour ne jamais afficher les OSC du projet précédent.
+    // Retour sur un projet déjà ouvert (depuis une fiche, par exemple) : la dernière version s'affiche tout de suite,
+    // puis elle est remplacée par les données fraîches.
+    setData(d => (d && d.pid === project.id ? d : cache.get(cacheKey) || null)); setError('');
     (async () => {
       try {
         const memsQ = sb().from('memberships').select('user_id, role, offered_to_osc, profile:profiles(name, first_name, last_name, email)').eq('project_id', project.id);
         const [cohort, { data: mems }] = await Promise.all([loadCohort(project), memsQ]);
-        const needs = await loadNeeds(project, cohort);
-        if (alive) { setData({ pid: project.id, cohort, needs, members: mems || [] }); setError(''); }
+        const next = { pid: project.id, cohort, needs: loadNeeds(project, cohort), members: mems || [] };
+        cache.set(cacheKey, next);
+        if (alive) { setData(next); setError(''); }
       } catch (e) { console.error(e); if (alive) setError('server_error'); }
     })();
     return () => { alive = false; };

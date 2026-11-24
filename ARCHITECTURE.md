@@ -38,7 +38,7 @@ ocat/
 │   ├── bank.js             Chargement des sections et questions (banque + projet + évaluation)
 │   ├── scoring.js          Avancement et scores (ce qui compte, ce qui ne compte pas)
 │   ├── stage.js            Étape d'accompagnement d'une organisation
-│   ├── cohort.js           Données de la cohorte et des besoins
+│   ├── cohort.js           Données de la cohorte et des besoins (un appel : fonction SQL project_load)
 │   ├── plan.js, planData.js, planCharts.js, planDocx.js   Plan d'accompagnement et ses exports
 │   ├── mail.js, mailcheck.js, invite.js, activation.js, login.js   E-mails, invitations, connexion
 │   ├── airtableSync.js, scoresExport.js, airtableActions.js        Export Airtable (table « Scores » ou trois tables)
@@ -47,7 +47,7 @@ ocat/
 ├── locales/fr.json, en.json   Tous les textes de l'interface et des e-mails
 ├── styles/globals.css      Thème
 ├── supabase/
-│   ├── migrations/0001…0011   Schéma, sécurité par ligne, puis évolutions (à exécuter dans l'ordre)
+│   ├── migrations/0001…0016   Schéma, sécurité par ligne, puis évolutions (à exécuter dans l'ordre)
 │   ├── setup_all.sql       Toutes les migrations réunies (généré par `npm run sql`)
 │   └── tests/rls_test.sql  Tests des droits (base vide)
 ├── scripts/                seed.js (import de la banque), smoke_osc.js (test du parcours), build_bank.js, check_i18n.js…
@@ -76,3 +76,5 @@ ocat/
 | `rate_events` | Limitation des tentatives par adresse IP | kind, ip_hash, at |
 
 **Droits.** La sécurité par ligne s'appuie sur des fonctions (`is_admin`, `is_owner`, `is_member`, `can_subject`…). Un coach ne voit que ses organisations ; un owner voit tout son projet ; l'administrateur voit tout. Les organisations n'ont pas de compte : elles passent par l'API serveur avec leur jeton personnel. `staff_invites` et `app_settings` ne sont lisibles que par le serveur.
+
+**Chargement d'un projet.** `project_load(p)` (migration 0016, `security invoker`) renvoie en un seul objet JSON les organisations, évaluations, réponses, plans, travail du coach, besoins et liens visibles par l'appelant. `lib/cohort.js` l'appelle et se replie sur des requêtes séparées si la fonction n'existe pas encore.

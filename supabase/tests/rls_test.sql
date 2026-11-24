@@ -138,6 +138,18 @@ do $$ declare n int; begin
 end $$;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000b', true);
 
+-- Chargement en un appel (project_load) : mêmes droits que les tables
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000b', true);
+insert into results select 'project_load : owner reçoit 2 OSC et 2 réponses',
+  jsonb_array_length(project_load('40000000-0000-0000-0000-000000000001')->'subjects') = 2
+  and jsonb_array_length(project_load('40000000-0000-0000-0000-000000000001')->'answers') = 2;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000d', true);
+insert into results select 'project_load : coach2 ne reçoit que son OSC',
+  jsonb_array_length(project_load('40000000-0000-0000-0000-000000000001')->'subjects') = 1
+  and project_load('40000000-0000-0000-0000-000000000001')->'subjects'->0->>'name' = 'OSC B';
+insert into results select 'project_load : rien sur un projet dont on n''est pas membre',
+  jsonb_array_length(project_load('40000000-0000-0000-0000-000000000002')->'subjects') = 0;
+
 -- Admin : tout
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000a', true);
 insert into results select 'admin voit 3 OSC', (select count(*) from subjects) = 3;

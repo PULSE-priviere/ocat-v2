@@ -23,11 +23,10 @@ export default function CoachHome({ staff }) {
   useEffect(() => {
     let alive = true;
     (async () => {
+      // Projets chargés en parallèle (et non l'un après l'autre)
+      const cohorts = await Promise.all(projects.map(p => loadCohort(p)));
       const all = [];
-      for (const p of projects) {
-        const c = await loadCohort(p);
-        c.rows.filter(r => r.subject.coach_id === staff.profile.id).forEach(r => all.push({ ...r, project: p }));
-      }
+      cohorts.forEach((c, i) => c.rows.filter(r => r.subject.coach_id === staff.profile.id).forEach(r => all.push({ ...r, project: projects[i] })));
       if (alive) setRows(all);
     })().catch(() => alive && setRows([]));
     return () => { alive = false; };

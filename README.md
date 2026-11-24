@@ -213,3 +213,15 @@ Aucune migration. **Nouvelles dépendances** : `nodemailer` et `@vercel/function
 - Les sections propres au projet portent le badge « Section spécifique <projet> ».
 - Barre de recherche (insensible aux accents) : cartes grisées ou comptées par section, résultats groupés avec surlignage, liste des sections où le sujet est absent.
 - La migration 0011 interdit de rattacher une question d'un projet à la section d'un autre projet.
+
+## Mise à jour 3.11 (chargement plus rapide)
+
+**Ordre : d'abord la base, ensuite le code.** Supabase > SQL Editor : exécuter `supabase/migrations/0016_project_load.sql`.
+Si le code part avant la migration, rien ne casse : l'application se replie sur l'ancien chargement (amélioré), simplement moins rapide.
+
+- Ouvrir un projet (cohorte, besoins, équipe…) demandait 9 à 22 requêtes en 5 à 8 vagues successives : 2 à 6 s selon le projet, car chaque aller-retour vers Supabase coûte environ 0,45 s depuis Madagascar, quel que soit le volume de données.
+- La fonction SQL `project_load` renvoie tout en **un seul appel** (organisations, évaluations, réponses, plans, besoins). Elle s'exécute avec les droits de l'appelant : un coach ne reçoit que ses organisations, comme avant (3 vérifications ajoutées à `rls_test.sql`).
+- Besoins : une seule requête par projet au lieu d'une par lot de 150 réponses.
+- Retour sur un projet déjà ouvert (depuis une fiche, par exemple) : la dernière version s'affiche aussitôt, puis se met à jour. Ces données restent en mémoire le temps de la visite, par compte.
+- Accueil du coach : ses projets se chargent en parallèle.
+- Aucune nouvelle dépendance.
