@@ -1,127 +1,78 @@
-// Colonne gauche de l'écran de séance : rappel + besoins triés + sections à approfondir.
-import { useMemo } from 'react';
-import { useI18n } from '../../lib/i18n';
+// Colonne gauche de l'écran de séance : sections thématiques + liste des questions « appui demandé ».
+import { useMemo, useState } from 'react';
+import { useI18n, pick } from '../../lib/i18n';
 
-const STATUSES = ['todo', 'discussed', 'covered', 'autonomy', 'out_of_scope'];
+export default function SessionAgenda({ bank, answers, selectedId, onSelect }) {
+  const { t, lang } = useI18n();
 
-export default function SessionAgenda({ needs, statuses, lastSession, deepenSections, answers, bank, onInsertMention, onSetStatus }) {
-  const { t } = useI18n();
-  const byNeed = Object.fromEntries((statuses || []).map(s => [s.need_id, s]));
-
-  // Nb de réponses à 1 ou 2 par besoin + indicateur « appui demandé »
-  const info = useMemo(() => {
-    const m = {};
-    (needs || []).forEach(n => { m[n.id] = { low: 0, support: false }; });
-    Object.values(answers || {}).forEach(a => {
-      if (!a) return;
-      const low = ['1', '2'].includes(a.code);
-      (a.needIds || []).forEach(nid => { if (!m[nid]) return; if (low) m[nid].low += 1; if (a.support) m[nid].support = true; });
+  // Questions avec appui demandé, regroupées par section
+  const groups = useMemo(() => {
+    const byS = new Map();
+    const supportQs = (bank.questions || []).filter(q => answers[q.id]?.support);
+    supportQs.forEach(q => {
+      const s = (bank.sections || []).find(x => x.id === q.section_id);
+      if (!s) return;
+      if (!byS.has(s.id)) byS.set(s.id, { section: s, questions: [] });
+      byS.get(s.id).questions.push(q);
     });
-    return m;
-  }, [needs, answers]);
+    return Array.from(byS.values()).sort((a, b) => a.section.idx - b.section.idx);
+  }, [bank, answers]);
 
-  const statusOf = id => byNeed[id]?.status || 'todo';
-  const score = n => {
-    const s = statusOf(n.id);
-    const sup = info[n.id]?.support ? 1 : 0;
-    const open = (s === 'todo' || s === 'discussed');
-    return [open ? 0 : 1, -sup, -(info[n.id]?.low || 0), n.label];
-  };
-  const sorted = [...(needs || [])].sort((a, b) => {
-    const sa = score(a), sb = score(b);
-    for (let i = 0; i < sa.length; i++) if (sa[i] !== sb[i]) return sa[i] < sb[i] ? -1 : 1;
-    return 0;
-  });
-  const mainOpen = sorted.filter(n => ['todo', 'discussed'].includes(statusOf(n.id)));
-  const others = sorted.filter(n => !mainOpen.includes(n));
-  const covered = others.filter(n => statusOf(n.id) === 'covered').length;
-  const autonomy = others.filter(n => statusOf(n.id) === 'autonomy').length;
-  const todoHidden = 0;
+  const total = groups.reduce((n, g) => n + g.questions.length, 0);
+  const [filter, setFilter] = useState('all');   // 'all' | <sectionId>
+  const visible = filter === 'all' ? groups : groups.filter(g => g.section.id === filter);
 
-  const deepen = (deepenSections || [])
-    .map(num => (bank?.sections || []).find(s => s.num === num))
-    .filter(Boolean);
-
-  const lastByNeed = Object.fromEntries((lastSession?.statuses || []).map(s => [s.need_id, s]));
+  const touched = a => !!(String(a?.coach_notes || '').trim() || String(a?.coach_action || '').trim() || String(a?.coach_owner || '').trim());
+  const doneCount = groups.reduce((n, g) => n + g.questions.filter(q => touched(answers[q.id])).length, 0);
 
   return (
     <aside className="sess-agenda">
-      {lastSession ? (
-        <section className="sess-last">
-          <h3>{t('session.v1.last_title')}</h3>
-          {Object.keys(lastByNeed).length === 0 ? <p className="muted small">{t('session.v1.last_empty')}</p> : null}
-          {(needs || []).filter(n => lastByNeed[n.id]).map(n => {
-            const s = lastByNeed[n.id];
-            return (
-              <div key={n.id} className="sess-last-card">
-                <b>{n.label}</b>
-                {s.decided ? <p><em>{t('session.v1.decided')} :</em> {s.decided}</p> : null}
-                {s.open_points ? <p><em>{t('session.v1.open')} :</em> {s.open_points}</p> : null}
-              </div>
-            );
-          })}
-        </section>
-      ) : null}
-
-      <section>
+      <header className="sess-agenda-head">
         <h3>{t('session.v1.agenda_title')}</h3>
-        <ul className="sess-need-list">
-          {mainOpen.map(n => (
-            <NeedRow key={n.id} need={n} status={statusOf(n.id)} info={info[n.id]} t={t}
-              onInsert={() => onInsertMention(`@${n.label}`)} onSetStatus={s => onSetStatus(n.id, s)} />
-          ))}
-        </ul>
-      </section>
+        <span className="sess-count">{doneCount} / {total}</span>
+      </header>
 
-      {deepen.length ? (
-        <section>
-          <h3>{t('session.v1.deepen_title')}</h3>
-          <ul className="sess-need-list">
-            {deepen.map(s => (
-              <li key={s.id} className="sess-need deepen">
-                <span className="tag">{t('session.v1.deepen_badge')}</span>
-                {s.idx}. {s.name_fr || s.name_en}
+      {groups.length === 0 ? (
+        <p className="muted small">{t('session.v1.empty_support')}</p>
+      ) : (
+        <>
+          <div className="sess-sections" role="tablist" aria-label={t('session.v1.filter_section')}>
+            <button type="button" role="tab" aria-selected={filter === 'all'} className={`sess-chip ${filter === 'all' ? 'on' : ''}`} onClick={() => setFilter('all')}>
+              {t('session.v1.all_sections')} <span className="sess-chip-n">{total}</span>
+            </button>
+            {groups.map(g => (
+              <button key={g.section.id} type="button" role="tab" aria-selected={filter === g.section.id}
+                className={`sess-chip ${filter === g.section.id ? 'on' : ''}`} onClick={() => setFilter(g.section.id)}>
+                {g.section.idx}. {pick(g.section, 'name', lang)} <span className="sess-chip-n">{g.questions.length}</span>
+              </button>
+            ))}
+          </div>
+
+          <ul className="sess-qlist">
+            {visible.map(g => (
+              <li key={g.section.id} className="sess-qgroup">
+                {filter === 'all' ? <div className="sess-qgroup-head">{g.section.idx}. {pick(g.section, 'name', lang)}</div> : null}
+                <ul>
+                  {g.questions.map(q => {
+                    const a = answers[q.id] || {};
+                    const sel = selectedId === q.id;
+                    const filled = touched(a);
+                    return (
+                      <li key={q.id}>
+                        <button type="button" className={`sess-qitem ${sel ? 'on' : ''} ${filled ? 'filled' : ''}`} onClick={() => onSelect(q.id)}>
+                          <span className="sess-qitem-dot" aria-hidden="true" />
+                          {q.code ? <span className="q-code">{q.code}</span> : null}
+                          <span className="sess-qitem-text">{pick(q, 'text', lang)}</span>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
               </li>
             ))}
           </ul>
-        </section>
-      ) : null}
-
-      {others.length ? (
-        <details className="sess-others">
-          <summary>{t('session.v1.others', { n: others.length, covered, autonomy, todo: todoHidden })}</summary>
-          <ul className="sess-need-list">
-            {others.map(n => (
-              <NeedRow key={n.id} need={n} status={statusOf(n.id)} info={info[n.id]} t={t}
-                onInsert={() => onInsertMention(`@${n.label}`)} onSetStatus={s => onSetStatus(n.id, s)} />
-            ))}
-          </ul>
-        </details>
-      ) : null}
+        </>
+      )}
     </aside>
-  );
-}
-
-function NeedRow({ need, status, info, t, onInsert, onSetStatus }) {
-  return (
-    <li className="sess-need">
-      <button type="button" className="sess-need-label" onClick={onInsert}>{need.label}</button>
-      <StatusDot status={status} onChange={onSetStatus} t={t} />
-      {info ? (
-        <div className="muted small">
-          {info.low ? t('session.v1.ctx_low', { n: info.low }) : null}
-          {info.low && info.support ? ' · ' : null}
-          {info.support ? t('session.v1.ctx_support') : null}
-        </div>
-      ) : null}
-    </li>
-  );
-}
-
-function StatusDot({ status, onChange, t }) {
-  return (
-    <select className={`sess-status s-${status}`} value={status} onChange={e => onChange(e.target.value)} aria-label={t('session.v1.status')}>
-      {STATUSES.map(s => <option key={s} value={s}>{t(`session.v1.st_${s}`)}</option>)}
-    </select>
   );
 }
