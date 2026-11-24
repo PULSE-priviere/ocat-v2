@@ -8,12 +8,14 @@
     "seed": "node scripts/seed.js",
     "sql": "cat supabase/migrations/*.sql > supabase/setup_all.sql",
     "demo": "node scripts/demo.js",
-    "check:i18n": "node scripts/check_i18n.js"
+    "check:i18n": "node scripts/check_i18n.js",
+    "test:analytics": "node --import ./scripts/_esm_hooks.mjs scripts/test_analytics.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.119.2",
     "@vercel/functions": "3.11.3",
     "docx": "9.12.0",
+    "exceljs": "4.4.0",
     "next": "14.2.35",
     "nodemailer": "10.6.1",
     "react": "18.3.1",

@@ -1,6 +1,7 @@
 // Espace équipe : « Tous les projets », administration, puis un projet (cohorte, besoins, équipe, réglages…) via le menu latéral
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
+import dynamic from 'next/dynamic';
 import Layout from '../../components/Layout';
 import StaffNav from '../../components/staff/StaffNav';
 import ProjectsHome from '../../components/staff/ProjectsHome';
@@ -14,6 +15,8 @@ import Duplicates from '../../components/staff/Duplicates';
 import Admin from '../../components/staff/Admin';
 import ShareLinks from '../../components/staff/ShareLinks';
 import CoachHome from '../../components/staff/CoachHome';
+// Analytics : code chargé seulement à l'ouverture de l'onglet (graphiques, tableaux, exports)
+const Analytics = dynamic(() => import('../../components/staff/Analytics'), { ssr: false, loading: () => null });
 import { useI18n } from '../../lib/i18n';
 import { useStaff } from '../../lib/useStaff';
 import { sb } from '../../lib/supabase';
@@ -39,7 +42,7 @@ export default function Staff() {
   const projects = (staff.projects || []).filter(p => !p.archived || staff.profile?.is_admin);
   const project = pid ? projects.find(p => p.id === pid) : null;
   const owner = project ? staff.isOwner(project.id) : false;
-  const allowed = ['cohort', 'needs', 'sections', 'team', ...(owner ? ['project', 'journal', 'duplicates'] : [])];
+  const allowed = ['cohort', ...(owner ? ['analytics'] : []), 'needs', 'sections', 'team', ...(owner ? ['project', 'journal', 'duplicates'] : [])];
   const coachHome = !staff.profile?.is_admin && Object.values(staff.roles || {}).some(r => r.includes('coach'));
   const cur = project ? (allowed.includes(tab) ? tab : 'cohort') : (tab === 'admin' && staff.profile?.is_admin ? 'admin' : tab === 'projects' ? 'projects' : 'home');
 
@@ -98,8 +101,9 @@ export default function Staff() {
             </div>
           ) : null}
         </section>
-        {error ? <p className="error">{t(`errors.${error}`)}</p> : null}
-        {!data ? <p className="muted">{t('common.loading')}</p> : (
+        {error && cur !== 'analytics' ? <p className="error">{t(`errors.${error}`)}</p> : null}
+        {/* Analytics a son propre chargement (un appel) : il n'attend pas celui de la cohorte */}
+        {cur === 'analytics' ? <Analytics project={project} /> : !data ? <p className="muted">{t('common.loading')}</p> : (
           <>
             {cur === 'cohort' && <><ShareLinks project={project} staff={staff} /><Cohort project={project} cohort={data.cohort} coaches={coaches} owner={owner} reload={reload} /></>}
             {cur === 'needs' && <Needs project={project} cohort={data.cohort} needs={data.needs} />}

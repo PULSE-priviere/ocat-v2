@@ -1,6 +1,7 @@
 // Fausses données pour les tests de bout en bout (jamais en production).
 // Usage : node scripts/demo.js owner@exemple.org coach@exemple.org
-// Crée un projet « Projet démo », un owner, un coach, 2 OSC (dont une à moitié remplie) et quelques besoins.
+// Crée un projet « Projet démo », un owner, un coach, 14 organisations (12 diagnostics soumis, 5 suivis) et quelques besoins.
+// Nécessite les migrations jusqu'à 0017 (structure d'accompagnement, mode de passation).
 const crypto = require('crypto');
 const db = require('./_env')();
 
@@ -29,18 +30,38 @@ async function main() {
   const { data: qs } = await db.from('questions').select('id, section_id, sections(num)').eq('framework_id', fw.id).is('assessment_id', null);
   const appUrl = (process.env.APP_URL || 'http://localhost:3000').replace(/\/$/, '');
 
-  for (const [i, name] of ['OSC Démo Alpha', 'OSC Démo Beta'].entries()) {
-    const { data: s } = await db.from('subjects').insert({ project_id: project.id, name, email: `demo${i + 1}@example.org`, coach_id: coachId, origin: 'manual' }).select('id').single();
+  // 14 organisations aux profils variés (taille, structure d'accompagnement, mode de passation) pour l'onglet Analytics :
+  // 12 diagnostics soumis (dont 5 avec une évaluation de suivi), Alpha à moitié rempli et Beta complet mais non soumis.
+  const SIZES = ['1-5', '6-20', '21-50', '50+'], STRUCTS = ['Luhnyezi', 'Luhnyezi', 'Réseau Sud', null];
+  const names = ['OSC Démo Alpha', 'OSC Démo Beta', ...Array.from({ length: 12 }, (_, i) => `OSC Démo ${String(i + 1).padStart(2, '0')}`)];
+  const fill = (aid, rows, seed, shift = 0) => rows.map((q, k) => {
+    const r = (k * 7 + seed * 13) % 10;
+    const code = r === 0 ? 'NA' : String(Math.min(3, Math.max(1, (r < 4 ? 1 : r < 7 ? 2 : 3) + shift)));
+    return { assessment_id: aid, question_id: q.id, code, support: ['1', '2'].includes(code) ? (k + seed) % 3 === 0 : null };
+  });
+  const newAssessment = async (subjectId, extra) => {
     const token = crypto.randomBytes(32).toString('base64url');
-    const { data: a } = await db.from('assessments').insert({ subject_id: s.id, token_hash: crypto.createHash('sha256').update(token).digest('hex'),
-      token_expires_at: new Date(Date.now() + 60 * 864e5).toISOString() }).select('id').single();
-    // Alpha : sections 1 à 4 remplies ; Beta : tout rempli
-    const rows = qs.filter(q => i === 1 || q.sections.num <= 4).map((q, k) => {
-      const code = ['1', '2', '3', 'NA', '2', '1', '3'][k % 7];
-      return { assessment_id: a.id, question_id: q.id, code, support: ['1', '2'].includes(code) ? k % 2 === 0 : null };
-    });
-    await db.from('answers').insert(rows);
-    console.log(`${name} : ${appUrl}/a/${token}`);
+    const { data: a, error } = await db.from('assessments').insert({ subject_id: subjectId, token_hash: crypto.createHash('sha256').update(token).digest('hex'),
+      token_expires_at: new Date(Date.now() + 60 * 864e5).toISOString(), ...extra }).select('id').single();
+    if (error) throw error;
+    return { id: a.id, token };
+  };
+  for (const [i, name] of names.entries()) {
+    const { data: s, error } = await db.from('subjects').insert({ project_id: project.id, name, email: `demo${i + 1}@example.org`, coach_id: coachId, origin: 'manual',
+      org_size: SIZES[i % 4], org_type: ['association', 'ngo', 'cooperative'][i % 3], support_org: STRUCTS[i % 4] }).select('id').single();
+    if (error) throw new Error(`${error.message} (migration 0017 exécutée ?)`);
+    const submitted = i >= 2;
+    const a = await newAssessment(s.id, submitted
+      ? { status: 'submitted', submitted_at: new Date().toISOString(), administration_mode: i % 3 === 0 ? 'guided' : 'self',
+        section_comments: i % 4 === 0 ? { 1: 'Le conseil se réunit rarement.', 3: 'Pas encore de procédures écrites.' } : {} }
+      : {});
+    // Alpha : sections 1 à 4 remplies ; les autres : tout rempli
+    await db.from('answers').insert(fill(a.id, qs.filter(q => i !== 0 || q.sections.num <= 4), i));
+    if (submitted && i < 7) {                                   // 5 organisations ont aussi une évaluation de suivi, en progrès
+      const f = await newAssessment(s.id, { type: 'followup', status: 'submitted', submitted_at: new Date().toISOString() });
+      await db.from('answers').insert(fill(f.id, qs, i, 1));
+    }
+    console.log(`${name} : ${appUrl}/a/${a.token}`);
   }
   console.log(`Lien public du projet : ${appUrl}/p/${project.public_slug}`);
 }

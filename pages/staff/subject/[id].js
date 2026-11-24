@@ -157,7 +157,13 @@ export default function SubjectPage() {
       </nav>
       {tab === 'settings' || !current ? (
         <SettingsTab assessment={current} link={link} onAction={action} onUpdate={updateAssessment}
-          onCreateAssessment={type => action('create_assessment', { subjectId: subject.id, type })} />
+          onCreateAssessment={type => action('create_assessment', { subjectId: subject.id, type })}
+          subject={subject} owner={staff.isOwner(subject.project.id)}
+          onSubjectUpdate={async patch => {
+            const { error } = await sb().from('subjects').update(patch).eq('id', subject.id);
+            if (error) throw error;
+            setSubject(s => ({ ...s, ...patch }));
+          }} />
       ) : tab === 'recap' ? (
         <Recap bank={bank} progress={progress} answers={answers} series={series} assessment={current} saveAnswer={saveAnswer} onStartSession={() => setTab('session')} />
       ) : tab === 'session' ? (

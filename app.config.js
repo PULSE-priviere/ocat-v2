@@ -33,6 +33,16 @@ const appConfig = {
     showProvisional: true,         // graphiques de l'équipe : valeur provisoire (marquée *) tant qu'une section est incomplète
     globalIncludesProjectSections: false, // les sections propres à un projet ont leur score mais n'entrent pas dans le global (comparabilité)
   },
+  // Onglet Analytics (owners et administrateur)
+  analytics: {
+    naAlert: 0.10,                 // question signalée au-delà de 10 % de N/A (et exclue du top/flop)
+    minGroup: 10,                  // groupe de moins de 10 organisations : affiché « indicatif », grisé, jamais exclu
+    lowCompletion: 80,             // qualité des données : organisations sous 80 % de complétude
+    lowSection: 1.5,               // chiffres clés : sections dont la moyenne est sous ce seuil
+    topN: 10,                      // nombre de pratiques dans le top et le flop
+    // Tranches de score (bornes basses incluses) : 1-1,49 / 1,5-1,99 / 2-2,49 / 2,5-3
+    bands: [{ key: 'b1', min: 1 }, { key: 'b2', min: 1.5 }, { key: 'b3', min: 2 }, { key: 'b4', min: 2.5 }],
+  },
   // Listes de choix de la fiche organisation (libellés FR/EN dans locales/*.json, clés profile.opt.*)
   profileOptions: {
     // Le pays n'a pas de liste fixe : il vient des pays du projet (codes ISO, voir lib/countries.js)

@@ -45,6 +45,13 @@ export default function SessionTab({ hasWork, onUpdate, bank, answers, comments,
         <label>{t('sess.date')}
           <input type="date" value={assessment.session_date || ''} onChange={e => onUpdate({ session_date: e.target.value || null }).catch(() => {})} />
         </label>
+        {assessment.administration_mode !== undefined ? (
+          <label>{t('sess.mode')}
+            <select value={assessment.administration_mode || 'self'} onChange={e => onUpdate({ administration_mode: e.target.value }).catch(() => {})} title={t('sess.mode_hint')}>
+              {['self', 'guided'].map(k => <option key={k} value={k}>{t(`analytics.mode_${k}`)}</option>)}
+            </select>
+          </label>
+        ) : null}
       </section>
       <details className="guide-card" open={!started}>
         <summary><Icon name="bulb" />{t('session.guide_title')}</summary>

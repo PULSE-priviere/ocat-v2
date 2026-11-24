@@ -5,7 +5,7 @@ import { useI18n } from '../../lib/i18n';
 import { safeStr } from '../../lib/safe';
 import { projectColor } from '../../lib/projectColor';
 
-const ICONS = { cohort: 'users', needs: 'target', team: 'user', project: 'link', sections: 'layers', journal: 'clock', duplicates: 'copy' };
+const ICONS = { cohort: 'users', analytics: 'chart', needs: 'target', team: 'user', project: 'link', sections: 'layers', journal: 'clock', duplicates: 'copy' };
 
 export default function StaffNav({ staff, project, active, onSignOut }) {
   const { t } = useI18n();
@@ -14,7 +14,7 @@ export default function StaffNav({ staff, project, active, onSignOut }) {
   const coachHome = !staff.profile?.is_admin && Object.values(staff.roles || {}).some(r => r.includes('coach'));   // un coach arrive sur son accueil
   const anyOwner = Object.values(staff.roles || {}).some(r => r.includes('owner'));
   const showProjects = !coachHome || projects.length > 1 || anyOwner;
-  const items = ['cohort', 'needs', 'sections', 'team', ...(owner ? ['project', 'journal', 'duplicates'] : [])];
+  const items = ['cohort', ...(owner ? ['analytics'] : []), 'needs', 'sections', 'team', ...(owner ? ['project', 'journal', 'duplicates'] : [])];
   return (
     <nav className="sidenav" aria-label={t('staff.menu')}>
       {coachHome ? <Link className={`sideitem ${active === 'home' ? 'on' : ''}`} href="/staff"><Icon name="home" />{t('staff.home')}</Link> : null}

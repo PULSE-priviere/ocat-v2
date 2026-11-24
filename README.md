@@ -225,3 +225,22 @@ Si le code part avant la migration, rien ne casse : l'application se replie sur 
 - Retour sur un projet déjà ouvert (depuis une fiche, par exemple) : la dernière version s'affiche aussitôt, puis se met à jour. Ces données restent en mémoire le temps de la visite, par compte.
 - Accueil du coach : ses projets se chargent en parallèle.
 - Aucune nouvelle dépendance.
+
+## Mise à jour 3.12 (Analytics)
+
+**Ordre : d'abord la base, ensuite le code.**
+1. Supabase > SQL Editor : exécuter `supabase/migrations/0017_analytics.sql` (et `0016_project_load.sql` si ce n'est pas déjà fait).
+2. **Nouvelle dépendance** : `exceljs` (déjà dans `package.json` et `package-lock.json`). Localement : `npm install` ; Vercel l'installe au déploiement. Elle n'est chargée qu'au clic sur « Exporter tout (Excel) ».
+3. `git push` : Vercel redéploie.
+
+Si le code part avant la migration, l'onglet Analytics affiche « migration 0017 requise » ; le reste de l'application fonctionne.
+
+- **Onglet « Analytics »** (owners et administrateur), après « Cohorte » : `/staff?p=<id>&tab=analytics`. Les filtres sont dans l'adresse : un lien copié ouvre la même vue.
+- Filtres : évaluation (baseline par défaut), structure d'accompagnement, coach, taille, type, mode de passation, pays (si plusieurs), « inclure les évaluations en cours ». Le nombre d'organisations retenues reste affiché ; avertissement sous 10.
+- Huit blocs : chiffres clés, maturité par section, tableau des questions (tri, recherche, détail par organisation), top et flop, comparaison par segment (carte de chaleur), évolution (organisations appariées), qualité des données, commentaires.
+- Exports : un CSV par bloc (exactement ce qui est affiché ; UTF-8, séparateur `;`) et un classeur Excel (une feuille par bloc, plus « Méthodologie » et « Organisations »). Aucun e-mail ni jeton exporté.
+- Règles : échelle 1-3, N/A jamais compté comme 0 ; seules les questions notées comptent (`isScored`) ; score global = moyenne des sections, hors sections propres au projet (comme ailleurs dans l'application). Seuils réglables dans `app.config.js`, section `analytics`.
+- Périmètre par défaut : évaluations soumises, et verrouillées **après** soumission. Une évaluation verrouillée sans avoir été soumise n'entre qu'avec « inclure les évaluations en cours ».
+- **Mode de passation** (auto-évaluation ou guidée) : choisi par le coach dans l'onglet Session de la fiche. **Structure d'accompagnement** : saisie par un owner dans Paramètres de la fiche, avec suggestions (garde en base : un coach ne peut pas la modifier). Les deux sont journalisés.
+- Données : une seule fonction SQL, `analytics_rows`, réservée aux owners (`forbidden` sinon) ; un seul appel pour tout l'onglet.
+- Tests : `npm run test:analytics` (calculs, sans base) ; `rls_test.sql` (droits). Données de démonstration : `node scripts/demo.js owner@… coach@…` crée 14 organisations, dont 5 avec un suivi.

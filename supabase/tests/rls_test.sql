@@ -150,6 +150,30 @@ insert into results select 'project_load : coach2 ne reçoit que son OSC',
 insert into results select 'project_load : rien sur un projet dont on n''est pas membre',
   jsonb_array_length(project_load('40000000-0000-0000-0000-000000000002')->'subjects') = 0;
 
+-- Analytics : réservé aux owners (et à l'administrateur)
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000b', true);
+update subjects set support_org = 'Luhnyezi' where id = '50000000-0000-0000-0000-000000000001';
+insert into results select 'l''owner renseigne la structure d''accompagnement',
+  (select support_org from subjects where id = '50000000-0000-0000-0000-000000000001') = 'Luhnyezi';
+do $$ begin
+  perform analytics_rows('40000000-0000-0000-0000-000000000001', null, true);
+  insert into results values ('analytics_rows : l''owner lit son projet', true);
+exception when others then insert into results values ('analytics_rows : l''owner lit son projet', false); end $$;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000d', true);
+do $$ begin
+  perform analytics_rows('40000000-0000-0000-0000-000000000001', null, true);
+  insert into results values ('analytics_rows : un coach reçoit forbidden', false);
+exception when others then insert into results values ('analytics_rows : un coach reçoit forbidden', sqlerrm = 'forbidden'); end $$;
+do $$ begin
+  update subjects set support_org = 'Structure X' where id = '50000000-0000-0000-0000-000000000002';
+  insert into results values ('un coach ne peut pas changer la structure d''accompagnement', false);
+exception when others then insert into results values ('un coach ne peut pas changer la structure d''accompagnement', sqlerrm = 'forbidden'); end $$;
+select set_config('request.jwt.claim.sub', '', true);
+do $$ begin
+  perform analytics_rows('40000000-0000-0000-0000-000000000001', null, true);
+  insert into results values ('analytics_rows : un inconnu reçoit forbidden', false);
+exception when others then insert into results values ('analytics_rows : un inconnu reçoit forbidden', sqlerrm = 'forbidden'); end $$;
+
 -- Admin : tout
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000a', true);
 insert into results select 'admin voit 3 OSC', (select count(*) from subjects) = 3;

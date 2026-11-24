@@ -5,6 +5,7 @@ import { inBackground } from '../../../lib/background';
 import { mailConfig, smtpConfig, sendMail } from '../../../lib/mail';
 import { checkDns, FREE_MAIL } from '../../../lib/mailcheck';
 import { airtableConfig, airtableReady, testAirtable, airtableCode, cleanToken, cleanBaseId, DEFAULT_TABLES, DEFAULT_SCORES_TABLE } from '../../../lib/scoresExport';
+import { loadBank } from '../../../lib/bank';
 import { buildData, syncAssessments, syncAssessmentsSafe, ensureTables, fieldNames, legacyRows, TABLE_KEYS, CSV_KEYS } from '../../../lib/airtableSync';
 
 // L'envoi vers Airtable peut durer (5 requêtes par seconde au plus)
@@ -275,6 +276,23 @@ const actions = {
     const cfg = await airtableConfig(svc);
     if (!airtableReady(cfg)) return [400, 'airtable_not_configured'];
     try { return await testAirtable(cfg); } catch (e) { return [502, airtableCode(e), e.message]; }
+  },
+
+  // Analytics : toutes les données de l'onglet en un appel (owner du projet ou administrateur).
+  // La fonction SQL vérifie elle-même is_owner ; les questions viennent de la banque (lib/bank.js) pour appliquer isScored.
+  async analytics({ db, body }) {
+    const projectId = String(body.projectId || '');
+    if (!(await rpc(db, 'is_owner', { p: projectId }))) return [403, 'forbidden'];
+    const { data: p } = await db.from('projects').select('id, framework_id').eq('id', projectId).maybeSingle();
+    if (!p) return [404, 'not_found'];
+    const [bank, { data, error }] = await Promise.all([
+      loadBank(db, p.framework_id, null, p.id),
+      db.rpc('analytics_rows', { p_project: p.id, p_type: null, p_include_in_progress: true }),
+    ]);
+    if (error) return [error.code === 'PGRST202' ? 501 : 500, error.code === 'PGRST202' ? 'analytics_not_installed' : 'server_error'];
+    // Textes nécessaires seulement : pas de guides de réponse
+    const questions = bank.questions.map(({ guide_fr, guide_en, ...q }) => q);   // eslint-disable-line no-unused-vars
+    return { sections: bank.sections, questions, ...data };
   },
 
   // Fusion de doublons (F31) : les évaluations passent sur le dossier conservé
