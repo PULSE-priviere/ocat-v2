@@ -43,13 +43,15 @@ export default function Staff() {
   useEffect(() => {
     if (!project) { setData(null); return; }
     let alive = true;
+    // Changement de projet : on vide l'écran pour ne jamais afficher les OSC du projet précédent
+    setData(d => (d && d.pid === project.id ? d : null)); setError('');
     (async () => {
       try {
-        const cohort = await loadCohort(project);
+        const memsQ = sb().from('memberships').select('user_id, role, offered_to_osc, profile:profiles(name, first_name, last_name, email)').eq('project_id', project.id);
+        const [cohort, { data: mems }] = await Promise.all([loadCohort(project), memsQ]);
         const needs = await loadNeeds(project, cohort);
-        const { data: mems } = await sb().from('memberships').select('user_id, role, offered_to_osc, profile:profiles(name, first_name, last_name, email)').eq('project_id', project.id);
-        if (alive) { setData({ cohort, needs, members: mems || [] }); setError(''); }
-      } catch { if (alive) setError('server_error'); }
+        if (alive) { setData({ pid: project.id, cohort, needs, members: mems || [] }); setError(''); }
+      } catch (e) { console.error(e); if (alive) setError('server_error'); }
     })();
     return () => { alive = false; };
   }, [project?.id, tick]); // eslint-disable-line react-hooks/exhaustive-deps

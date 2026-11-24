@@ -43,11 +43,13 @@ export default function SessionPage() {
       const { data: a } = await sb().from('assessments')
         .select('*, subject:subjects(name, project:projects(id, name, framework_id))').eq('id', assessmentId).maybeSingle();
       if (!a) return setMsg('forbidden');
-      const b = await loadBank(sb(), a.subject.project.framework_id, a.id, a.subject.project.id);
-      const { data: ans } = await sb().from('answers').select('*').eq('assessment_id', a.id);
+      const [b, { data: ans }, { data: pl }] = await Promise.all([
+        loadBank(sb(), a.subject.project.framework_id, a.id, a.subject.project.id),
+        sb().from('answers').select('*').eq('assessment_id', a.id),
+        sb().from('action_plans').select('items, status').eq('assessment_id', a.id).maybeSingle(),
+      ]);
       const map = {};
       (ans || []).forEach(r => { map[r.question_id] = r; });
-      const { data: pl } = await sb().from('action_plans').select('items, status').eq('assessment_id', a.id).maybeSingle();
       setAssessment(a); setSubject(a.subject); setProject(a.subject.project); setBank(b); setAnswers(map);
       setPlan({ items: Array.isArray(pl?.items) ? pl.items : [], status: pl?.status || 'draft' });
     })();
