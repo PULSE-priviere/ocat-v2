@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import Head from 'next/head';
+import { LangToggle } from '../../../components/Layout';
 import SessionAgenda from '../../../components/staff/SessionAgenda';
 import SessionNotes from '../../../components/staff/SessionNotes';
 import SessionRecap from '../../../components/staff/SessionRecap';
@@ -116,6 +117,21 @@ export default function SessionPage() {
 
   const reorder = next => persistPlan({ ...plan, items: next });
 
+  const setDue = useCallback((qid, due) => {
+    setPlan(cur => {
+      const exists = cur.items.some(i => i.questionId === qid);
+      const items = exists
+        ? cur.items.map(i => i.questionId === qid ? { ...i, due } : i)
+        : [...cur.items, { questionId: qid, due, kept: true }];
+      const next = { ...cur, items };
+      clearTimeout(planTimer.current);
+      planTimer.current = setTimeout(async () => {
+        await sb().from('action_plans').upsert({ assessment_id: assessmentId, items: next.items, status: next.status }, { onConflict: 'assessment_id' });
+      }, 500);
+      return next;
+    });
+  }, [assessmentId]);
+
   const finishSession = async () => {
     setFinishing(true);
     // Flush éventuel de la ligne courante : déjà sauvegardé 700 ms après la dernière frappe.
@@ -150,14 +166,16 @@ export default function SessionPage() {
         <div className="sess-top-stats muted small">
           {supportQs.length ? t('session.v1.counter_questions', { n: (bank.questions || []).filter(q => wanted(answers[q.id])).length, total: supportQs.length }) : t('session.v1.no_support')}
         </div>
-        <span className="sess-top-save muted small">{savingItems ? t('session.v1.saving') : t('session.v1.saved')}</span>
+        <LangToggle />
         <button type="button" className="btn primary sess-top-finish" onClick={finishSession} disabled={finishing}>{t('session.v1.finish')}</button>
       </header>
 
       <div className="sess-canvas">
         <SessionAgenda bank={bank} answers={answers} selectedId={selectedId} onSelect={setSelectedId} />
         <SessionNotes question={selected} answer={selected ? answers[selected.id] : null} section={section}
-          onSave={patch => selected && saveQuestion(selected, patch)}
+          due={selected ? (plan.items.find(i => i.questionId === selected.id)?.due || '') : ''}
+          onSaveAnswer={patch => selected && saveQuestion(selected, patch)}
+          onSaveDue={due => selected && setDue(selected.id, due)}
           onPrev={() => setSelectedId(supportQs[Math.max(0, curIdx - 1)]?.id || null)}
           onNext={() => setSelectedId(supportQs[Math.min(supportQs.length - 1, curIdx + 1)]?.id || null)}
           hasPrev={curIdx > 0} hasNext={curIdx >= 0 && curIdx < supportQs.length - 1}

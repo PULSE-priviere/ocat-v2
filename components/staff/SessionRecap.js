@@ -44,7 +44,12 @@ export default function SessionRecap({ items, bank, answers, onReorder, onSelect
                   <span className="sess-recap-q">{pick(q, 'text', lang)}</span>
                 </div>
                 {firstLine ? <p className="sess-recap-first">{firstLine}</p> : null}
-                {a.coach_owner ? <p className="sess-recap-owner">· {a.coach_owner}</p> : null}
+                {(a.coach_owner || it.due) ? (
+                  <p className="sess-recap-owner">
+                    {a.coach_owner ? <span>· {a.coach_owner}</span> : null}
+                    {it.due ? <span>{a.coach_owner ? ' · ' : '· '}{new Date(`${it.due}T12:00:00`).toLocaleDateString(lang, { day: 'numeric', month: 'short' })}</span> : null}
+                  </p>
+                ) : null}
               </button>
               <div className="sess-recap-ctrl">
                 <button type="button" aria-label={t('session.v1.up')} title={t('session.v1.up')} disabled={i === 0} onClick={() => move(i, -1)}>↑</button>

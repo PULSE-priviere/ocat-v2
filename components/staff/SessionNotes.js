@@ -1,82 +1,55 @@
-// Colonne centrale : une question à la fois. Bloc pré-rempli en H2 (Notes / Actions / Responsable),
-// parsé à l'enregistrement pour alimenter answers.coach_notes / coach_action / coach_owner.
+// Colonne centrale : une question à la fois. Quatre champs structurés avec libellés H2 « façon Notion ».
+// Les champs texte s'enregistrent 700 ms après la dernière frappe ;
+// l'échéance est stockée dans action_plans.items[i].due, les autres dans answers.coach_*.
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useI18n, pick } from '../../lib/i18n';
 
-const H2 = /^##\s+(.+?)\s*$/;
+const BLANK = { coach_notes: '', coach_action: '', coach_owner: '', due: '' };
 
-function parseBlock(text) {
-  const out = { coach_notes: '', coach_action: '', coach_owner: '' };
-  if (!text) return out;
-  const lines = String(text).split('\n');
-  let bucket = 'coach_notes';
-  let buf = [];
-  const flush = () => { if (buf.length) out[bucket] = (out[bucket] ? out[bucket] + '\n' : '') + buf.join('\n').trim(); buf = []; };
-  for (const line of lines) {
-    const m = line.match(H2);
-    if (m) {
-      flush();
-      const h = m[1].toLowerCase();
-      if (/action/.test(h)) bucket = 'coach_action';
-      else if (/responsa|owner/.test(h)) bucket = 'coach_owner';
-      else bucket = 'coach_notes';
-    } else buf.push(line);
-  }
-  flush();
-  Object.keys(out).forEach(k => { out[k] = out[k].trim() || null; });
-  return out;
-}
-
-function buildBlock(a, labels) {
-  const n = String(a?.coach_notes || '').trim();
-  const act = String(a?.coach_action || '').trim();
-  const own = String(a?.coach_owner || '').trim();
-  return `## ${labels.notes}\n${n}\n\n## ${labels.action}\n${act}\n\n## ${labels.owner}\n${own}\n`;
-}
-
-export default function SessionNotes({ question, answer, section, onSave, onPrev, onNext, hasPrev, hasNext, position, total }) {
+export default function SessionNotes({ question, answer, section, due, onSaveAnswer, onSaveDue, onPrev, onNext, hasPrev, hasNext, position, total }) {
   const { t, lang } = useI18n();
-  const labels = useMemo(() => ({ notes: t('session.v1.h_notes'), action: t('session.v1.h_action'), owner: t('session.v1.h_owner') }), [t]);
-  const [text, setText] = useState(() => buildBlock(answer, labels));
+  const timers = useRef({});
+  const latest = useRef(BLANK);
+
+  const initial = useMemo(() => ({
+    coach_notes: String(answer?.coach_notes || ''),
+    coach_action: String(answer?.coach_action || ''),
+    coach_owner: String(answer?.coach_owner || ''),
+    due: String(due || ''),
+  }), [answer, due]);
+
+  const [f, setF] = useState(initial);
   const [state, setState] = useState('saved');
-  const timer = useRef(null);
-  const latest = useRef(text);
 
-  // Recharge quand la question change (ou ses données externes)
-  useEffect(() => {
-    const next = buildBlock(answer, labels);
-    setText(next);
-    latest.current = next;
-    setState('saved');
-    return () => clearTimeout(timer.current);
-  }, [question?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { setF(initial); latest.current = initial; setState('saved'); return () => Object.values(timers.current).forEach(clearTimeout); }, [question?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Autosave
-  useEffect(() => {
-    if (text === latest.current) return;
+  const schedule = (key, value) => {
+    setF(prev => ({ ...prev, [key]: value }));
     setState('saving');
-    clearTimeout(timer.current);
-    timer.current = setTimeout(async () => {
-      const parsed = parseBlock(text);
-      await onSave(parsed);
-      latest.current = text;
+    clearTimeout(timers.current[key]);
+    timers.current[key] = setTimeout(async () => {
+      if (key === 'due') await onSaveDue(value || '');
+      else await onSaveAnswer({ [key]: value.trim() || null });
+      latest.current = { ...latest.current, [key]: value };
       setState('saved');
     }, 700);
-    return () => clearTimeout(timer.current);
-  }, [text]); // eslint-disable-line react-hooks/exhaustive-deps
+  };
 
-  // Flush à la fermeture / changement de question
+  // Flush à la fermeture
   useEffect(() => {
-    const flush = () => { if (text !== latest.current) onSave(parseBlock(text)); };
+    const flush = () => {
+      ['coach_notes', 'coach_action', 'coach_owner'].forEach(k => { if (f[k] !== (latest.current[k] || '')) onSaveAnswer({ [k]: f[k].trim() || null }); });
+      if (f.due !== (latest.current.due || '')) onSaveDue(f.due || '');
+    };
     window.addEventListener('beforeunload', flush);
     window.addEventListener('pagehide', flush);
-    return () => { flush(); window.removeEventListener('beforeunload', flush); window.removeEventListener('pagehide', flush); };
-  }, [text]); // eslint-disable-line react-hooks/exhaustive-deps
+    return () => { window.removeEventListener('beforeunload', flush); window.removeEventListener('pagehide', flush); };
+  }, [f]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onKey = e => {
-    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); if (hasNext) onNext(); }
-    if ((e.metaKey || e.ctrlKey) && e.key === 'ArrowDown') { e.preventDefault(); if (hasNext) onNext(); }
-    if ((e.metaKey || e.ctrlKey) && e.key === 'ArrowUp') { e.preventDefault(); if (hasPrev) onPrev(); }
+    if (!(e.metaKey || e.ctrlKey)) return;
+    if (e.key === 'ArrowDown' || e.key === 'Enter') { e.preventDefault(); if (hasNext) onNext(); }
+    if (e.key === 'ArrowUp') { e.preventDefault(); if (hasPrev) onPrev(); }
   };
 
   if (!question) {
@@ -92,25 +65,42 @@ export default function SessionNotes({ question, answer, section, onSave, onPrev
 
   return (
     <section className="sess-stage">
-      <div className="sess-stage-crumb">
-        {section ? <span>{section.idx}. {pick(section, 'name', lang)}</span> : null}
-        {question.code ? <><span className="sep">·</span><span className="q-code">{question.code}</span></> : null}
-        <span className="grow" />
-        <span className="muted small">{t('session.v1.question_position', { n: position, total })}</span>
-      </div>
-      <h1 className="sess-stage-title">{pick(question, 'text', lang)}</h1>
-
-      <div className="sess-stage-editor">
-        <textarea value={text} onChange={e => setText(e.target.value)} onKeyDown={onKey}
-          spellCheck="true" aria-label={t('session.v1.notes')} />
-        <div className="sess-stage-meta">
-          <span className="muted small">{state === 'saving' ? t('session.v1.saving') : t('session.v1.saved')}</span>
+      <div className="sess-stage-paper" onKeyDown={onKey}>
+        <div className="sess-stage-crumb">
+          {section ? <span>{section.idx}. {pick(section, 'name', lang)}</span> : null}
+          {question.code ? <><span className="sep">·</span><span className="q-code">{question.code}</span></> : null}
           <span className="grow" />
-          <button type="button" className="btn ghost" onClick={onPrev} disabled={!hasPrev}>← {t('session.v1.prev')}</button>
-          <button type="button" className="btn primary" onClick={onNext} disabled={!hasNext}>{t('session.v1.next')} →</button>
+          <span className="muted small">{t('session.v1.question_position', { n: position, total })}</span>
         </div>
-        <p className="muted tiny">{t('session.v1.editor_hint')}</p>
+        <h1 className="sess-stage-title">{pick(question, 'text', lang)}</h1>
+
+        <h2 className="sess-h2">{t('session.v1.h_notes')}</h2>
+        <textarea className="sess-field" rows={5} placeholder={t('session.v1.ph_notes')}
+          value={f.coach_notes} onChange={e => schedule('coach_notes', e.target.value)} />
+
+        <h2 className="sess-h2">{t('session.v1.h_action')}</h2>
+        <textarea className="sess-field" rows={4} placeholder={t('session.v1.ph_action')}
+          value={f.coach_action} onChange={e => schedule('coach_action', e.target.value)} />
+
+        <div className="sess-row">
+          <div className="sess-col">
+            <h2 className="sess-h2">{t('session.v1.h_owner')}</h2>
+            <input className="sess-field" placeholder={t('session.v1.ph_owner')}
+              value={f.coach_owner} onChange={e => schedule('coach_owner', e.target.value)} />
+          </div>
+          <div className="sess-col sess-col-due">
+            <h2 className="sess-h2">{t('session.v1.h_due')}</h2>
+            <input className="sess-field" type="date" value={f.due} onChange={e => schedule('due', e.target.value)} />
+          </div>
+        </div>
       </div>
+
+      <footer className="sess-stage-foot">
+        <span className={`sess-save ${state}`}>{state === 'saving' ? t('session.v1.saving') : t('session.v1.saved')}</span>
+        <span className="grow" />
+        <button type="button" className="btn ghost" onClick={onPrev} disabled={!hasPrev}>← {t('session.v1.prev')}</button>
+        <button type="button" className="btn primary" onClick={onNext} disabled={!hasNext}>{t('session.v1.next')} →</button>
+      </footer>
     </section>
   );
 }
