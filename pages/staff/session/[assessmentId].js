@@ -132,12 +132,19 @@ export default function SessionPage() {
     });
   }, [assessmentId]);
 
+  const doneCount = useMemo(() => supportQs.filter(q => wanted(answers[q.id])).length, [supportQs, answers]);
+  const allCovered = supportQs.length > 0 && doneCount === supportQs.length;
+
   const finishSession = async () => {
     setFinishing(true);
-    // Flush éventuel de la ligne courante : déjà sauvegardé 700 ms après la dernière frappe.
     await sb().from('assessments').update({ session_status: 'done' }).eq('id', assessmentId);
     staffApi('sync_assessment', { assessmentId }).catch(() => {});
     router.replace(`/staff/subject/${assessment.subject_id}?tab=plan`);
+  };
+  const pauseSession = async () => {
+    setFinishing(true);
+    await sb().from('assessments').update({ session_status: 'in_progress' }).eq('id', assessmentId);
+    router.replace(`/staff/subject/${assessment.subject_id}?tab=session`);
   };
 
   if (msg === 'forbidden') return <main className="page"><p className="error">{t('errors.forbidden')}</p></main>;
@@ -164,10 +171,12 @@ export default function SessionPage() {
           }} />
         </label>
         <div className="sess-top-stats muted small">
-          {supportQs.length ? t('session.v1.counter_questions', { n: (bank.questions || []).filter(q => wanted(answers[q.id])).length, total: supportQs.length }) : t('session.v1.no_support')}
+          {supportQs.length ? t('session.v1.counter_questions', { n: doneCount, total: supportQs.length }) : t('session.v1.no_support')}
         </div>
         <LangToggle />
-        <button type="button" className="btn primary sess-top-finish" onClick={finishSession} disabled={finishing}>{t('session.v1.finish')}</button>
+        {allCovered
+          ? <button type="button" className="btn primary sess-top-finish" onClick={finishSession} disabled={finishing}>{t('session.v1.finish')}</button>
+          : <button type="button" className="btn sess-top-finish" onClick={pauseSession} disabled={finishing}>{t('session.v1.pause')}</button>}
       </header>
 
       <div className="sess-canvas">

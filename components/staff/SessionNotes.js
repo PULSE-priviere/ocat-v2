@@ -3,6 +3,7 @@
 // l'échéance est stockée dans action_plans.items[i].due, les autres dans answers.coach_*.
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useI18n, pick } from '../../lib/i18n';
+import DuePicker from './DuePicker';
 
 const BLANK = { coach_notes: '', coach_action: '', coach_owner: '', due: '' };
 
@@ -82,17 +83,12 @@ export default function SessionNotes({ question, answer, section, due, onSaveAns
         <textarea className="sess-field" rows={4} placeholder={t('session.v1.ph_action')}
           value={f.coach_action} onChange={e => schedule('coach_action', e.target.value)} />
 
-        <div className="sess-row">
-          <div className="sess-col">
-            <h2 className="sess-h2">{t('session.v1.h_owner')}</h2>
-            <input className="sess-field" placeholder={t('session.v1.ph_owner')}
-              value={f.coach_owner} onChange={e => schedule('coach_owner', e.target.value)} />
-          </div>
-          <div className="sess-col sess-col-due">
-            <h2 className="sess-h2">{t('session.v1.h_due')}</h2>
-            <input className="sess-field" type="date" value={f.due} onChange={e => schedule('due', e.target.value)} />
-          </div>
-        </div>
+        <h2 className="sess-h2">{t('session.v1.h_owner')}</h2>
+        <input className="sess-field" placeholder={t('session.v1.ph_owner')}
+          value={f.coach_owner} onChange={e => schedule('coach_owner', e.target.value)} />
+
+        <h2 className="sess-h2">{t('session.v1.h_due')}</h2>
+        <DuePicker value={f.due} onChange={v => schedule('due', v)} />
       </div>
 
       <footer className="sess-stage-foot">

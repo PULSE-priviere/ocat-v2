@@ -1,8 +1,8 @@
-// Colonne gauche : dropdown de section (ton pastel par section) + liste des questions « appui demandé ».
+// Colonne gauche : dropdown de section + liste des questions « appui demandé »
+// présentées comme des pills pastel (une couleur par section, façon Airtable).
 import { useMemo, useState } from 'react';
 import { useI18n, pick } from '../../lib/i18n';
-
-const SECTION_HUE = ['#FDF1EE', '#EEF4FD', '#F2EFFC', '#EEF7EF', '#FDF8EB', '#FBECEE', '#EAF3F3', '#F5F0E7'];
+import { sectionHue } from '../../lib/sectionColors';
 
 export default function SessionAgenda({ bank, answers, selectedId, onSelect }) {
   const { t, lang } = useI18n();
@@ -24,7 +24,8 @@ export default function SessionAgenda({ bank, answers, selectedId, onSelect }) {
   const visible = filter === 'all' ? groups : groups.filter(g => g.section.id === filter);
   const touched = a => !!(String(a?.coach_notes || '').trim() || String(a?.coach_action || '').trim() || String(a?.coach_owner || '').trim());
   const doneCount = groups.reduce((n, g) => n + g.questions.filter(q => touched(answers[q.id])).length, 0);
-  const hue = idx => SECTION_HUE[(idx - 1) % SECTION_HUE.length];
+
+  const currentSwatch = filter === 'all' ? '#E6E1D8' : sectionHue(groups.find(g => g.section.id === filter)?.section.idx || 1).bg;
 
   return (
     <aside className="sess-agenda">
@@ -40,7 +41,7 @@ export default function SessionAgenda({ bank, answers, selectedId, onSelect }) {
           <div className="sess-select">
             <label className="sess-select-label">{t('session.v1.filter_section')}</label>
             <div className="sess-select-wrap">
-              <span className="sess-select-swatch" style={{ background: filter === 'all' ? 'var(--b1)' : hue(groups.find(g => g.section.id === filter)?.section.idx || 1) }} />
+              <span className="sess-select-swatch" style={{ background: currentSwatch }} />
               <select value={filter} onChange={e => setFilter(e.target.value)}>
                 <option value="all">{t('session.v1.all_sections')} · {total}</option>
                 {groups.map(g => (
@@ -51,32 +52,39 @@ export default function SessionAgenda({ bank, answers, selectedId, onSelect }) {
           </div>
 
           <ul className="sess-qlist">
-            {visible.map(g => (
-              <li key={g.section.id} className="sess-qgroup">
-                {filter === 'all' ? (
-                  <div className="sess-qgroup-head" style={{ background: hue(g.section.idx) }}>
-                    <span className="sess-qgroup-idx">{g.section.idx}</span>
-                    <span>{pick(g.section, 'name', lang)}</span>
-                  </div>
-                ) : null}
-                <ul>
-                  {g.questions.map(q => {
-                    const a = answers[q.id] || {};
-                    const sel = selectedId === q.id;
-                    const filled = touched(a);
-                    return (
-                      <li key={q.id}>
-                        <button type="button" className={`sess-qitem ${sel ? 'on' : ''} ${filled ? 'filled' : ''}`} onClick={() => onSelect(q.id)}>
-                          <span className="sess-qitem-dot" aria-hidden="true" />
-                          {q.code ? <span className="q-code">{q.code}</span> : null}
-                          <span className="sess-qitem-text">{pick(q, 'text', lang)}</span>
-                        </button>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </li>
-            ))}
+            {visible.map(g => {
+              const hue = sectionHue(g.section.idx);
+              return (
+                <li key={g.section.id} className="sess-qgroup">
+                  {filter === 'all' ? (
+                    <div className="sess-qgroup-head" style={{ background: hue.bg, color: hue.fg }}>
+                      <span className="sess-qgroup-idx">{g.section.idx}</span>
+                      <span>{pick(g.section, 'name', lang)}</span>
+                    </div>
+                  ) : null}
+                  <ul>
+                    {g.questions.map(q => {
+                      const a = answers[q.id] || {};
+                      const sel = selectedId === q.id;
+                      const filled = touched(a);
+                      const style = { background: hue.bg, color: hue.fg };
+                      return (
+                        <li key={q.id}>
+                          <button type="button"
+                            className={`sess-pill ${sel ? 'on' : ''} ${filled ? 'filled' : ''}`}
+                            style={style}
+                            onClick={() => onSelect(q.id)}>
+                            {filled ? <span className="sess-pill-tick" aria-hidden="true">●</span> : null}
+                            {q.code ? <span className="sess-pill-code">{q.code}</span> : null}
+                            <span className="sess-pill-text">{pick(q, 'text', lang)}</span>
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </li>
+              );
+            })}
           </ul>
         </>
       )}

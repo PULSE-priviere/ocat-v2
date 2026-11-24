@@ -4,3 +4,8 @@ node_modules
 !.env.example
 data/*.json
 !data/example_bank.json
+
+# Données d'import confidentielles (jamais commiter)
+data/SAMIM2_import.csv
+data/legacy_import/
+scripts/maps_samim2.json

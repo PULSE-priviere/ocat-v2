@@ -1,26 +1,32 @@
-// Colonne droite : récapitulatif de la séance = lignes du plan dans l'ordre choisi.
-// Les flèches réordonnent ; l'ordre est persisté dans action_plans.items.
+// Colonne droite : lignes du plan, badge de section coloré, glisser-déposer pour réordonner.
+import { useState } from 'react';
 import { useI18n, pick } from '../../lib/i18n';
+import { sectionHue } from '../../lib/sectionColors';
+import { dueLabel } from './DuePicker';
 
 export default function SessionRecap({ items, bank, answers, onReorder, onSelect, selectedId }) {
   const { t, lang } = useI18n();
+  const [dragIdx, setDragIdx] = useState(null);
+  const [overIdx, setOverIdx] = useState(null);
 
   if (!items || items.length === 0) {
     return (
       <aside className="sess-recap">
-        <h3>{t('session.v1.recap_title')}</h3>
+        <header className="sess-recap-head"><h3>{t('session.v1.recap_title')}</h3></header>
         <p className="muted small">{t('session.v1.recap_empty')}</p>
       </aside>
     );
   }
 
-  const move = (idx, dir) => {
-    const to = idx + dir;
-    if (to < 0 || to >= items.length) return;
+  const move = (from, to) => {
+    if (from === to || from < 0 || to < 0 || from >= items.length || to >= items.length) return;
     const next = items.slice();
-    [next[idx], next[to]] = [next[to], next[idx]];
+    const [card] = next.splice(from, 1);
+    next.splice(to, 0, card);
     onReorder(next);
   };
+
+  const sectionOf = q => (bank.sections || []).find(s => s.id === q.section_id);
 
   return (
     <aside className="sess-recap">
@@ -33,28 +39,35 @@ export default function SessionRecap({ items, bank, answers, onReorder, onSelect
           const q = (bank.questions || []).find(x => x.id === it.questionId);
           if (!q) return null;
           const a = answers[q.id] || {};
-          const firstLine = String(a.coach_action || a.coach_notes || '').split('\n').map(s => s.trim()).find(Boolean) || '';
+          const s = sectionOf(q);
+          const hue = s ? sectionHue(s.idx) : { bg: '#EEE', fg: '#333' };
+          const firstLine = String(a.coach_action || a.coach_notes || '').split('\n').map(x => x.trim()).find(Boolean) || '';
           const sel = selectedId === q.id;
+          const due = dueLabel(it.due, lang);
           return (
-            <li key={it.questionId} className={`sess-recap-card ${sel ? 'on' : ''}`}>
+            <li key={it.questionId}
+              className={`sess-recap-card ${sel ? 'on' : ''} ${dragIdx === i ? 'dragging' : ''} ${overIdx === i && dragIdx !== null ? 'drop-into' : ''}`}
+              draggable
+              onDragStart={e => { setDragIdx(i); e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', String(i)); } catch {} }}
+              onDragOver={e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setOverIdx(i); }}
+              onDragLeave={() => setOverIdx(null)}
+              onDrop={e => { e.preventDefault(); const from = Number(e.dataTransfer.getData('text/plain') || dragIdx); if (!Number.isNaN(from)) move(from, i); setDragIdx(null); setOverIdx(null); }}
+              onDragEnd={() => { setDragIdx(null); setOverIdx(null); }}>
               <button type="button" className="sess-recap-body" onClick={() => onSelect(q.id)}>
                 <div className="sess-recap-top">
+                  <span className="sess-recap-grip" aria-hidden="true">⋮⋮</span>
                   <span className="sess-recap-n">{i + 1}</span>
-                  {q.code ? <span className="q-code">{q.code}</span> : null}
-                  <span className="sess-recap-q">{pick(q, 'text', lang)}</span>
+                  {s ? <span className="sess-recap-badge" style={{ background: hue.bg, color: hue.fg }}>{s.idx}. {pick(s, 'name', lang)}</span> : null}
                 </div>
+                <p className="sess-recap-q">{q.code ? <span className="sess-recap-code">{q.code}</span> : null}{pick(q, 'text', lang)}</p>
                 {firstLine ? <p className="sess-recap-first">{firstLine}</p> : null}
-                {(a.coach_owner || it.due) ? (
-                  <p className="sess-recap-owner">
-                    {a.coach_owner ? <span>· {a.coach_owner}</span> : null}
-                    {it.due ? <span>{a.coach_owner ? ' · ' : '· '}{new Date(`${it.due}T12:00:00`).toLocaleDateString(lang, { day: 'numeric', month: 'short' })}</span> : null}
+                {(a.coach_owner || due) ? (
+                  <p className="sess-recap-meta">
+                    {a.coach_owner ? <span>{a.coach_owner}</span> : null}
+                    {due ? <span>{a.coach_owner ? ' · ' : ''}{due}</span> : null}
                   </p>
                 ) : null}
               </button>
-              <div className="sess-recap-ctrl">
-                <button type="button" aria-label={t('session.v1.up')} title={t('session.v1.up')} disabled={i === 0} onClick={() => move(i, -1)}>↑</button>
-                <button type="button" aria-label={t('session.v1.down')} title={t('session.v1.down')} disabled={i === items.length - 1} onClick={() => move(i, 1)}>↓</button>
-              </div>
             </li>
           );
         })}
