@@ -32,6 +32,9 @@ export default function SessionTab({ hasWork, onUpdate, bank, answers, comments,
   const sessionValue = effectiveSession(assessment, hasWork);
   return (
     <>
+      <div className="toolbar">
+        <a className="btn primary" href={`/staff/session/${assessment.id}`}>{t('session.v1.open_session')}</a>
+      </div>
       <section className="sessionbar">
         <div className="sessionbar-text"><b>{t('sess.title')}</b><p>{t('sess.hint')}</p></div>
         <label>{t('sess.status')}

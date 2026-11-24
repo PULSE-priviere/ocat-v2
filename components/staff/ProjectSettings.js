@@ -64,6 +64,15 @@ export default function ProjectSettings({ project, needs, reload }) {
         <label>{t('project.welcome_en')}<textarea rows={3} value={p.welcome_en || ''} onChange={e => setP({ ...p, welcome_en: e.target.value })} /></label>
         <button className="btn primary" onClick={() => update({ welcome_fr: p.welcome_fr, welcome_en: p.welcome_en })}>{saved ? t('save.saved') : t('common.save')}</button>
       </div>
+      <h2>{t('project.sessions_target_title')}</h2>
+      <div className="card form">
+        <label>{t('project.sessions_target')}
+          <input type="number" min={1} max={200} value={p.sessions_target ?? ''} placeholder={t('project.sessions_target_empty')}
+            onChange={e => setP({ ...p, sessions_target: e.target.value === '' ? null : Number(e.target.value) })}
+            onBlur={() => update({ sessions_target: p.sessions_target ?? null }).catch(() => {})} />
+        </label>
+        <p className="muted small">{t('project.sessions_target_hint')}</p>
+      </div>
       <h2>{t('project.needs')}</h2>
       <ul className="plain">{needs.map(n => (
         <li key={n.id} className="neededit">

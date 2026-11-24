@@ -177,6 +177,35 @@ do $$ begin
   insert into results values ('le dernier owner ne peut pas être retiré', false);
 exception when others then insert into results values ('le dernier owner ne peut pas être retiré', sqlerrm = 'last_owner'); end $$;
 
+-- Séances d'accompagnement : droits et verrou « besoin du bon projet »
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000c', true);  -- coach1, OSC A
+do $$ begin
+  insert into coaching_sessions(assessment_id, notes) values ('60000000-0000-0000-0000-000000000001','n');
+  insert into results values ('coach1 écrit une séance sur son OSC', true);
+exception when others then insert into results values ('coach1 écrit une séance sur son OSC', false); end $$;
+do $$ begin
+  insert into coaching_sessions(assessment_id, notes) values ('60000000-0000-0000-0000-000000000003','x');
+  insert into results values ('coach1 ne peut pas écrire une séance sur une autre OSC', false);
+exception when others then insert into results values ('coach1 ne peut pas écrire une séance sur une autre OSC', true); end $$;
+
+-- Un besoin ne peut être suivi que dans un diagnostic de son projet
+insert into needs(id, project_id, label) values
+ ('70000000-0000-0000-0000-000000000001','40000000-0000-0000-0000-000000000001','Besoin P1'),
+ ('70000000-0000-0000-0000-000000000002','40000000-0000-0000-0000-000000000002','Besoin P2');
+do $$ begin
+  insert into need_status(assessment_id, need_id, status) values ('60000000-0000-0000-0000-000000000001','70000000-0000-0000-0000-000000000001','discussed');
+  insert into results values ('coach1 pose un statut sur un besoin du bon projet', true);
+exception when others then insert into results values ('coach1 pose un statut sur un besoin du bon projet', false); end $$;
+do $$ begin
+  insert into need_status(assessment_id, need_id, status) values ('60000000-0000-0000-0000-000000000001','70000000-0000-0000-0000-000000000002','discussed');
+  insert into results values ('need_status refuse un besoin d''un autre projet', false);
+exception when others then insert into results values ('need_status refuse un besoin d''un autre projet', sqlerrm = 'need_of_other_project'); end $$;
+
+-- L'owner lit les séances de son projet
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000b', true);
+insert into results select 'owner lit les séances de son projet',
+  (select count(*) from coaching_sessions where assessment_id = '60000000-0000-0000-0000-000000000001') >= 1;
+
 reset role;
 select test, case when ok then 'OK' else 'ÉCHEC' end as result from results;
 rollback;

@@ -46,6 +46,14 @@ Cochez chaque ligne. Les numéros renvoient au cahier des charges.
 ## 8. Langue (F7)
 - [ ] Bascule FR/EN sur chaque écran : libellés et textes des questions changent.
 
+## Séance d'accompagnement v1 (écran dédié)
+- [ ] Ouvrir une séance depuis l'onglet Session (« Ouvrir la séance »), écrire quelques lignes, fermer l'onglet, rouvrir : les notes sont là, statut draft repris.
+- [ ] Mentionner un besoin avec `@` : il passe au statut « abordé » et apparaît dans le récapitulatif de droite.
+- [ ] Remplir un récapitulatif partiel (une ligne « Décidé », rien d'autre), cliquer « Terminer la séance » : compteur « Séances 1 / 13 » sur un projet avec `sessions_target`, plan Markdown à jour.
+- [ ] Projet sans `sessions_target` : aucun compteur dans la barre du haut, tout le reste fonctionne.
+- [ ] « Télécharger .md », « Copier pour Notion » et coller dans une page : titres, synthèse, besoins, journal présents.
+- [ ] Vue organisation : le plan partagé ne montre pas les notes brutes des séances.
+
 ## 9. Après chaque session
 - [ ] Supabase > Table Editor : exporter en CSV `subjects`, `assessments`, `answers`, `answer_needs`, `needs`, `action_plans`, `audit_log`.
 - [ ] Se connecter au tableau de bord Supabase au moins une fois tous les 5 jours (pause du plan gratuit).
