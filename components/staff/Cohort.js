@@ -12,6 +12,22 @@ import SearchBox from '../SearchBox';
 import { matches } from '../../lib/search';
 import { countryName } from '../../lib/countries';
 
+// Facilitateur modifiable dans le tableau (comme le coach) : enregistré en quittant le champ ou avec Entrée. Texte libre, sans effet sur les droits.
+function FacilitatorCell({ subject, onSave }) {
+  const { t } = useI18n();
+  const [v, setV] = useState(subject.facilitator || '');
+  const [busy, setBusy] = useState(false);
+  const clean = v.trim().replace(/\s+/g, ' ').slice(0, 120);
+  const save = async () => {
+    if (clean === (subject.facilitator || '')) { setV(clean); return; }
+    setBusy(true); await onSave(subject.id, clean || null); setBusy(false);
+  };
+  return (
+    <input className="faccell" list="cohort-facilitators" value={v} maxLength={120} disabled={busy} placeholder="—" aria-label={t('cohort.facilitator')}
+      onChange={e => setV(e.target.value)} onBlur={save} onKeyDown={e => { if (e.key === 'Enter') e.currentTarget.blur(); }} />
+  );
+}
+
 export default function Cohort({ project, cohort, coaches, owner, reload }) {
   const { t, lang } = useI18n();
   const [coachFilter, setCoachFilter] = useState('');
@@ -33,6 +49,10 @@ export default function Cohort({ project, cohort, coaches, owner, reload }) {
   const count = s => base.filter(r => r.stage === s).length;
   const assign = async (subjectId, coachId) => {
     const { error: e } = await sb().from('subjects').update({ coach_id: coachId || null }).eq('id', subjectId);
+    if (e) setError('forbidden'); else reload();
+  };
+  const setFacilitator = async (subjectId, facilitator) => {
+    const { error: e } = await sb().from('subjects').update({ facilitator }).eq('id', subjectId);
     if (e) setError('forbidden'); else reload();
   };
   const create = async e => {
@@ -98,7 +118,7 @@ export default function Cohort({ project, cohort, coaches, owner, reload }) {
       {rows.length === 0 ? <p className="empty-inline">{t(query.trim() ? 'search.no_result' : cohort.rows.length === 0 ? (owner ? 'cohort.empty' : 'cohort.empty_coach') : 'cohort.none_in_filter')}</p> : (
         <div className="card flush"><div className="scroll"><table className="table">
           <thead><tr>
-            <th>{t('cohort.osc')}</th>{owner ? <th>{t('cohort.coach')}</th> : null}{facilitators.length ? <th>{t('cohort.facilitator')}</th> : null}<th>{t('coach.col_questionnaire')}</th><th>{t('cohort.col_stage')}</th><th>{t('cohort.global')}</th>
+            <th>{t('cohort.osc')}</th>{owner ? <th title={t('cohort.coach_hint')}>{t('cohort.coach')}</th> : null}<th title={t('cohort.facilitator_hint')}>{t('cohort.facilitator')}</th><th>{t('coach.col_questionnaire')}</th><th>{t('cohort.col_stage')}</th><th>{t('cohort.global')}</th>
           </tr></thead>
           <tbody>{rows.map(r => (
             <tr key={r.subject.id}>
@@ -111,7 +131,7 @@ export default function Cohort({ project, cohort, coaches, owner, reload }) {
                   </select>
                 </td>
               ) : null}
-              {facilitators.length ? <td>{safeStr(r.subject.facilitator) || <span className="muted">—</span>}</td> : null}
+              <td><FacilitatorCell key={`${r.subject.id}:${r.subject.facilitator || ''}`} subject={r.subject} onSave={setFacilitator} /></td>
               <td><span className="bar inline"><span style={{ width: `${r.completion}%` }} /></span> {r.completion} %</td>
               <td><StageBadge stage={r.stage} date={r.current?.session_date} /></td>
               <td>{safeNum(r.global) !== null ? `${r.global.toFixed(2)}${r.globalProvisional ? '*' : ''}` : '—'}</td>
@@ -119,6 +139,7 @@ export default function Cohort({ project, cohort, coaches, owner, reload }) {
           ))}</tbody>
         </table></div></div>
       )}
+      <datalist id="cohort-facilitators">{facilitators.map(f => <option key={f} value={f} />)}</datalist>
       {rows.some(r => r.globalProvisional) ? <p className="muted small">{t('sheet.provisional_note')}</p> : null}
     </>
   );

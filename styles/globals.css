@@ -899,3 +899,5 @@ input.sess-field { padding: 0.35rem 0; }
 .acm-head { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; }
 @media (max-width: 960px) { .akpis { grid-template-columns: repeat(3, 1fr); } .atopflop { grid-template-columns: 1fr; } .afilters { position: static; } }
 @media (max-width: 760px) { .akpis { grid-template-columns: 1fr 1fr; } .analytics .charts { grid-template-columns: 1fr; } .aguided li { grid-template-columns: 1fr 70px auto; } }
+
+.faccell { min-width: 9rem; width: 100%; font-size: 0.84rem; padding: 0.3rem 0.5rem; }
