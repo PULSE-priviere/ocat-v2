@@ -49,7 +49,7 @@ ocat/
 ├── locales/fr.json, en.json   Tous les textes de l'interface et des e-mails
 ├── styles/globals.css      Thème
 ├── supabase/
-│   ├── migrations/0001…0018   Schéma, sécurité par ligne, puis évolutions (à exécuter dans l'ordre)
+│   ├── migrations/0001…0019   Schéma, sécurité par ligne, puis évolutions (à exécuter dans l'ordre)
 │   ├── setup_all.sql       Toutes les migrations réunies (généré par `npm run sql`)
 │   └── tests/rls_test.sql  Tests des droits (base vide)
 ├── scripts/                seed.js (import de la banque), smoke_osc.js (test du parcours), build_bank.js, check_i18n.js, test_analytics.mjs…

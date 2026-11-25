@@ -15,6 +15,7 @@ import { countryName } from '../../lib/countries';
 export default function Cohort({ project, cohort, coaches, owner, reload }) {
   const { t, lang } = useI18n();
   const [coachFilter, setCoachFilter] = useState('');
+  const [facFilter, setFacFilter] = useState('');
   const [stageFilter, setStageFilter] = useState('');
   const [query, setQuery] = useState('');
   const [adding, setAdding] = useState(false);
@@ -26,7 +27,8 @@ export default function Cohort({ project, cohort, coaches, owner, reload }) {
   // Le filtre par coach n'existe que pour les owners et l'administrateur
   const base = cohort.rows
     .filter(r => !owner || !coachFilter || (coachFilter === 'none' ? !r.subject.coach_id : r.subject.coach_id === coachFilter))
-    .filter(r => matches(query, [r.subject.name, r.subject.email, contactName(r.subject), countryName(r.subject.country, lang)]));
+    .filter(r => !facFilter || (facFilter === 'none' ? !r.subject.facilitator : r.subject.facilitator === facFilter))
+    .filter(r => matches(query, [r.subject.name, r.subject.email, contactName(r.subject), countryName(r.subject.country, lang), r.subject.facilitator]));
   const rows = base.filter(r => !stageFilter || r.stage === stageFilter);
   const count = s => base.filter(r => r.stage === s).length;
   const assign = async (subjectId, coachId) => {
@@ -39,6 +41,8 @@ export default function Cohort({ project, cohort, coaches, owner, reload }) {
     catch (err) { setError(err.message); }
     setBusy(false);
   };
+  // Facilitateur (texte libre : un coach, une structure, une autre organisation) : distinct du coach, qui porte les droits d'accès
+  const facilitators = [...new Set(cohort.rows.map(r => r.subject.facilitator).filter(Boolean))].sort((a, b) => a.localeCompare(b));
   const unassigned = cohort.rows.filter(r => !r.subject.coach_id).length;
 
   return (
@@ -54,6 +58,15 @@ export default function Cohort({ project, cohort, coaches, owner, reload }) {
             </select>
           </label>
         ) : <span className="muted small">{t('cohort.only_yours')}</span>}
+        {facilitators.length ? (
+          <label className="inline">{t('cohort.filter_facilitator')}
+            <select value={facFilter} onChange={e => setFacFilter(e.target.value)}>
+              <option value="">{t('cohort.all_facilitators')}</option>
+              <option value="none">{t('cohort.no_facilitator')} ({cohort.rows.filter(r => !r.subject.facilitator).length})</option>
+              {facilitators.map(f => <option key={f} value={f}>{f}</option>)}
+            </select>
+          </label>
+        ) : null}
         <span className="grow" />
         {owner ? <button className="btn" onClick={() => setAdding(!adding)}>{t('cohort.add_osc')}</button> : null}
       </div>
@@ -85,7 +98,7 @@ export default function Cohort({ project, cohort, coaches, owner, reload }) {
       {rows.length === 0 ? <p className="empty-inline">{t(query.trim() ? 'search.no_result' : cohort.rows.length === 0 ? (owner ? 'cohort.empty' : 'cohort.empty_coach') : 'cohort.none_in_filter')}</p> : (
         <div className="card flush"><div className="scroll"><table className="table">
           <thead><tr>
-            <th>{t('cohort.osc')}</th>{owner ? <th>{t('cohort.coach')}</th> : null}<th>{t('coach.col_questionnaire')}</th><th>{t('cohort.col_stage')}</th><th>{t('cohort.global')}</th>
+            <th>{t('cohort.osc')}</th>{owner ? <th>{t('cohort.coach')}</th> : null}{facilitators.length ? <th>{t('cohort.facilitator')}</th> : null}<th>{t('coach.col_questionnaire')}</th><th>{t('cohort.col_stage')}</th><th>{t('cohort.global')}</th>
           </tr></thead>
           <tbody>{rows.map(r => (
             <tr key={r.subject.id}>
@@ -98,6 +111,7 @@ export default function Cohort({ project, cohort, coaches, owner, reload }) {
                   </select>
                 </td>
               ) : null}
+              {facilitators.length ? <td>{safeStr(r.subject.facilitator) || <span className="muted">—</span>}</td> : null}
               <td><span className="bar inline"><span style={{ width: `${r.completion}%` }} /></span> {r.completion} %</td>
               <td><StageBadge stage={r.stage} date={r.current?.session_date} /></td>
               <td>{safeNum(r.global) !== null ? `${r.global.toFixed(2)}${r.globalProvisional ? '*' : ''}` : '—'}</td>
