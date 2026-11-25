@@ -7,7 +7,7 @@ import { pick } from '../../../lib/i18n';
 export default function SegmentHeatmap({ view, table, ctx, onBy }) {
   const { t, lang, label, project, type } = ctx;
   const by = view.segBy, seg = view.segments, sections = view.model.sections;
-  const showGuided = ['support_org', 'coach'].includes(by);
+  const showGuided = ['facilitator', 'coach'].includes(by);
   const keys = PROFILE_KEYS.filter(k => k !== 'country' || view.model.options.country.length > 1);
   const cell = (v, r, title) => (
     <td className="hcell" style={{ background: heatColor(v) }} title={`${title} : ${fmtScore(v, lang)} (${t('analytics.col_n')} ${r.n})`}>{fmtScore(v, lang)}</td>

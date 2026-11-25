@@ -18,7 +18,7 @@ export default function Comments({ view, ctx }) {
   return (
     <Block id="a-comments" title={t('analytics.b8_title')} table={table} csvName={csvFile(project, 'commentaires', type)}>
       <div className="toolbar">
-        <SearchBox value={query} onChange={setQuery} />
+        <SearchBox value={query} onChange={setQuery} placeholder={t('analytics.search_comment')} />
         <label className="inline">{t('analytics.col_section')}
           <select value={section} onChange={e => setSection(e.target.value)}>
             <option value="">{t('analytics.all_sections')}</option>

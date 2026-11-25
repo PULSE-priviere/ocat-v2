@@ -25,6 +25,8 @@
   "staff": "Espace équipe"
  },
  "entry": {
+  "facilitator": "Facilitateur",
+  "optional": "(facultatif)",
   "title": "Commencer votre diagnostic",
   "default_welcome": "Projet {project}. Indiquez le nom de votre organisation et une adresse e-mail : nous créons votre dossier et vous envoyons votre lien personnel.",
   "name": "Nom de l'organisation",
@@ -672,11 +674,10 @@
   "rights_none": "Aucun droit n'est encore attribué à votre compte. Demandez à un owner de projet de vous ajouter à son équipe."
  },
  "settings": {
-  "support_org_owner_only": "(modifiable par un owner du projet)",
-  "support_org_saved": "Enregistré",
-  "support_org_placeholder": "Nom de la structure",
-  "support_org_desc": "Structure qui accompagne l'organisation (par exemple « Luhnyezi »). Ce n'est pas un compte : elle sert à filtrer et comparer dans l'onglet Analytics.",
-  "support_org_title": "Structure d'accompagnement",
+  "facilitator_title": "Facilitateur",
+  "facilitator_desc": "Nom du coach ou de la structure d'accompagnement qui suit l'organisation. Texte libre, sans effet sur les droits d'accès : il sert à filtrer et comparer dans l'onglet Analytics.",
+  "facilitator_placeholder": "Nom du coach ou de la structure",
+  "facilitator_saved": "Enregistré",
   "link_title": "Lien personnel de l'organisation",
   "link_desc": "L'organisation ouvre son diagnostic avec ce lien. Générer un nouveau lien invalide l'ancien. Révoquer le lien coupe l'accès jusqu'à ce que vous en génériez un autre.",
   "session_title": "Clôture de la session",
@@ -981,6 +982,8 @@
   "text_en_optional": "Texte en anglais (facultatif)"
  },
  "analytics": {
+  "search_question": "Rechercher une question…",
+  "search_comment": "Rechercher dans les commentaires…",
   "filters": "Filtres",
   "all": "Ensemble",
   "none": "Non renseigné",
@@ -988,7 +991,7 @@
   "all_sections": "Toutes les sections",
   "close": "Fermer",
   "f_type": "Évaluation",
-  "f_support_org": "Structure d'accompagnement",
+  "f_facilitator": "Facilitateur",
   "f_coach": "Coach",
   "f_org_size": "Taille",
   "f_org_type": "Type d'organisation",
@@ -1071,7 +1074,7 @@
   "compare_by": "Comparer par",
   "indicative": "indicatif",
   "by_org_size": "Taille",
-  "by_support_org": "Structure d'accompagnement",
+  "by_facilitator": "Facilitateur",
   "by_coach": "Coach",
   "by_org_type": "Type d'organisation",
   "by_mode": "Mode de passation",

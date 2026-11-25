@@ -50,7 +50,7 @@ export default function QuestionTable({ view, table, ctx, section, onSection }) 
   return (
     <Block id="a-questions" title={t('analytics.b3_title')} hint={t('analytics.b3_hint')} table={shown} csvName={csvFile(project, 'questions', type)}>
       <div className="toolbar">
-        <SearchBox value={query} onChange={setQuery} />
+        <SearchBox value={query} onChange={setQuery} placeholder={t('analytics.search_question')} />
         <label className="inline">{t('analytics.col_section')}
           <select value={section} onChange={e => onSection(e.target.value)}>
             <option value="">{t('analytics.all_sections')}</option>

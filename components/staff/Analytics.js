@@ -20,7 +20,7 @@ import DataQuality from './analytics/DataQuality';
 import Comments from './analytics/Comments';
 
 // Filtre → paramètre d'URL
-const PARAM = { type: 'type', support_org: 'so', coach: 'coach', org_size: 'size', org_type: 'otype', mode: 'mode', country: 'country' };
+const PARAM = { type: 'type', facilitator: 'fac', coach: 'coach', org_size: 'size', org_type: 'otype', mode: 'mode', country: 'country' };
 const VIEW_PARAMS = ['ip', 'seg', 'evo', 'sec', 'sort'];
 
 export default function Analytics({ project }) {

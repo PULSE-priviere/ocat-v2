@@ -20,11 +20,11 @@ const questions = [
 ];
 
 const subjects = [], assessments = [], answers = [];
-const org = (id, size, extra = {}) => subjects.push({ id, name: `Org ${id}`, org_size: size, country: 'MG', org_type: 'association', coach_id: 'c1', coach_name: 'Coach Un', support_org: '', ...extra });
+const org = (id, size, extra = {}) => subjects.push({ id, name: `Org ${id}`, org_size: size, country: 'MG', org_type: 'association', coach_id: 'c1', coach_name: 'Coach Un', facilitator: '', ...extra });
 const ass = (id, subject_id, a = {}) => assessments.push({ id, subject_id, type: 'baseline', status: 'submitted', submitted_at: '2026-01-01', created_at: '2026-01-01', administration_mode: 'self', section_comments: {}, ...a });
 const ans = (aid, map) => Object.entries(map).forEach(([q, v]) => { const [code, support = null] = Array.isArray(v) ? v : [v]; answers.push([aid, q, code, support]); });
 
-org('o1', '1-5', { support_org: 'Luhnyezi' });
+org('o1', '1-5', { facilitator: 'Luhnyezi' });
 ass('a1', 'o1', { administration_mode: 'guided', section_comments: { 1: 'Bon début de gouvernance', 2: '  ' } });
 ans('a1', { q11: ['1', true], q12: ['2', false], q21: '3', q22: 'NA', q31: '1', q13: '3', qA: '1' });
 ass('a1f', 'o1', { type: 'followup', submitted_at: '2026-06-01', created_at: '2026-06-01' });
@@ -68,6 +68,7 @@ ok('chiffres clés', () => { assert.equal(v.key.n, 12); assert.equal(v.key.globa
 const g15 = v.segments.rows.find(r => r.key === '1-5'), g620 = v.segments.rows.find(r => r.key === '6-20');
 ok('groupe < 10 : indicatif, jamais exclu', () => { assert.equal(g15.n, 2); assert.equal(g15.small, true); });
 ok('groupe de 10 : non indicatif', () => { assert.equal(g620.n, 10); assert.equal(g620.small, false); });
+ok('par facilitateur : sans facilitateur seulement dans Ensemble', () => { const sg = A.segments(v.records, model, 'facilitator'); assert.deepEqual(sg.rows.map(r => r.key), ['Luhnyezi']); assert.equal(sg.total.n, 12); });
 ok('ligne Ensemble et part de passation guidée', () => { assert.equal(v.segments.total.n, 12); assert.equal(v.segments.total.guidedShare, 1 / 12); });
 
 ok('évolution : seules les organisations appariées', () => {
@@ -75,8 +76,8 @@ ok('évolution : seules les organisations appariées', () => {
   const s1 = v.evolution.sections.find(s => s.section.id === 's1');
   assert.deepEqual([s1.from, s1.to, s1.diff, s1.n], [1.5, 3, 1.5, 1]);
 });
-ok('filtre de profil (structure d\'accompagnement)', () => assert.equal(A.selectRecords(model, { ...F, support_org: 'Luhnyezi' }).length, 1));
-ok('filtre « non renseigné »', () => assert.equal(A.selectRecords(model, { ...F, support_org: A.NONE }).length, 11));
+ok('filtre de profil (structure d\'accompagnement)', () => assert.equal(A.selectRecords(model, { ...F, facilitator: 'Luhnyezi' }).length, 1));
+ok('filtre « non renseigné »', () => assert.equal(A.selectRecords(model, { ...F, facilitator: A.NONE }).length, 11));
 
 ok('commentaires : vides ignorés, recherche sans accents', () => {
   assert.equal(v.comments.length, 1);

@@ -25,6 +25,8 @@
   "staff": "Team area"
  },
  "entry": {
+  "facilitator": "Facilitator",
+  "optional": "(optional)",
   "title": "Start your assessment",
   "default_welcome": "Project {project}. Enter your organisation's name and an email address: we create your file and send you your personal link.",
   "name": "Organisation name",
@@ -672,11 +674,10 @@
   "rights_none": "No access has been granted to your account yet. Ask a project owner to add you to their team."
  },
  "settings": {
-  "support_org_owner_only": "(editable by a project owner)",
-  "support_org_saved": "Saved",
-  "support_org_placeholder": "Name of the structure",
-  "support_org_desc": "Structure supporting the organisation (for example “Luhnyezi”). It is not an account: it is used to filter and compare in the Analytics tab.",
-  "support_org_title": "Support structure",
+  "facilitator_title": "Facilitator",
+  "facilitator_desc": "Name of the coach or support structure working with the organisation. Free text, no effect on access rights: it is used to filter and compare in the Analytics tab.",
+  "facilitator_placeholder": "Name of the coach or structure",
+  "facilitator_saved": "Saved",
   "link_title": "Organisation's personal link",
   "link_desc": "The organisation opens its assessment with this link. Generating a new link invalidates the old one. Revoking the link cuts access until you generate another.",
   "session_title": "Closing the session",
@@ -981,6 +982,8 @@
   "text_en_optional": "English text (optional)"
  },
  "analytics": {
+  "search_question": "Search a question…",
+  "search_comment": "Search the comments…",
   "filters": "Filters",
   "all": "All",
   "none": "Not specified",
@@ -988,7 +991,7 @@
   "all_sections": "All sections",
   "close": "Close",
   "f_type": "Assessment",
-  "f_support_org": "Support structure",
+  "f_facilitator": "Facilitator",
   "f_coach": "Coach",
   "f_org_size": "Size",
   "f_org_type": "Organisation type",
@@ -1071,7 +1074,7 @@
   "compare_by": "Compare by",
   "indicative": "indicative",
   "by_org_size": "Size",
-  "by_support_org": "Support structure",
+  "by_facilitator": "Facilitator",
   "by_coach": "Coach",
   "by_org_type": "Organisation type",
   "by_mode": "Administration mode",

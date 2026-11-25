@@ -49,7 +49,7 @@ ocat/
 ├── locales/fr.json, en.json   Tous les textes de l'interface et des e-mails
 ├── styles/globals.css      Thème
 ├── supabase/
-│   ├── migrations/0001…0017   Schéma, sécurité par ligne, puis évolutions (à exécuter dans l'ordre)
+│   ├── migrations/0001…0018   Schéma, sécurité par ligne, puis évolutions (à exécuter dans l'ordre)
 │   ├── setup_all.sql       Toutes les migrations réunies (généré par `npm run sql`)
 │   └── tests/rls_test.sql  Tests des droits (base vide)
 ├── scripts/                seed.js (import de la banque), smoke_osc.js (test du parcours), build_bank.js, check_i18n.js, test_analytics.mjs…
@@ -67,7 +67,7 @@ ocat/
 | `profiles` | Comptes de l'équipe (liés à `auth.users`) | id, email, name, first_name, last_name, is_admin |
 | `projects` | Projets | id, name, cohort, zone, countries[], framework_id, public_slug, public_active, welcome_fr/en, offer_coach_choice, archived |
 | `memberships` | Rôles dans un projet (owner et/ou coach) | user_id, project_id, role, offered_to_osc |
-| `subjects` | Organisations | id, project_id, name, email, contact_first_name/last_name, country (ISO), org_type, org_size, coach_id, origin, support_org (structure d'accompagnement, modifiable par un owner) |
+| `subjects` | Organisations | id, project_id, name, email, contact_first_name/last_name, country (ISO), org_type, org_size, coach_id (droits), facilitator (texte libre, analyse), origin, support_org (plus utilisé par l’interface) |
 | `assessments` | Diagnostics (baseline, midline, endline) | id, subject_id, type, status, token_hash, token_expires_at, section_comments, section_deepen, notes_shared, session_status, session_date, administration_mode (`self` / `guided`), submitted_at, locked_at |
 | `answers` | Réponses | id, assessment_id, question_id, code, value_text, support, coach_notes, coach_action, coach_owner, edited_by_coach |
 | `needs` / `answer_needs` | Besoins d'un projet et leur lien aux réponses | id, project_id, label / answer_id, need_id |

@@ -17,7 +17,7 @@ export default function PublicEntry() {
   const { t, lang } = useI18n();
   const [project, setProject] = useState(null);
   const [loadError, setLoadError] = useState('');
-  const [form, setForm] = useState({ name: '', firstName: '', lastName: '', email: '', coachId: '', country: '', orgType: '', orgSize: '', consent: false });
+  const [form, setForm] = useState({ name: '', firstName: '', lastName: '', email: '', coachId: '', facilitator: '', country: '', orgType: '', orgSize: '', consent: false });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [result, setResult] = useState(null);
@@ -130,6 +130,10 @@ export default function PublicEntry() {
               </select>
             </label>
           ) : null}
+          <label>{t('entry.facilitator')} <span className="muted small">{t('entry.optional')}</span>
+            <input list="facilitator-list" maxLength={120} value={form.facilitator} onChange={e => setForm({ ...form, facilitator: e.target.value })} autoComplete="off" />
+            <datalist id="facilitator-list">{(project.facilitators || []).map(f => <option key={f} value={f} />)}</datalist>
+          </label>
           </fieldset>
           <label className="check">
             <input type="checkbox" required checked={form.consent} onChange={e => setForm({ ...form, consent: e.target.checked })} />

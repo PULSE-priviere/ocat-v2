@@ -212,7 +212,7 @@ async function main() {
       legacy_id: r.ID, name: r["Nom de l'OSC"], email, country,
       org_type: (maps.org_type || {})[r["Type d'organisation"]] || null,
       org_size: (maps.org_size || {})[r["Taille (nombre d'employes)"]] || null,
-      facilitator: r['Facilitateur'], coach_id: coachByName[r['Facilitateur']] || null,
+      facilitator: String(r['Facilitateur'] || '').trim().replace(/\s+/g, ' ').slice(0, 120) || null, coach_id: coachByName[r['Facilitateur']] || null,
       assessment_type: aType,
       submitted_at: parseDate(r['Date de soumission']) || parseDate(r['Modification_date']) || new Date().toISOString(),
       comments, deepen, answers,
@@ -247,13 +247,13 @@ async function main() {
 
   for (const it of items) {
     // organisation : jamais écrasée
-    let { data: ex, error: e1 } = await sb.from('subjects').select('id,coach_id').eq('project_id', project.id).eq('email', it.email).maybeSingle();
+    let { data: ex, error: e1 } = await sb.from('subjects').select('id,coach_id,facilitator').eq('project_id', project.id).eq('email', it.email).maybeSingle();
     if (e1) throw e1;
     let subjectId = ex?.id;
     if (!subjectId) {
       const { data, error } = await sb.from('subjects').insert({
         project_id: project.id, name: it.name, email: it.email, country: it.country,
-        org_type: it.org_type, org_size: it.org_size, coach_id: it.coach_id, origin: 'manual',
+        org_type: it.org_type, org_size: it.org_size, coach_id: it.coach_id, facilitator: it.facilitator, origin: 'manual',
       }).select('id').single();
       if (error) throw new Error(`${it.name} : ${error.message}`);
       subjectId = data.id; created++;
@@ -263,6 +263,11 @@ async function main() {
       if (!ex.coach_id && it.coach_id) {
         const { error } = await sb.from('subjects').update({ coach_id: it.coach_id }).eq('id', subjectId);
         if (error) throw new Error(`${it.name} (coach) : ${error.message}`);
+      }
+      // complète le facilitateur seulement s'il est vide (jamais d'écrasement)
+      if (!String(ex.facilitator || '').trim() && it.facilitator) {
+        const { error } = await sb.from('subjects').update({ facilitator: it.facilitator }).eq('id', subjectId);
+        if (error) throw new Error(`${it.name} (facilitateur) : ${error.message}`);
       }
     }
 

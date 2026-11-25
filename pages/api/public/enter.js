@@ -9,10 +9,11 @@ import { orgTypesOf } from '../../../lib/orgTypes';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return fail(res, 405, 'method');
-  const { slug, name, firstName, lastName, email, coachId, consent, lang = 'fr', captcha, country, orgType, orgSize } = req.body || {};
+  const { slug, name, firstName, lastName, email, coachId, consent, lang = 'fr', captcha, country, orgType, orgSize, facilitator } = req.body || {};
   const first = String(firstName || '').trim().slice(0, 100), last = String(lastName || '').trim().slice(0, 100);
   const cleanName = String(name || '').trim().slice(0, 200);
   const cleanEmail = String(email || '').trim().toLowerCase();
+  const cleanFacilitator = String(facilitator || '').trim().replace(/\s+/g, ' ').slice(0, 120) || null;   // facultatif, texte libre
   if (!cleanName || !first || !last || !isEmail(cleanEmail)) return fail(res, 400, 'invalid_form');
   if (!consent) return fail(res, 400, 'consent_required');
   const ip = clientIp(req);
@@ -49,7 +50,7 @@ export default async function handler(req, res) {
     coach = m ? m.user_id : null;
   }
   const { data: subj, error: e1 } = await db.from('subjects')
-    .insert({ project_id: p.id, name: cleanName, contact_first_name: first, contact_last_name: last, email: cleanEmail, coach_id: coach, origin: 'public', country: cc, org_type: orgType, org_size: orgSize }).select('id').single();
+    .insert({ project_id: p.id, name: cleanName, contact_first_name: first, contact_last_name: last, email: cleanEmail, coach_id: coach, origin: 'public', country: cc, org_type: orgType, org_size: orgSize, facilitator: cleanFacilitator }).select('id').single();
   if (e1) return fail(res, 500, 'server_error');
   const token = newToken();
   const { data: asm, error: e2 } = await db.from('assessments')

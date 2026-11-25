@@ -225,6 +225,12 @@ select.notion { background-color: var(--panel); padding-right: 2rem; max-width: 
 .table .right { text-align: right; white-space: nowrap; }
 .table .clip { max-width: 18rem; overflow-wrap: anywhere; }
 .scroll { overflow-x: auto; }
+/* En-têtes de tableau fixes au défilement. Hors conteneur : collés sous la barre du haut (61 px).
+   Dans un conteneur à défilement horizontal (.scroll), l'en-tête colle en haut du conteneur, dont la hauteur est bornée. */
+.table thead th { position: sticky; top: 61px; z-index: 2; background: var(--card); box-shadow: inset 0 -1px 0 var(--b1); }
+.scroll { max-height: 70vh; overflow: auto; }
+.scroll > .table thead th { top: 0; }
+.scroll > .table { margin-top: 0; }
 .rlist { list-style: none; padding: 0; margin: 0; }
 .rlist li { display: grid; grid-template-columns: 7.5rem 1fr; gap: 0.7rem; padding: 0.55rem 0; border-bottom: 1px solid #F2F2F2; font-size: 0.87rem; }
 .rlist li .coachnote { grid-column: 2; }

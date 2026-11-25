@@ -20,5 +20,8 @@ export default async function handler(req, res) {
     const { data: m } = await db.from('memberships').select('user_id, profiles(name, first_name, last_name, email)').eq('project_id', p.id).eq('user_id', cid).eq('role', 'coach').maybeSingle();
     if (m) presetCoach = { id: m.user_id, name: [m.profiles?.first_name, m.profiles?.last_name].filter(Boolean).join(' ') || m.profiles?.name || m.profiles?.email };
   }
-  res.json({ name: p.name, welcome_fr: p.welcome_fr, welcome_en: p.welcome_en, countries: p.countries || [], org_types: p.org_types || [], coaches, presetCoach });
+  // Facilitateurs déjà saisis dans CE projet : suggestions du champ « Facilitateur » (saisie libre toujours possible)
+  const { data: fac } = await db.from('subjects').select('facilitator').eq('project_id', p.id).not('facilitator', 'is', null);
+  const facilitators = [...new Set((fac || []).map(x => String(x.facilitator).trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+  res.json({ facilitators, name: p.name, welcome_fr: p.welcome_fr, welcome_en: p.welcome_en, countries: p.countries || [], org_types: p.org_types || [], coaches, presetCoach });
 }

@@ -244,3 +244,11 @@ Si le code part avant la migration, l'onglet Analytics affiche « migration 0017
 - **Mode de passation** (auto-évaluation ou guidée) : choisi par le coach dans l'onglet Session de la fiche. **Structure d'accompagnement** : saisie par un owner dans Paramètres de la fiche, avec suggestions (garde en base : un coach ne peut pas la modifier). Les deux sont journalisés.
 - Données : une seule fonction SQL, `analytics_rows`, réservée aux owners (`forbidden` sinon) ; un seul appel pour tout l'onglet.
 - Tests : `npm run test:analytics` (calculs, sans base) ; `rls_test.sql` (droits). Données de démonstration : `node scripts/demo.js owner@… coach@…` crée 14 organisations, dont 5 avec un suivi.
+
+## Mise à jour 3.13 (facilitateur, en-têtes de tableau fixes)
+
+**Ordre : d'abord la base, ensuite le code.** Supabase > SQL Editor : exécuter `supabase/migrations/0018_facilitator.sql`.
+
+- Champ **Facilitateur** (nom d'un coach ou d'une structure d'accompagnement, texte libre, sans effet sur les droits) : fiche de l'organisation (Paramètres), page d'entrée publique (facultatif), suggestions tirées du projet. Le filtre et la comparaison d'Analytics « Structure d'accompagnement » deviennent « Facilitateur » ; une organisation sans facilitateur ne compte que dans « Ensemble ».
+- Import : `scripts/import_legacy.js` écrit le facilitateur (colonne « Facilitateur ») à la création, ou le complète s'il est vide. Rattrapage : relancer l'import avec `--apply`.
+- En-têtes de tableau fixes au défilement ; recherche du tableau des questions : « Rechercher une question… ».
