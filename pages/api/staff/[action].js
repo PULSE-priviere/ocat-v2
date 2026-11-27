@@ -295,6 +295,32 @@ const actions = {
     return { sections: bank.sections, questions, ...data };
   },
 
+  // Modifier un compte (administrateur) : prénom, nom et e-mail. L'e-mail est aussi changé dans l'authentification Supabase.
+  async update_account({ db, svc, body }) {
+    if (!(await rpc(db, 'is_admin'))) return [403, 'forbidden'];
+    const id = String(body.userId || '');
+    const first = String(body.firstName || '').trim().slice(0, 100), last = String(body.lastName || '').trim().slice(0, 100);
+    const email = String(body.email || '').trim().toLowerCase();
+    if (!id || !isEmail(email)) return [400, 'invalid_form'];
+    const { data: cur } = await svc.from('profiles').select('id, email').eq('id', id).maybeSingle();
+    if (!cur) return [404, 'not_found'];
+    const changed = email !== String(cur.email).toLowerCase();
+    if (changed) {
+      const { data: other } = await svc.from('profiles').select('id').eq('email', email).neq('id', id).maybeSingle();
+      if (other) return [409, 'email_exists'];
+      const { error } = await svc.auth.admin.updateUserById(id, { email, email_confirm: true });
+      if (error) return /already|registered|exists/i.test(error.message) ? [409, 'email_exists'] : [502, 'server_error'];
+    }
+    const { error } = await svc.from('profiles')
+      .update({ email, first_name: first || null, last_name: last || null, name: [first, last].filter(Boolean).join(' ') || null }).eq('id', id);
+    if (error) {
+      if (changed) await svc.auth.admin.updateUserById(id, { email: cur.email, email_confirm: true });   // annule le changement d'e-mail
+      return [500, 'server_error'];
+    }
+    if (changed) await svc.from('staff_invites').update({ email }).eq('user_id', id).is('used_at', null);
+    return { ok: true };
+  },
+  
   // Fusion de doublons (F31) : les évaluations passent sur le dossier conservé
   async merge({ db, svc, body }) {
     const { data: rows } = await db.from('subjects').select('id, project_id').in('id', [body.keepId, body.dropId]);

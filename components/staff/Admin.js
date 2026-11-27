@@ -1,5 +1,5 @@
 // Administration : projets (membres, rôles, accès), comptes (administrateurs), connexion Airtable pour tous les projets
-import { useCallback, useEffect, useState } from 'react';
+import { Fragment, useCallback, useEffect, useState } from 'react';
 import Icon from '../Icon';
 import Check from '../Check';
 import Team from './Team';
@@ -149,6 +149,15 @@ function Accounts({ profiles, setProfiles, mems, projects, onChanged }) {
   const [busy, setBusy] = useState(false);
   const [resending, setResending] = useState('');
   const [msg, setMsg] = useState('');
+  const [edit, setEdit] = useState(null);      // { id, firstName, lastName, email } : personne en cours de modification
+  const [saving, setSaving] = useState(false);
+  const startEdit = p => { setMsg(''); setEdit({ id: p.id, firstName: p.first_name || '', lastName: p.last_name || '', email: p.email || '' }); };
+  const saveEdit = async e => {
+    e.preventDefault(); setSaving(true); setMsg('');
+    try { await staffApi('update_account', { userId: edit.id, firstName: edit.firstName, lastName: edit.lastName, email: edit.email }); setEdit(null); setMsg('accounts.saved'); onChanged(); }
+    catch (x) { setMsg(`errors.${x.message}`); }
+    setSaving(false);
+  };
   const resend = async p => {
     setMsg(''); setResending(p.id);
     const first = mems.find(m => m.user_id === p.id);
@@ -174,14 +183,33 @@ function Accounts({ profiles, setProfiles, mems, projects, onChanged }) {
         <table className="table">
           <thead><tr><th>{t('admin.person')}</th><th>{t('admin.projects_roles')}</th><th>{t('role.admin')}</th><th /></tr></thead>
           <tbody>{profiles.map(p => (
-            <tr key={p.id}>
+            <Fragment key={p.id}>
+            <tr>
               <td>{fullName(p)}<br /><small className="muted">{safeStr(p.email)}</small></td>
               <td><div className="chips">{mems.filter(m => m.user_id === p.id).map(m => (
                 <span key={`${m.project_id}-${m.role}`} className="pill"><span className="sq" style={{ background: projectColor(projects, m.project_id) }} />{pname(m.project_id)} · {t(`role.${m.role}`)}</span>
               ))}</div></td>
               <td><Check checked={p.is_admin} onChange={v => toggleAdmin(p, v)} label={t('role.admin')} /></td>
-              <td className="right">{p.is_admin || mems.some(m => m.user_id === p.id) ? <button className="btn small" aria-busy={resending === p.id} disabled={!!resending} onClick={() => resend(p)}>{t('team.resend')}</button> : null}</td>
+              <td className="right">
+                <button className="btn small" onClick={() => startEdit(p)}>{t('accounts.edit')}</button>{' '}
+                {p.is_admin || mems.some(m => m.user_id === p.id) ? <button className="btn small" aria-busy={resending === p.id} disabled={!!resending} onClick={() => resend(p)}>{t('team.resend')}</button> : null}
+              </td>
             </tr>
+            {edit?.id === p.id ? (
+              <tr>
+                <td colSpan={4}>
+                  <form className="form row" onSubmit={saveEdit}>
+                    <label>{t('profile.label.first_name')}<input value={edit.firstName} onChange={e => setEdit({ ...edit, firstName: e.target.value })} /></label>
+                    <label>{t('profile.label.last_name')}<input value={edit.lastName} onChange={e => setEdit({ ...edit, lastName: e.target.value })} /></label>
+                    <label>{t('entry.email')}<input type="email" required value={edit.email} onChange={e => setEdit({ ...edit, email: e.target.value })} /></label>
+                    <div className="span-all"><p className="muted small">{t('accounts.email_note')}</p></div>
+                    <button className="btn primary" aria-busy={saving} disabled={saving}>{t('common.save')}</button>
+                    <button type="button" className="btn" disabled={saving} onClick={() => setEdit(null)}>{t('accounts.cancel')}</button>
+                  </form>
+                </td>
+              </tr>
+            ) : null}
+            </Fragment>
           ))}</tbody>
         </table>
       </section>

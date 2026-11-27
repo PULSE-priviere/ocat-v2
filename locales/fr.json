@@ -396,6 +396,12 @@
   "at_table_scores": "Nom de la table",
   "at_status_ok_simple": "Connectée et vérifiée : base {base}, table « {table} ». Tous les projets y envoient leurs diagnostics."
  },
+ "accounts": {
+  "edit": "Modifier",
+  "cancel": "Annuler",
+  "saved": "Compte mis à jour.",
+  "email_note": "Changer l'e-mail change aussi l'adresse de connexion de cette personne. Une invitation en attente reste valable ; « Renvoyer l'invitation » part vers la nouvelle adresse."
+ },
  "subject": {
   "back": "Retour à la cohorte",
   "new_link": "Générer un nouveau lien",
@@ -884,7 +890,7 @@
   "empty": "Aucune organisation ne vous est affectée pour l'instant. Partagez votre lien de coach : les organisations qui entrent par ce lien vous sont rattachées automatiquement. Un owner du projet peut aussi vous en affecter.",
   "session_title": "Comment mener une session d'accompagnement"
  },
-  "orgtypes": {
+ "orgtypes": {
   "title": "Types de structure proposés",
   "hint": "Ces choix apparaissent dans le formulaire d'entrée du projet (« Type de structure »). Laissez la liste vide pour utiliser la liste par défaut. Corriger un libellé ne touche pas aux réponses déjà données.",
   "empty": "Aucun choix propre au projet : la liste par défaut est utilisée.",

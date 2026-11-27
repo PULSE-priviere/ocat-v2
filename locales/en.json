@@ -396,6 +396,12 @@
   "at_table_scores": "Table name",
   "at_status_ok_simple": "Connected and verified: base {base}, table \"{table}\". All projects send their diagnostics there."
  },
+ "accounts": {
+  "edit": "Edit",
+  "cancel": "Cancel",
+  "saved": "Account updated.",
+  "email_note": "Changing the email also changes this person's sign-in address. A pending invitation stays valid; \"Resend the invitation\" goes to the new address."
+ },
  "subject": {
   "back": "Back to the cohort",
   "new_link": "Generate a new link",
@@ -884,7 +890,7 @@
   "empty": "No organisation is assigned to you yet. Share your coach link: organisations that come in through it are automatically attached to you. A project owner can also assign some to you.",
   "session_title": "How to run a support session"
  },
-"orgtypes": {
+ "orgtypes": {
   "title": "Organization types offered",
   "hint": "These choices appear in the project's entry form (\"Organization type\"). Leave the list empty to use the default list. Fixing a label does not affect answers already given.",
   "empty": "No project-specific choices: the default list is used.",
