@@ -321,6 +321,38 @@ const actions = {
     return { ok: true };
   },
   
+  // Envoie le midline : pour chaque organisation du projet sans diagnostic « suivi », crée une évaluation rattachée à la MÊME organisation
+  // (donc liée à sa baseline) et envoie son lien personnel par e-mail. Lots de 10 par appel ; relançable sans doublon.
+  // dryRun : compte seulement. Si un e-mail échoue, l'évaluation créée est supprimée (elle sera reprise à la relance) et le lot s'arrête.
+  async send_midlines({ db, svc, body }) {
+    const projectId = String(body.projectId || '');
+    if (!(await rpc(db, 'is_owner', { p: projectId }))) return [403, 'forbidden'];
+    const lang = body.lang === 'en' ? 'en' : 'fr';
+    const { data: subs, error } = await svc.from('subjects').select('id, name, email, contact_first_name').eq('project_id', projectId).order('created_at').order('id');
+    if (error) return [500, 'server_error'];
+    const { data: have } = await svc.from('assessments').select('subject_id, subjects!inner(project_id)').eq('type', 'followup').eq('subjects.project_id', projectId);
+    const done = new Set((have || []).map(a => a.subject_id));
+    const pending = (subs || []).filter(s => !done.has(s.id) && isEmail(String(s.email || '')));
+    if (body.dryRun) return { pending: pending.length, total: (subs || []).length };
+    const batch = pending.slice(0, 10);
+    let sent = 0; const failed = [];
+    for (const s of batch) {
+      const token = newToken();
+      const { data: a, error: e1 } = await svc.from('assessments')
+        .insert({ subject_id: s.id, type: 'followup', token_hash: hashToken(token), token_expires_at: tokenExpiry() }).select('id').single();
+      if (e1) { failed.push({ name: s.name, error: 'server_error' }); break; }
+      try {
+        await sendMail({ to: s.email, kind: 'midline_link', lang, vars: { url: personalUrl(token), contact: s.contact_first_name || '', name: s.name } });
+        sent++;
+      } catch (e) {
+        await svc.from('assessments').delete().eq('id', a.id);
+        failed.push({ name: s.name, error: String(e.message).startsWith('mail_') ? e.message : 'mail_failed' });
+        break;
+      }
+    }
+    return { sent, failed, remaining: pending.length - sent };
+  },
+  
   // Fusion de doublons (F31) : les évaluations passent sur le dossier conservé
   async merge({ db, svc, body }) {
     const { data: rows } = await db.from('subjects').select('id, project_id').in('id', [body.keepId, body.dropId]);

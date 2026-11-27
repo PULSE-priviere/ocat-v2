@@ -402,6 +402,17 @@
   "saved": "Compte mis à jour.",
   "email_note": "Changer l'e-mail change aussi l'adresse de connexion de cette personne. Une invitation en attente reste valable ; « Renvoyer l'invitation » part vers la nouvelle adresse."
  },
+ "midline": {
+  "title": "Envoyer le midline",
+  "lead": "Crée pour chaque organisation du projet un diagnostic de suivi (midline), rattaché à son dossier et donc à sa baseline, et lui envoie son lien personnel par e-mail. Les organisations qui ont déjà un midline sont ignorées : vous pouvez relancer sans doublon.",
+  "pending": "{n} organisation(s) sur {total} n'ont pas encore de midline.",
+  "none": "Toutes les organisations de ce projet ont déjà un midline.",
+  "lang": "Langue de l'e-mail",
+  "send": "Envoyer le midline à {n} organisation(s)",
+  "confirm": "Envoyer maintenant un e-mail avec un lien personnel à {n} organisation(s) ? Cette action ne peut pas être annulée.",
+  "done": "{n} e-mail(s) envoyé(s).",
+  "failed": "L'envoi s'est arrêté : échec pour « {name} » ({error}). Corrigez le problème puis relancez : seules les organisations restantes seront traitées."
+ },
  "subject": {
   "back": "Retour à la cohorte",
   "new_link": "Générer un nouveau lien",
@@ -586,10 +597,15 @@
    "login": "Me connecter",
    "invite": "Activer mon compte",
    "invite_admin": "Activer mon compte",
-   "submitted": "Ouvrir la fiche"
+   "submitted": "Ouvrir la fiche",
+   "midline_link": "Ouvrir mon midline"
   },
   "fallback": "Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :",
-  "and": "et"
+  "and": "et",
+  "midline_link": {
+   "subject": "Votre diagnostic à mi-parcours (midline)",
+   "body": "{hello}\n\nVotre accompagnement avance : il est temps de refaire le diagnostic de {name} à mi-parcours (midline). Il sera comparé à celui que vous avez rempli au départ (baseline), pour mesurer vos progrès.\n\nOuvrez ce lien pour répondre, en une ou plusieurs fois :\n{url}\n\nCe lien est propre à votre organisation : vous pouvez le partager avec vos collègues concernés, pas en dehors de l'organisation. Merci de ne pas créer un second dossier.\n\n{org}"
+  }
  },
  "profile": {
   "title": "Informations de l'organisation",

@@ -402,6 +402,17 @@
   "saved": "Account updated.",
   "email_note": "Changing the email also changes this person's sign-in address. A pending invitation stays valid; \"Resend the invitation\" goes to the new address."
  },
+ "midline": {
+  "title": "Send the midline",
+  "lead": "Creates a follow-up assessment (midline) for each organisation in the project, attached to its file and therefore to its baseline, and emails it its personal link. Organisations that already have a midline are skipped: you can run it again without duplicates.",
+  "pending": "{n} of {total} organisation(s) do not have a midline yet.",
+  "none": "All organisations in this project already have a midline.",
+  "lang": "Email language",
+  "send": "Send the midline to {n} organisation(s)",
+  "confirm": "Send an email with a personal link to {n} organisation(s) now? This cannot be undone.",
+  "done": "{n} email(s) sent.",
+  "failed": "Sending stopped: failure for \"{name}\" ({error}). Fix the problem and run it again: only the remaining organisations will be processed."
+ },
  "subject": {
   "back": "Back to the cohort",
   "new_link": "Generate a new link",
@@ -586,10 +597,15 @@
    "login": "Sign in",
    "invite": "Activate my account",
    "invite_admin": "Activate my account",
-   "submitted": "Open the record"
+   "submitted": "Open the record",
+   "midline_link": "Open my midline"
   },
   "fallback": "If the button does not work, copy this link into your browser:",
-  "and": "and"
+  "and": "and",
+  "midline_link": {
+   "subject": "Your mid-term assessment (midline)",
+   "body": "{hello}\n\nYour support is moving forward: it is time to redo the mid-term assessment (midline) for {name}. It will be compared with the one you filled in at the start (baseline), to measure your progress.\n\nOpen this link to answer, in one or several sittings:\n{url}\n\nThis link belongs to your organisation: you can share it with the colleagues involved, not outside the organisation. Please do not create a second file.\n\n{org}"
+  }
  },
  "profile": {
   "title": "Organisation details",

@@ -125,6 +125,7 @@ function ProjectAdmin({ project, projects, mems, onBack, onChanged }) {
         <h2>{t('admin.members')}</h2>
         <Team project={project} members={mems} owner isAdmin embedded reload={onChanged} />
       </section>
+      <MidlineSend project={project} />
       <section className="card">
         <h2>{t('admin.edit_project')}</h2>
         <form className="form row" onSubmit={saveInfo}>
@@ -139,6 +140,52 @@ function ProjectAdmin({ project, projects, mems, onBack, onChanged }) {
       <OrgTypesEditor value={project.org_types || []} onSave={saveOrgTypes} />
       {msg ? <p className={msg.startsWith('errors') ? 'error' : 'ok'}>{t(msg)}</p> : null}
     </>
+  );
+}
+
+// Envoi du midline : crée une évaluation « suivi » liée à l'organisation (donc à sa baseline) et envoie son lien personnel par e-mail
+function MidlineSend({ project }) {
+  const { t } = useI18n();
+  const [st, setSt] = useState(null);          // { pending, total }
+  const [ml, setMl] = useState('fr');
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState(null);
+  const refresh = useCallback(async () => {
+    try { setSt(await staffApi('send_midlines', { projectId: project.id, dryRun: true })); } catch { setSt(null); }
+  }, [project.id]);
+  useEffect(() => { refresh(); }, [refresh]);
+  const run = async () => {
+    if (!window.confirm(t('midline.confirm', { n: st.pending }))) return;
+    setBusy(true); setMsg(null);
+    let sent = 0;
+    try {
+      for (;;) {                                // lots de 10 : chaque appel doit rester sous la limite de durée du serveur
+        const r = await staffApi('send_midlines', { projectId: project.id, lang: ml });
+        sent += r.sent;
+        setSt(x => ({ ...x, pending: r.remaining }));
+        if (r.failed?.length) { setMsg({ kind: 'error', text: t('midline.failed', { name: r.failed[0].name, error: t(`errors.${r.failed[0].error}`) }) }); break; }
+        if (!r.remaining || !r.sent) break;
+      }
+      setMsg(m => m || { kind: 'ok', text: t('midline.done', { n: sent }) });
+    } catch (x) { setMsg({ kind: 'error', text: t(`errors.${x.message}`) }); }
+    setBusy(false); refresh();
+  };
+  if (!st) return null;
+  return (
+    <section className="card">
+      <h2>{t('midline.title')}</h2>
+      <p className="muted small">{t('midline.lead')}</p>
+      <p>{st.pending ? t('midline.pending', { n: st.pending, total: st.total }) : t('midline.none')}</p>
+      {st.pending ? (
+        <div className="form row">
+          <label>{t('midline.lang')}
+            <select value={ml} onChange={e => setMl(e.target.value)}><option value="fr">{t('plan.lang_fr')}</option><option value="en">{t('plan.lang_en')}</option></select>
+          </label>
+          <button className="btn primary" aria-busy={busy} disabled={busy} onClick={run}>{t('midline.send', { n: st.pending })}</button>
+        </div>
+      ) : null}
+      {msg ? <p className={msg.kind === 'ok' ? 'ok' : 'error'}>{msg.text}</p> : null}
+    </section>
   );
 }
 
